@@ -1,0 +1,208 @@
+---
+import CaseStudyCard from '../components/astro/CaseStudyCard.astro';
+import CaseStudyHoverEnhancer from '../components/astro/CaseStudyHoverEnhancer.astro';
+import HeroPattern from '../components/astro/HeroPattern.astro';
+import Section from '../components/astro/Section.astro';
+import SocialIcon from '../components/astro/SocialIcon.astro';
+import WorkHistoryItem from '../components/astro/WorkHistoryItem.astro';
+import { buildPrinciples } from '../data/experience';
+import { contactLinks, heroContent } from '../data/site';
+import {
+  getExternalLinkProps,
+  isOutboundHref,
+  resolveHref,
+} from '../lib/links';
+import { getFeaturedProjects } from '../lib/projects';
+import { getResume } from '../lib/resume';
+import { withBase } from '../lib/paths';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+type SocialIconName = 'GitHub' | 'LinkedIn' | 'Email';
+
+const featuredProjects = await getFeaturedProjects(4);
+const resume = await getResume();
+const homeExperience = resume.data.experience.slice(0, 2);
+const base = import.meta.env.BASE_URL;
+const primaryContactLinks = contactLinks.slice(0, 3).map((item) => ({
+  ...item,
+  href: resolveHref(item, base),
+  icon: item.label as SocialIconName,
+}));
+const resolvedContactLinks = contactLinks.map((item) => ({
+  ...item,
+  href: resolveHref(item, base),
+}));
+---
+
+<BaseLayout description={heroContent.statement.join(' ')}>
+  <section class="section-shell hero">
+    <HeroPattern />
+
+    <div class="container hero__grid">
+      <div class="flow-lg">
+        <div class="flow-sm">
+          <h1>{heroContent.title}</h1>
+        </div>
+
+        <div class="flow">
+          {
+            heroContent.statement.map((paragraph) => (
+              <p class="lead">{paragraph}</p>
+            ))
+          }
+        </div>
+
+        <div class="button-row">
+          {
+            heroContent.ctas.map((item, index) => (
+              <a
+                class={
+                  index === 0
+                    ? 'button-link'
+                    : 'button-link button-link--secondary'
+                }
+                href={withBase(item.href, base)}
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </div>
+
+        <ul
+          class="inline-link-list inline-link-list--muted inline-link-list--icons"
+          aria-label="Primary contact links"
+        >
+          {
+            primaryContactLinks.map((item) => (
+              <li>
+                <a
+                  class="social-link"
+                  href={item.href}
+                  aria-label={item.label}
+                  title={item.label}
+                  {...getExternalLinkProps(item.href)}
+                >
+                  <SocialIcon name={item.icon} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+
+        {/* <TrustList items={heroContent.trustRow} /> */}
+      </div>
+
+      <aside class="surface-card hero-panel flow" aria-label="Current focus">
+        <p class="eyebrow eyebrow--muted">Current focus</p>
+        <h2>
+          AI-accelerated front-end engineering with human judgment, durable
+          systems, and code that holds up.
+        </h2>
+        <ul class="stack-list">
+          <li>
+            Creating practical workflows that turn AI into leverage without
+            lowering standards
+          </li>
+          <li>
+            Applying AI thoughtfully across accessibility, performance, testing,
+            and implementation
+          </li>
+          <li>
+            Building maintainable interfaces and team-friendly systems for
+            AI-assisted delivery
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <Section
+    id="selected-work"
+    eyebrow="Selected case studies"
+    title="Front-end systems and product work structured for consistency across teams, features, and releases."
+    description="A curated set of recent projects grounded in accessibility, maintainability, and practical engineering constraints."
+  >
+    <div class="section-actions">
+      <a class="inline-link" href={withBase('/work/', base)}>Browse all work</a>
+    </div>
+
+    <div class="case-study-grid">
+      {
+        featuredProjects.map((project) => (
+          <CaseStudyCard project={project} hoverMeta={true} />
+        ))
+      }
+    </div>
+
+    <CaseStudyHoverEnhancer />
+  </Section>
+
+  <Section
+    id="how-i-build"
+    eyebrow="How I build"
+    title="I build with systems in mind, with strong defaults, clear constraints, and durable front-end architecture for real product demands."
+    contrast={true}
+  >
+    <ol class="principles-list">
+      {
+        buildPrinciples.map((principle) => (
+          <li class="surface-card surface-hover principle-card flow-sm">
+            <h3>{principle.title}</h3>
+            <p class="text-muted">{principle.summary}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <Section
+    id="work-history"
+    eyebrow="Work history snapshot"
+    title="Recent roles that show enterprise range and practical product thinking."
+  >
+    <div class="experience-grid">
+      {
+        homeExperience.map((item) => (
+          <WorkHistoryItem item={item} compact={true} />
+        ))
+      }
+    </div>
+
+    <div class="section-actions">
+      <a
+        class="button-link button-link--secondary"
+        href={withBase('/resume/', base)}
+      >
+        View full resume
+      </a>
+    </div>
+  </Section>
+
+  <Section
+    id="contact"
+    eyebrow="Contact / links"
+    title="Drawn to roles where front-end architecture, design systems, and content come together, with teams that prioritize accessibility, performance, and long-term maintainability."
+  >
+    <div class="contact-panel surface-card flow">
+      <ul class="contact-grid" aria-label="Contact links">
+        {
+          resolvedContactLinks.map((item) => (
+            <li>
+              <a
+                class="contact-link surface-hover"
+                href={item.href}
+                {...getExternalLinkProps(item.href)}
+              >
+                <span>{item.label}</span>
+                <span aria-hidden="true">
+                  {isOutboundHref(item.href) ? '↗' : '→'}
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Section>
+</BaseLayout>

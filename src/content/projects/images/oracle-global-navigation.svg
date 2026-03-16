@@ -1,0 +1,27 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --project-background: #f7f1e8;
+      --project-surface: #fffdf8;
+      --project-border: #d8ccc0;
+      --project-panel: #f0e7d9;
+      --project-accent: #0f766e;
+      --project-text: #1f2933;
+      --project-muted: #52606d;
+    }
+  </style>
+  <rect width="1200" height="720" rx="36" fill="var(--project-background)"/>
+  <rect x="56" y="56" width="1088" height="88" rx="20" fill="var(--project-surface)" stroke="var(--project-border)"/>
+  <rect x="88" y="88" width="180" height="22" rx="11" fill="var(--project-accent)"/>
+  <rect x="724" y="90" width="96" height="16" rx="8" fill="var(--project-border)"/>
+  <rect x="840" y="90" width="96" height="16" rx="8" fill="var(--project-border)"/>
+  <rect x="956" y="90" width="100" height="16" rx="8" fill="var(--project-border)"/>
+  <rect x="56" y="188" width="1088" height="476" rx="28" fill="var(--project-surface)" stroke="var(--project-border)"/>
+  <rect x="96" y="228" width="308" height="396" rx="24" fill="var(--project-panel)"/>
+  <rect x="448" y="228" width="656" height="64" rx="18" fill="var(--project-panel)"/>
+  <rect x="448" y="322" width="284" height="126" rx="20" fill="var(--project-background)" stroke="var(--project-border)"/>
+  <rect x="760" y="322" width="344" height="126" rx="20" fill="var(--project-background)" stroke="var(--project-border)"/>
+  <rect x="448" y="478" width="656" height="146" rx="24" fill="var(--project-accent)"/>
+  <text x="96" y="602" fill="var(--project-text)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34" font-weight="700">Oracle navigation</text>
+  <text x="96" y="640" fill="var(--project-muted)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="24">Shared patterns for accessible enterprise wayfinding.</text>
+</svg>

@@ -1,0 +1,11 @@
+---
+interface Props {
+  items: readonly string[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="trust-list" aria-label="Focus areas">
+  {items.map((item) => <li>{item}</li>)}
+</ul>

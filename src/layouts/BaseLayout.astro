@@ -1,0 +1,212 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Footer from '../components/astro/Footer.astro';
+import Header from '../components/astro/Header.astro';
+import { siteMeta } from '../data/site';
+import '../styles/global.scss';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: 'website' | 'article';
+  socialImage?: string;
+}
+
+const {
+  title = siteMeta.title,
+  description = siteMeta.description,
+  ogType = 'website',
+  socialImage = siteMeta.socialImage,
+} = Astro.props;
+const themeColor = siteMeta.themeColor;
+
+const pageTitle =
+  title === siteMeta.title ? title : `${title} | ${siteMeta.title}`;
+const canonicalUrl = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).toString()
+  : Astro.url.toString();
+const socialImageUrl = Astro.site
+  ? new URL(socialImage, Astro.site).toString()
+  : undefined;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content={themeColor.light} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:site_name" content={siteMeta.title} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    {socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
+    {socialImageUrl && <meta property="og:image:alt" content={pageTitle} />}
+    <meta
+      name="twitter:card"
+      content={socialImageUrl ? 'summary_large_image' : 'summary'}
+    />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {socialImageUrl && <meta name="twitter:image" content={socialImageUrl} />}
+    {socialImageUrl && <meta name="twitter:image:alt" content={pageTitle} />}
+    <title>{pageTitle}</title>
+    <ClientRouter />
+    <script
+      is:inline
+      define:vars={{
+        lightThemeColor: themeColor.light,
+        darkThemeColor: themeColor.dark,
+      }}
+    >
+      (() => {
+        const themeWindow = window;
+
+        if (themeWindow.__siteThemeControllerInitialized) {
+          themeWindow.__syncSiteTheme?.();
+          return;
+        }
+
+        const storageKey = 'theme-preference';
+        const root = document.documentElement;
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const modes = ['auto', 'dark', 'light'];
+        const labels = {
+          auto: 'Auto',
+          dark: 'Dark',
+          light: 'Light',
+        };
+        const getThemeColorMeta = () =>
+          document.querySelector('meta[name="theme-color"]');
+
+        const sanitizeMode = (value) =>
+          value === 'dark' || value === 'light' ? value : 'auto';
+
+        const getStoredMode = () => {
+          try {
+            return sanitizeMode(window.localStorage.getItem(storageKey));
+          } catch {
+            return 'auto';
+          }
+        };
+
+        const getEffectiveTheme = (mode) =>
+          mode === 'auto' ? (mediaQuery.matches ? 'dark' : 'light') : mode;
+
+        const nextMode = (mode) =>
+          modes[(modes.indexOf(mode) + 1) % modes.length];
+
+        const applyMode = (mode) => {
+          const effectiveTheme = getEffectiveTheme(mode);
+
+          if (mode === 'auto') {
+            root.removeAttribute('data-theme');
+          } else {
+            root.dataset.theme = mode;
+          }
+
+          root.dataset.themeMode = mode;
+
+          const themeColorMeta = getThemeColorMeta();
+
+          if (themeColorMeta) {
+            themeColorMeta.setAttribute(
+              'content',
+              effectiveTheme === 'dark' ? darkThemeColor : lightThemeColor,
+            );
+          }
+        };
+
+        const updateControls = () => {
+          const mode = getStoredMode();
+          const upcomingMode = nextMode(mode);
+
+          document.querySelectorAll('[data-theme-toggle]').forEach((node) => {
+            if (!(node instanceof HTMLButtonElement)) {
+              return;
+            }
+
+            const value = node.querySelector('[data-theme-toggle-value]');
+
+            if (value) {
+              value.textContent = labels[mode];
+            }
+
+            node.setAttribute(
+              'aria-label',
+              `Theme: ${labels[mode]}. Activate to switch to ${labels[upcomingMode]}.`,
+            );
+            node.title = `Theme: ${labels[mode]}`;
+          });
+        };
+
+        const syncTheme = () => {
+          applyMode(getStoredMode());
+          updateControls();
+        };
+
+        document.addEventListener('click', (event) => {
+          if (!(event.target instanceof Element)) {
+            return;
+          }
+
+          const button = event.target.closest('[data-theme-toggle]');
+
+          if (!(button instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const mode = getStoredMode();
+          const upcomingMode = nextMode(mode);
+
+          try {
+            if (upcomingMode === 'auto') {
+              window.localStorage.removeItem(storageKey);
+            } else {
+              window.localStorage.setItem(storageKey, upcomingMode);
+            }
+          } catch {
+            // Ignore storage failures and still apply the current session override.
+          }
+
+          applyMode(upcomingMode);
+          updateControls();
+        });
+
+        const handlePreferenceChange = () => {
+          if (getStoredMode() === 'auto') {
+            syncTheme();
+          }
+        };
+
+        mediaQuery.addEventListener('change', handlePreferenceChange);
+
+        themeWindow.__syncSiteTheme = syncTheme;
+        themeWindow.__siteThemeControllerInitialized = true;
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', syncTheme, {
+            once: true,
+          });
+        } else {
+          syncTheme();
+        }
+
+        document.addEventListener('astro:page-load', syncTheme);
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <Header />
+    <main id="main-content" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

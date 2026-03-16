@@ -1,0 +1,124 @@
+---
+import ProjectVisual from './ProjectVisual.astro';
+import { getExternalLinkProps } from '../../lib/links';
+import type { ProjectEntry } from '../../lib/projects';
+import { getProjectLinks, getProjectTransitionNames } from '../../lib/projects';
+
+interface Props {
+  project: ProjectEntry;
+  hoverMeta?: boolean;
+}
+
+const { project, hoverMeta = false } = Astro.props;
+const links = getProjectLinks(project, import.meta.env.BASE_URL);
+const transitionNames = getProjectTransitionNames(project.id);
+type ActionLink = {
+  label: string;
+  href: string;
+};
+
+const actionLinks = [
+  {
+    label: 'Case study',
+    href: links.writeup,
+  },
+  links.live && {
+    label: 'Live project',
+    href: links.live,
+  },
+  links.repo && {
+    label: 'Repository',
+    href: links.repo,
+  },
+].filter((link): link is ActionLink => Boolean(link));
+---
+
+<article
+  class:list={[
+    'case-study-card surface-card',
+    hoverMeta && 'case-study-card--hover-meta',
+  ]}
+>
+  <ProjectVisual
+    project={project}
+    hoverMeta={hoverMeta}
+    href={links.writeup}
+    transitionName={transitionNames.visual}
+    title={project.data.title}
+    titleTransitionName={transitionNames.heading}
+  />
+
+  <div class="case-study-card__body flow">
+    <header class="flow-sm">
+      {
+        !hoverMeta ? (
+          <div class="case-study-card__meta">
+            <p class="eyebrow eyebrow--muted">{project.data.role}</p>
+            {project.data.status && (
+              <p class="status-note">{project.data.status}</p>
+            )}
+            <ul class="tag-list" aria-label={`${project.data.title} stack`}>
+              {project.data.stack.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+            <div class="flow-sm">
+              <ul
+                class="inline-link-list inline-link-list--card"
+                aria-label={`${project.data.title} links`}
+              >
+                {actionLinks.map((link) => (
+                  <li>
+                    <a href={link.href} {...getExternalLinkProps(link.href)}>
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              {/* {project.data.note && <p class="card-note">{project.data.note}</p>} */}
+            </div>
+          </div>
+        ) : (
+          <div class="flow-sm case-study-card__actions">
+            <ul
+              class="inline-link-list inline-link-list--card"
+              aria-label={`${project.data.title} links`}
+            >
+              {actionLinks.map((link) => (
+                <li>
+                  <a href={link.href} {...getExternalLinkProps(link.href)}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {/* {project.data.note && <p class="card-note">{project.data.note}</p>} */}
+          </div>
+        )
+      }
+      <p
+        class="case-study-card__summary"
+        transition:name={transitionNames.summary}
+        transition:animate="initial"
+      >
+        {project.data.summary}
+      </p>
+      <p
+        class="case-study-card__problem"
+        transition:name={transitionNames.problem}
+        transition:animate="initial"
+      >
+        {project.data.problem}
+      </p>
+    </header>
+
+    <ul
+      class="impact-list impact-list--compact"
+      aria-label={`${project.data.title} impact`}
+    >
+      {project.data.impact.map((item) => <li>{item}</li>)}
+    </ul>
+  </div>
+</article>

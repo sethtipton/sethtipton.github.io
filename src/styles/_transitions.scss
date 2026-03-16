@@ -1,0 +1,70 @@
+.project-visual--transitionable {
+  view-transition-class: case-study-visual;
+}
+
+.case-study-card__title,
+.project-hero__title {
+  view-transition-class: case-study-heading;
+}
+
+.case-study-card__summary,
+.project-hero__summary {
+  view-transition-class: case-study-summary;
+}
+
+.case-study-card__problem,
+.project-hero__problem {
+  view-transition-class: case-study-problem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(site-nav-active-chip) {
+    z-index: 5;
+    animation-duration: 360ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(site-nav-active-chip),
+  ::view-transition-new(site-nav-active-chip) {
+    border-radius: 4px;
+    overflow: clip;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-group(.case-study-visual) {
+    z-index: 2;
+    animation-duration: 520ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(.case-study-visual),
+  ::view-transition-new(.case-study-visual) {
+    border-radius: calc(var(--radius-lg) - 0.125rem);
+    overflow: clip;
+  }
+
+  ::view-transition-group(.case-study-heading) {
+    z-index: 3;
+    animation-duration: 420ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(.case-study-heading),
+  ::view-transition-new(.case-study-heading) {
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-group(.case-study-summary),
+  ::view-transition-group(.case-study-problem) {
+    z-index: 3;
+    animation-duration: 380ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(.case-study-summary),
+  ::view-transition-new(.case-study-summary),
+  ::view-transition-old(.case-study-problem),
+  ::view-transition-new(.case-study-problem) {
+    mix-blend-mode: normal;
+  }
+}

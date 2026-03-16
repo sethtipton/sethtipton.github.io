@@ -1,0 +1,52 @@
+---
+import type { ResumeExperienceItem } from '../../lib/resume';
+
+interface Props {
+  item: ResumeExperienceItem;
+  compact?: boolean;
+  interactive?: boolean;
+}
+
+const { item, compact = false, interactive = true } = Astro.props;
+const bullets = compact ? item.bullets.slice(0, 2) : item.bullets;
+---
+
+<article
+  class:list={[
+    'experience-card surface-card flow-sm pdf-entry',
+    interactive && 'surface-hover',
+  ]}
+>
+  <header class="experience-card__header flow-sm">
+    <h3 class="experience-card__title">{item.title}</h3>
+
+    <p class="experience-card__meta">
+      <span class="experience-card__company">{item.company}</span>
+
+      {
+        item.location && (
+          <>
+            <span class="experience-card__separator" aria-hidden="true">
+              |
+            </span>
+            <span class="experience-card__location">{item.location}</span>
+          </>
+        )
+      }
+
+      <span class="experience-card__separator" aria-hidden="true"> | </span>
+      <span class="experience-card__years">{item.years}</span>
+    </p>
+  </header>
+
+  <ul
+    class:list={[
+      'impact-list',
+      'pdf-entry__bullets',
+      compact && 'impact-list--compact',
+    ]}
+    aria-label={`${item.title} at ${item.company} highlights`}
+  >
+    {bullets.map((bullet) => <li>{bullet}</li>)}
+  </ul>
+</article>

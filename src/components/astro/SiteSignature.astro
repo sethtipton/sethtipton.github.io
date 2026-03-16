@@ -1,0 +1,197 @@
+---
+import signatureSource from '../../content/projects/images/sethtipton.svg?raw';
+
+const signatureStrokeWidths = '1 2';
+
+const signatureMarkup = signatureSource
+  .replace(/<\?xml[\s\S]*?\?>\s*/u, '')
+  .replace(/<!--[\s\S]*?-->\s*/gu, '')
+  .replace(/\s(width|height)="[^"]*"/gu, '')
+  .replace(/stroke:#000000/gu, 'stroke:currentColor')
+  .replace(/stroke-width:[^;"]+;?/gu, '')
+  .replace(
+    /<svg\b/u,
+    '<svg class="site-signature__svg" aria-hidden="true" focusable="false"',
+  );
+---
+
+<span
+  class="site-signature"
+  data-site-signature
+  data-site-signature-stroke-widths={signatureStrokeWidths}
+  set:html={signatureMarkup}
+/>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const SIGNATURE_SELECTOR = '[data-site-signature]';
+  const SIGNATURE_SESSION_KEY = 'site-signature-animated';
+  const SIGNATURE_TAB_NAME_PREFIX = 'site-signature-tab:';
+  let lastHandledPath = '';
+  let lastHandledSignature: Element | null = null;
+  const signatureWindow = window as Window & {
+    __siteSignatureInitialized?: boolean;
+  };
+
+  const getStrokeWidthRange = (signature: Element) => {
+    const rawValue =
+      signature.getAttribute('data-site-signature-stroke-widths') ?? '';
+    const [startValue, endValue] = rawValue
+      .trim()
+      .split(/[\s,]+/)
+      .map((value) => Number.parseFloat(value));
+
+    return {
+      start: Number.isFinite(startValue) ? startValue : 1,
+      end: Number.isFinite(endValue) ? endValue : 20,
+    };
+  };
+
+  const prepareSignaturePath = (path: SVGPathElement) => {
+    path.style.fill = 'none';
+    path.style.stroke = 'currentColor';
+    path.style.strokeLinecap = 'round';
+    path.style.vectorEffect = 'non-scaling-stroke';
+  };
+
+  const setFinalSignatureState = (signature: Element) => {
+    const { end: endStrokeWidth } = getStrokeWidthRange(signature);
+
+    signature.querySelectorAll<SVGPathElement>('path').forEach((path) => {
+      prepareSignaturePath(path);
+
+      gsap.killTweensOf(path);
+      gsap.set(path, {
+        opacity: 1,
+        strokeWidth: endStrokeWidth,
+        clearProps: 'strokeDasharray,strokeDashoffset',
+      });
+    });
+  };
+
+  const animateSignature = (signature: Element) => {
+    const paths = [...signature.querySelectorAll<SVGPathElement>('path')];
+    const { start: startStrokeWidth, end: endStrokeWidth } =
+      getStrokeWidthRange(signature);
+
+    if (!paths.length) {
+      return;
+    }
+
+    const timeline = gsap.timeline();
+
+    paths.forEach((path, index) => {
+      const length = path.getTotalLength();
+      const dashLength = length + 2;
+      const dashGap = length + 200;
+
+      prepareSignaturePath(path);
+
+      gsap.killTweensOf(path);
+      gsap.set(path, {
+        opacity: 0,
+        strokeDasharray: `${dashLength} ${dashGap}`,
+        strokeDashoffset: dashLength,
+        strokeWidth: startStrokeWidth,
+      });
+
+      timeline.to(
+        path,
+        {
+          opacity: 1,
+          strokeDashoffset: 0,
+          strokeWidth: endStrokeWidth,
+          duration: Math.max(0.24, Math.min(0.58, length / 140)),
+          ease: 'power1.inOut',
+          onComplete: () => {
+            gsap.set(path, {
+              clearProps: 'strokeDasharray,strokeDashoffset',
+            });
+          },
+        },
+        index === 0 ? 0 : '>-0.04',
+      );
+    });
+  };
+
+  const getSignatureSessionKey = () => {
+    let tabId = '';
+
+    if (window.name.startsWith(SIGNATURE_TAB_NAME_PREFIX)) {
+      tabId = window.name.slice(SIGNATURE_TAB_NAME_PREFIX.length);
+    } else {
+      tabId =
+        typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      window.name = `${SIGNATURE_TAB_NAME_PREFIX}${tabId}`;
+    }
+
+    return `${SIGNATURE_SESSION_KEY}:${tabId}`;
+  };
+
+  const hasAnimatedThisSession = () => {
+    try {
+      return sessionStorage.getItem(getSignatureSessionKey()) === 'true';
+    } catch {
+      return false;
+    }
+  };
+
+  const markAnimatedThisSession = () => {
+    try {
+      sessionStorage.setItem(getSignatureSessionKey(), 'true');
+    } catch {
+      // Ignore storage failures and continue with the animation.
+    }
+  };
+
+  const syncSignatureState = () => {
+    const signatures = document.querySelectorAll(SIGNATURE_SELECTOR);
+
+    if (!signatures.length) {
+      return;
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      signatures.forEach(setFinalSignatureState);
+      return;
+    }
+
+    if (hasAnimatedThisSession()) {
+      signatures.forEach(setFinalSignatureState);
+      return;
+    }
+
+    markAnimatedThisSession();
+    signatures.forEach(animateSignature);
+  };
+
+  const scheduleSignatureStateSync = () => {
+    const currentPath = `${location.pathname}${location.search}`;
+    const signature = document.querySelector(SIGNATURE_SELECTOR);
+
+    if (!signature) {
+      lastHandledSignature = null;
+      return;
+    }
+
+    if (currentPath === lastHandledPath && signature === lastHandledSignature) {
+      return;
+    }
+
+    lastHandledPath = currentPath;
+    lastHandledSignature = signature;
+    requestAnimationFrame(syncSignatureState);
+  };
+
+  if (!signatureWindow.__siteSignatureInitialized) {
+    signatureWindow.__siteSignatureInitialized = true;
+
+    scheduleSignatureStateSync();
+    document.addEventListener('astro:page-load', () => {
+      scheduleSignatureStateSync();
+    });
+  }
+</script>

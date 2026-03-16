@@ -1,0 +1,26 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --project-background: #f7f1e8;
+      --project-surface: #fffdf8;
+      --project-border: #d8ccc0;
+      --project-panel: #f0e7d9;
+      --project-accent: #0f766e;
+      --project-text: #1f2933;
+      --project-muted: #52606d;
+      --brew-dark: #6b4226;
+      --brew-gold: #d8a657;
+      --brew-foam: #fff4d6;
+    }
+  </style>
+  <rect width="1200" height="720" rx="36" fill="var(--project-background)"/>
+  <rect x="72" y="88" width="1056" height="544" rx="30" fill="var(--project-surface)" stroke="var(--project-border)"/>
+  <rect x="112" y="128" width="520" height="464" rx="26" fill="var(--brew-dark)"/>
+  <circle cx="372" cy="292" r="94" fill="var(--brew-gold)"/>
+  <rect x="300" y="398" width="144" height="98" rx="20" fill="var(--brew-foam)"/>
+  <rect x="676" y="128" width="412" height="120" rx="24" fill="var(--project-panel)"/>
+  <rect x="676" y="280" width="412" height="144" rx="24" fill="var(--project-background)" stroke="var(--project-border)"/>
+  <rect x="676" y="456" width="412" height="136" rx="24" fill="var(--project-accent)"/>
+  <text x="700" y="202" fill="var(--project-text)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34" font-weight="700">Belltower Brewing</text>
+  <text x="700" y="242" fill="var(--project-muted)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="24">WordPress publishing with a focused React pairing layer.</text>
+</svg>

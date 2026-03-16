@@ -1,0 +1,5 @@
+.astro
+.cache
+coverage
+dist
+node_modules

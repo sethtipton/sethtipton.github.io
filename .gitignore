@@ -1,0 +1,6 @@
+node_modules
+.astro
+.cache
+dist
+coverage
+.DS_Store

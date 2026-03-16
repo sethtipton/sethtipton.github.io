@@ -1,0 +1,17 @@
+---
+import ResumeDocument from '../../components/astro/ResumeDocument.astro';
+import PrintLayout from '../../layouts/PrintLayout.astro';
+import { getResume } from '../../lib/resume';
+
+const resume = await getResume();
+---
+
+<PrintLayout
+  title="Resume Print"
+  description={resume.data.description}
+  bodyClass="resume-print"
+>
+  <div class="resume-print-shell">
+    <ResumeDocument resume={resume} variant="print" />
+  </div>
+</PrintLayout>

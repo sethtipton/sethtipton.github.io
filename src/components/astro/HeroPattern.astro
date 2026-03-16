@@ -1,0 +1,189 @@
+---
+import bgTiltRaw from '../../content/projects/images/bg-til.svg?raw';
+
+interface Props {
+  variant?: 'hero' | 'footer';
+  trigger?: 'load' | 'view';
+}
+
+const { variant = 'hero', trigger = 'load' } = Astro.props;
+
+const patternSvg = bgTiltRaw
+  .replace(/<\?xml[\s\S]*?\?>\s*/i, '')
+  .replace(/<sodipodi:namedview[\s\S]*?<\/sodipodi:namedview>\s*/i, '')
+  .replace('viewBox="0 0 16000000 4000000"', 'viewBox="0 0 4000 2000"')
+  .replace(/\swidth="16000000"/i, '')
+  .replace(/\sheight="4000000"/i, '')
+  .replace(
+    /<svg\b/,
+    '<svg class="site-pattern__svg" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid slice"',
+  )
+  .replace(/<path\b/g, '<path data-site-pattern-path');
+---
+
+<div
+  class:list={['site-pattern', `site-pattern--${variant}`]}
+  aria-hidden="true"
+  data-site-pattern
+  data-site-pattern-trigger={trigger}
+>
+  <Fragment set:html={patternSvg} />
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const patternWindow = window as typeof window & {
+    __sitePatternEnhancerBound?: boolean;
+  };
+  const strokePalette = [
+    'var(--color-accent)',
+    'var(--color-accent-strong)',
+    'color-mix(in srgb, var(--color-accent) 72%, var(--color-text) 28%)',
+    'color-mix(in srgb, var(--color-accent-strong) 68%, var(--color-surface-tint) 32%)',
+    'color-mix(in srgb, var(--color-text) 52%, var(--color-accent) 48%)',
+    'color-mix(in srgb, var(--color-muted) 42%, var(--color-accent) 58%)',
+    'color-mix(in srgb, var(--color-accent) 38%, var(--color-background-alt) 62%)',
+    'color-mix(in srgb, var(--color-accent-strong) 48%, var(--color-white) 52%)',
+    'color-mix(in srgb, var(--color-text) 42%, var(--color-background-alt) 58%)',
+    'color-mix(in srgb, var(--color-accent-strong) 62%, var(--color-text) 38%)',
+    'color-mix(in srgb, var(--color-accent) 34%, var(--color-surface-strong) 66%)',
+    'color-mix(in srgb, var(--color-muted) 70%, var(--color-accent-strong) 30%)',
+    'color-mix(in srgb, var(--color-accent-strong) 54%, var(--color-background) 46%)',
+    'color-mix(in srgb, var(--color-accent) 52%, var(--color-white) 48%)',
+  ];
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)',
+  ).matches;
+
+  const initializePattern = (root: Element) => {
+    if (
+      !(root instanceof HTMLElement) ||
+      root.dataset.patternInitialized === 'true'
+    ) {
+      return;
+    }
+
+    const paths = Array.from(
+      root.querySelectorAll<SVGPathElement>('[data-site-pattern-path]'),
+    );
+    const svg = root.querySelector('.site-pattern__svg');
+
+    if (!(svg instanceof SVGElement) || paths.length === 0) {
+      return;
+    }
+
+    root.dataset.patternInitialized = 'true';
+
+    paths.forEach((path, index) => {
+      path.style.fill = 'none';
+      path.style.stroke = strokePalette[index % strokePalette.length];
+      path.style.strokeLinecap = 'round';
+      path.style.vectorEffect = 'non-scaling-stroke';
+    });
+
+    root.classList.add('is-ready');
+
+    const setFinalState = () => {
+      gsap.set(svg, { opacity: 1 });
+      gsap.set(paths, {
+        opacity: 0.05,
+        strokeWidth: 20,
+        strokeDashoffset: 0,
+        clearProps: 'strokeDasharray',
+      });
+    };
+
+    if (prefersReducedMotion) {
+      setFinalState();
+      return;
+    }
+
+    const playAnimation = () => {
+      if (root.dataset.patternPlayed === 'true') {
+        return;
+      }
+
+      root.dataset.patternPlayed = 'true';
+
+      const lengths = paths.map((path) => path.getTotalLength());
+
+      paths.forEach((path, index) => {
+        path.style.strokeDasharray = `${lengths[index]}`;
+        path.style.strokeDashoffset = `${lengths[index]}`;
+      });
+
+      gsap
+        .timeline({
+          defaults: {
+            ease: 'power2.out',
+          },
+        })
+        .set(svg, { opacity: 1 })
+        .set(paths, {
+          opacity: 0.05,
+          strokeWidth: 1,
+        })
+        .to(
+          paths,
+          {
+            strokeDashoffset: 0,
+            opacity: 0.08,
+            strokeWidth: 30,
+            duration: 10,
+            stagger: {
+              each: 1,
+              from: 'random',
+            },
+          },
+          0,
+        )
+        .to(
+          paths,
+          {
+            opacity: 0.05,
+            strokeWidth: 20,
+            duration: 5,
+            ease: 'power1.out',
+          },
+          '-=0.3',
+        );
+    };
+
+    if (root.dataset.sitePatternTrigger === 'view') {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const isVisible = entries.some((entry) => entry.isIntersecting);
+
+          if (!isVisible) {
+            return;
+          }
+
+          playAnimation();
+          observer.disconnect();
+        },
+        {
+          threshold: 0.2,
+          rootMargin: '0px 0px -8% 0px',
+        },
+      );
+
+      observer.observe(root);
+    } else {
+      playAnimation();
+    }
+  };
+
+  const initializeSitePatterns = () => {
+    document
+      .querySelectorAll('[data-site-pattern]')
+      .forEach((root) => initializePattern(root));
+  };
+
+  initializeSitePatterns();
+
+  if (!patternWindow.__sitePatternEnhancerBound) {
+    document.addEventListener('astro:page-load', initializeSitePatterns);
+    patternWindow.__sitePatternEnhancerBound = true;
+  }
+</script>

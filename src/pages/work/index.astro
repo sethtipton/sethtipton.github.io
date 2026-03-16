@@ -1,0 +1,46 @@
+---
+import CaseStudyCard from '../../components/astro/CaseStudyCard.astro';
+import CaseStudyHoverEnhancer from '../../components/astro/CaseStudyHoverEnhancer.astro';
+import { withBase } from '../../lib/paths';
+import { getProjects } from '../../lib/projects';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const projects = await getProjects();
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title="Work"
+  description="Selected front-end work across enterprise platforms and practical business tooling."
+>
+  <section class="page-shell">
+    <div class="container flow-xl">
+      <header class="page-intro page-intro--wide flow">
+        <h1>Selected front-end case studies.</h1>
+        <p class="lead">
+          The work is presented the way I like to read it myself: clear problem
+          framing, role, implementation approach, impact, and enough context to
+          explain judgment without turning every project into a long post.
+        </p>
+        <div class="button-row">
+          <a
+            class="button-link button-link--secondary"
+            href={withBase('/resume/', base)}
+          >
+            View resume
+          </a>
+        </div>
+      </header>
+
+      <div class="case-study-grid">
+        {
+          projects.map((project) => (
+            <CaseStudyCard project={project} hoverMeta={true} />
+          ))
+        }
+      </div>
+
+      <CaseStudyHoverEnhancer />
+    </div>
+  </section>
+</BaseLayout>

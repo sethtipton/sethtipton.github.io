@@ -1,0 +1,145 @@
+:root {
+  color-scheme: light dark;
+  --color-transparent: transparent;
+  --color-white: #ffffff;
+  --color-background: light-dark(#f3efe7, #0e1419);
+  --color-background-alt: light-dark(#e8dfd2, #162028);
+  --color-surface: light-dark(#fffdf9, #121a20);
+  --color-surface-strong: light-dark(#efe7dc, #18232c);
+  --color-surface-tint: light-dark(#f7f1e8, #1d2933);
+  --color-surface-paper: light-dark(#fffdf8, #10181f);
+  --color-text: light-dark(#1f2933, #e8eef5);
+  --color-muted: light-dark(#52606d, #a3b3c3);
+  --color-accent: light-dark(#0f766e, #247c75);
+  --color-accent-strong: light-dark(#115e59, #1f6a64);
+  --color-focus: light-dark(#0284c7, #67c8ff);
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  --color-accent-tint: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  --color-accent-tint-subtle: color-mix(
+    in srgb,
+    var(--color-accent) 8%,
+    transparent
+  );
+  --color-accent-border: color-mix(
+    in srgb,
+    var(--color-accent) 18%,
+    transparent
+  );
+  --color-accent-strong-tint: color-mix(
+    in srgb,
+    var(--color-accent-strong) 16%,
+    transparent
+  );
+  --color-border: color-mix(in srgb, var(--color-text) 14%, transparent);
+  --color-border-strong: color-mix(in srgb, var(--color-text) 28%, transparent);
+  --color-border-muted: color-mix(in srgb, var(--color-text) 12%, transparent);
+  --color-border-subtle: color-mix(in srgb, var(--color-text) 8%, transparent);
+  --color-link-underline: color-mix(
+    in srgb,
+    var(--color-accent) 45%,
+    transparent
+  );
+  --color-selection: color-mix(in srgb, var(--color-focus) 20%, transparent);
+  --color-header-background: color-mix(
+    in srgb,
+    var(--color-background) 84%,
+    transparent
+  );
+  --color-background-overlay: color-mix(
+    in srgb,
+    var(--color-background) 45%,
+    transparent
+  );
+  --color-background-alt-overlay: color-mix(
+    in srgb,
+    var(--color-background-alt) 45%,
+    transparent
+  );
+  --color-surface-soft: color-mix(
+    in srgb,
+    var(--color-surface) 76%,
+    transparent
+  );
+  --color-surface-strong-soft: color-mix(
+    in srgb,
+    var(--color-surface-strong) 95%,
+    transparent
+  );
+  --color-surface-panel: color-mix(
+    in srgb,
+    var(--color-surface) 94%,
+    transparent
+  );
+  --color-surface-panel-strong: color-mix(
+    in srgb,
+    var(--color-surface) 96%,
+    transparent
+  );
+  --color-surface-panel-soft: color-mix(
+    in srgb,
+    var(--color-surface) 70%,
+    transparent
+  );
+  --color-surface-tint-soft: color-mix(
+    in srgb,
+    var(--color-surface-tint) 88%,
+    transparent
+  );
+  --color-surface-tint-soft-strong: color-mix(
+    in srgb,
+    var(--color-surface-tint) 86%,
+    transparent
+  );
+  --color-surface-overlay: color-mix(
+    in srgb,
+    var(--color-surface) 72%,
+    transparent
+  );
+  --color-surface-paper-soft: color-mix(
+    in srgb,
+    var(--color-surface-paper) 94%,
+    transparent
+  );
+  --color-white-soft: color-mix(in srgb, var(--color-white) 50%, transparent);
+  --color-white-gloss: color-mix(in srgb, var(--color-white) 40%, transparent);
+  --shadow-soft-color: light-dark(rgb(31 41 51 / 0.08), rgb(0 0 0 / 0.32));
+  --shadow-card-color: light-dark(rgb(31 41 51 / 0.06), rgb(0 0 0 / 0.24));
+  --shadow-soft: 0 20px 50px var(--shadow-soft-color);
+  --shadow-card: 0 12px 28px var(--shadow-card-color);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.5rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --container-width: 72rem;
+  --content-width: 48rem;
+  /* --font-sans: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', sans-serif; */
+  /* --font-serif:
+    'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif; */
+  --font-sans:
+    Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-serif:
+    Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+$breakpoints: (
+  md: 48rem,
+  lg: 72rem,
+);

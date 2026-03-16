@@ -1,0 +1,15 @@
+---
+import ResumeDocument from '../components/astro/ResumeDocument.astro';
+import { getResume } from '../lib/resume';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const resume = await getResume();
+---
+
+<BaseLayout title="Resume" description={resume.data.description}>
+  <section class="page-shell">
+    <div class="container">
+      <ResumeDocument resume={resume} />
+    </div>
+  </section>
+</BaseLayout>

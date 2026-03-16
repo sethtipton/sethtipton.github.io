@@ -1,0 +1,57 @@
+---
+import HeroPattern from './HeroPattern.astro';
+import {
+  availabilityNote,
+  contactLinks,
+  primaryNav,
+  siteMeta,
+} from '../../data/site';
+import { getExternalLinkProps, resolveHref } from '../../lib/links';
+import { withBase } from '../../lib/paths';
+
+const base = import.meta.env.BASE_URL;
+const resolvedContactLinks = contactLinks.map((item) => ({
+  ...item,
+  href: resolveHref(item, base),
+}));
+---
+
+<footer class="site-footer">
+  <HeroPattern variant="footer" trigger="view" />
+
+  <div class="container site-footer__inner">
+    <div class="flow-sm">
+      <a class="site-brand" href={withBase('/', base)}>{siteMeta.title}</a>
+      <p class="text-muted">
+        Front-end engineering for products that need clarity, consistency, and
+        room to evolve. Focused on shared components, accessible interaction,
+        and durable implementation.
+      </p>
+      <p class="text-muted">{availabilityNote}</p>
+    </div>
+
+    <div class="site-footer__meta">
+      <ul class="link-list" aria-label="Primary pages">
+        {
+          primaryNav.map((item) => (
+            <li>
+              <a href={withBase(item.href, base)}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <ul class="link-list" aria-label="External links">
+        {
+          resolvedContactLinks.map((item) => (
+            <li>
+              <a href={item.href} {...getExternalLinkProps(item.href)}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</footer>

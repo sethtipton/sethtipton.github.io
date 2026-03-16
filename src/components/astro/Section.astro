@@ -1,0 +1,27 @@
+---
+interface Props {
+  id?: string;
+  eyebrow: string;
+  title: string;
+  description?: string;
+  contrast?: boolean;
+}
+
+const { id, eyebrow, title, description, contrast = false } = Astro.props;
+
+const sectionClass = ['section-shell', contrast && 'section-shell--contrast']
+  .filter(Boolean)
+  .join(' ');
+---
+
+<section id={id} class={sectionClass}>
+  <div class="container flow-lg">
+    <header class="section-heading flow-sm">
+      <p class="eyebrow">{eyebrow}</p>
+      <h2>{title}</h2>
+      {description && <p class="lead lead--section">{description}</p>}
+    </header>
+
+    <slot />
+  </div>
+</section>

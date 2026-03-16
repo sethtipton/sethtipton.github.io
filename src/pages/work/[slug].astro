@@ -1,0 +1,219 @@
+---
+import { render } from 'astro:content';
+
+import ProjectVisual from '../../components/astro/ProjectVisual.astro';
+import GitHubRepoMeta from '../../components/react/GitHubRepoMeta';
+import { parseGitHubRepoUrl } from '../../lib/github';
+import { getExternalLinkProps } from '../../lib/links';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  getProjectLinks,
+  getProjects,
+  getProjectTransitionNames,
+} from '../../lib/projects';
+import { withBase } from '../../lib/paths';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const base = import.meta.env.BASE_URL;
+const links = getProjectLinks(project, base);
+const transitionNames = getProjectTransitionNames(project.id);
+type ProjectLink = {
+  label: string;
+  href: string;
+};
+
+const publicLinks = [
+  links.live && {
+    label: 'Live project',
+    href: links.live,
+  },
+  links.repo && {
+    label: 'Repository',
+    href: links.repo,
+  },
+  {
+    label: 'All work',
+    href: withBase('/work/', base),
+  },
+].filter((link): link is ProjectLink => Boolean(link));
+const hasPublicRepo = Boolean(links.repo && parseGitHubRepoUrl(links.repo));
+---
+
+<BaseLayout
+  title={project.data.title}
+  description={project.data.summary}
+  ogType="article"
+  socialImage={project.data.thumbnail?.src}
+>
+  <section class="page-shell page-shell--project">
+    <div class="container flow-xl">
+      <section class="project-hero">
+        <div class="project-hero__content flow">
+          <a
+            class="inline-link inline-link--back"
+            href={withBase('/work/', base)}
+          >
+            Back to all work
+          </a>
+
+          <div class="flow-sm">
+            <h1
+              class="project-hero__title"
+              transition:name={transitionNames.heading}
+              transition:animate="initial"
+            >
+              {project.data.title}
+            </h1>
+            <div class="case-study-card__meta">
+              <p class="eyebrow eyebrow--muted">{project.data.role}</p>
+              {
+                project.data.status && (
+                  <p class="status-note">{project.data.status}</p>
+                )
+              }
+            </div>
+          </div>
+
+          <p
+            class="project-hero__summary lead"
+            transition:name={transitionNames.summary}
+            transition:animate="initial"
+          >
+            {project.data.summary}
+          </p>
+          <p
+            class="project-hero__problem text-muted"
+            transition:name={transitionNames.problem}
+            transition:animate="initial"
+          >
+            {project.data.problem}
+          </p>
+
+          <ul
+            class="inline-link-list"
+            aria-label={`${project.data.title} links`}
+          >
+            {
+              publicLinks.map((link) => (
+                <li>
+                  <a href={link.href} {...getExternalLinkProps(link.href)}>
+                    {link.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <ProjectVisual
+          project={project}
+          detail={true}
+          transitionName={transitionNames.visual}
+        />
+      </section>
+
+      <div class="project-layout">
+        <div class="project-main flow-lg">
+          <section class="surface-card project-section flow">
+            <p class="eyebrow eyebrow--muted">Overview</p>
+            <h2>What the project needed</h2>
+            <p>{project.data.summary}</p>
+          </section>
+
+          <section class="surface-card project-section flow">
+            <p class="eyebrow eyebrow--muted">Problem</p>
+            <h2>The challenge</h2>
+            <p>{project.data.problem}</p>
+          </section>
+
+          <section class="surface-card project-section flow">
+            <p class="eyebrow eyebrow--muted">Approach / implementation</p>
+            <h2>How I approached the work</h2>
+            <div class="content-body">
+              <Content />
+            </div>
+          </section>
+
+          <section class="surface-card project-section flow">
+            <p class="eyebrow eyebrow--muted">Impact</p>
+            <h2>What moved the work forward</h2>
+            <ul class="impact-list">
+              {project.data.impact.map((item) => <li>{item}</li>)}
+            </ul>
+          </section>
+        </div>
+
+        <aside class="project-sidebar flow-lg">
+          <section
+            class="surface-card flow"
+            aria-labelledby="project-role-title"
+          >
+            <p class="eyebrow eyebrow--muted">Role</p>
+            <h2 id="project-role-title" class="sidebar-title">
+              {project.data.role}
+            </h2>
+            {
+              project.data.status && (
+                <p class="status-note status-note--inline">
+                  {project.data.status}
+                </p>
+              )
+            }
+          </section>
+
+          <section
+            class="surface-card flow"
+            aria-labelledby="project-stack-title"
+          >
+            <p class="eyebrow eyebrow--muted">Stack</p>
+            <h2 id="project-stack-title" class="sidebar-title">Core tools</h2>
+            <ul class="tag-list" aria-label={`${project.data.title} stack`}>
+              {project.data.stack.map((item) => <li>{item}</li>)}
+            </ul>
+          </section>
+
+          <section
+            class="surface-card flow"
+            aria-labelledby="project-links-title"
+          >
+            <p class="eyebrow eyebrow--muted">Links</p>
+            <h2 id="project-links-title" class="sidebar-title">
+              Project access
+            </h2>
+            <ul
+              class="project-link-list"
+              aria-label={`${project.data.title} links`}
+            >
+              {
+                publicLinks.map((link) => (
+                  <li>
+                    <a href={link.href} {...getExternalLinkProps(link.href)}>
+                      {link.label}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            {project.data.note && <p class="card-note">{project.data.note}</p>}
+          </section>
+
+          {
+            hasPublicRepo && links.repo && (
+              <GitHubRepoMeta client:visible repoUrl={links.repo} />
+            )
+          }
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

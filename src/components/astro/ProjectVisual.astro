@@ -1,0 +1,206 @@
+---
+import type { ProjectEntry } from '../../lib/projects';
+
+interface Props {
+  project: ProjectEntry;
+  detail?: boolean;
+  hoverMeta?: boolean;
+  href?: string;
+  transitionName?: string;
+  title?: string;
+  titleTransitionName?: string;
+}
+
+const {
+  project,
+  detail = false,
+  hoverMeta = false,
+  href,
+  transitionName,
+  title,
+  titleTransitionName,
+} = Astro.props;
+const thumbnail = project.data.thumbnail;
+const visualClass = [
+  'project-visual',
+  detail && 'project-visual--detail',
+  hoverMeta && 'project-visual--hover-meta',
+  transitionName && 'project-visual--transitionable',
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div
+  class={visualClass}
+  data-case-study-hover-card={hoverMeta ? '' : undefined}
+  role={hoverMeta ? 'group' : undefined}
+  aria-label={hoverMeta ? `${project.data.title} preview` : undefined}
+  transition:name={transitionName}
+  transition:animate={transitionName ? 'initial' : undefined}
+>
+  {
+    href ? (
+      <a
+        class="project-visual__link"
+        href={href}
+        aria-label={`Open ${project.data.title} case study`}
+      >
+        {thumbnail ? (
+          <img
+            src={thumbnail.src}
+            width={thumbnail.width}
+            height={thumbnail.height}
+            alt=""
+            loading={detail ? 'eager' : 'lazy'}
+            decoding="async"
+            class="project-visual__image"
+            data-case-study-hover-image={hoverMeta ? '' : undefined}
+          />
+        ) : (
+          <div
+            class="project-visual__fallback"
+            aria-hidden="true"
+            data-case-study-hover-image={hoverMeta ? '' : undefined}
+          >
+            {!title && <span>{project.data.title}</span>}
+          </div>
+        )}
+
+        {title && (
+          <div class="project-visual__title-wrap">
+            <svg
+              class="heading-scrim heading-scrim--md project-visual__title-scrim"
+              viewBox="0 0 320 87"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              focusable="false"
+              data-case-study-title-scrim
+            >
+              <rect
+                class="heading-scrim__rect"
+                x="0"
+                y="0"
+                width="320"
+                height="87"
+              />
+            </svg>
+            <h3
+              class="case-study-card__title project-visual__title"
+              transition:name={titleTransitionName}
+              transition:animate={titleTransitionName ? 'initial' : undefined}
+            >
+              <span class="project-visual__title-text">{title}</span>
+            </h3>
+          </div>
+        )}
+
+        {hoverMeta && (
+          <>
+            <div class="project-visual__hover-layer" aria-hidden="true">
+              <div class="project-visual__scrim" data-case-study-hover-scrim />
+
+              <div class="project-visual__ink project-visual__ink--primary">
+                <svg
+                  viewBox="0 0 3053 2273"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    data-case-study-hover-path
+                    d="m 227.549,1818.76 c 0,0 178.467,388.99 341.5,311.5 C 843.431,1999.85 -300.3415,676.1625 191.3115,550.1245 591.943,449.9865 1133.2345,2506.285 1701.6375,2180.435 2245.0175,1868.935 352.2519,388.872 1097.8355,70.362 1679.3375,-178.052 2332.5,2489.35 2878.55,2195.76 3424.6,1902.18 1851.6175,337.0795 2141.5375,89.8745 c 186.95,-159.4083 787.1875,294.175 787.1875,294.175"
+                  />
+                </svg>
+              </div>
+
+              <div class="project-visual__ink project-visual__ink--secondary">
+                <svg
+                  viewBox="0 0 2250 2535"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    data-case-study-hover-path
+                    d="m 2360.761,2476.2351 c 0,0 553.4371,-459.9066 354.1271,-603.2666 -167.31,-120.34 -3013.01117,1056.2688 -3231.68617,441.6088 C -707.61007,1778.2373 3076.1621,1623.1564 2730.4321,972.83841 2384.7021,322.52441 -209.35592,2157.8643 -505.02392,1418.2043 -792.52392,698.98635 2854.1572,844.88193 2548.1572,205.37993 2277.1872,-360.92207 -267.83392,1014.8684 -495.69751,476.35667 -609.80131,311.51667 92.44958,59.333407 92.44958,59.333407"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <div
+              class="project-visual__hover-panel flow-sm"
+              data-case-study-hover-panel
+            >
+              <div class="case-study-card__meta case-study-card__meta--overlay">
+                <p class="eyebrow eyebrow--muted">{project.data.role}</p>
+                {project.data.status && (
+                  <p class="status-note">{project.data.status}</p>
+                )}
+              </div>
+
+              <ul
+                class="tag-list tag-list--overlay"
+                aria-label={`${project.data.title} stack`}
+              >
+                {project.data.stack.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+      </a>
+    ) : (
+      <>
+        {thumbnail ? (
+          <img
+            src={thumbnail.src}
+            width={thumbnail.width}
+            height={thumbnail.height}
+            alt=""
+            loading={detail ? 'eager' : 'lazy'}
+            class="project-visual__image"
+            decoding="async"
+            data-case-study-hover-image={hoverMeta ? '' : undefined}
+          />
+        ) : (
+          <div
+            class="project-visual__fallback"
+            aria-hidden="true"
+            data-case-study-hover-image={hoverMeta ? '' : undefined}
+          >
+            {!title && <span>{project.data.title}</span>}
+          </div>
+        )}
+
+        {title && (
+          <div class="project-visual__title-wrap">
+            <svg
+              class="heading-scrim heading-scrim--md project-visual__title-scrim"
+              viewBox="0 0 320 87"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              focusable="false"
+              data-case-study-title-scrim
+            >
+              <rect
+                class="heading-scrim__rect"
+                x="0"
+                y="0"
+                width="320"
+                height="87"
+              />
+            </svg>
+            <h3
+              class="case-study-card__title project-visual__title"
+              transition:name={titleTransitionName}
+              transition:animate={titleTransitionName ? 'initial' : undefined}
+            >
+              <span class="project-visual__title-text">{title}</span>
+            </h3>
+          </div>
+        )}
+      </>
+    )
+  }
+</div>

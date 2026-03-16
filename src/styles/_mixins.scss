@@ -1,0 +1,24 @@
+@use 'sass:map';
+@use './tokens' as tokens;
+
+@mixin container {
+  width: min(calc(100% - 2rem), var(--container-width));
+  margin-inline: auto;
+}
+
+@mixin section-space {
+  padding-block: clamp(var(--space-7), 10vw, var(--space-9));
+}
+
+@mixin card-surface {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+@mixin respond-up($breakpoint) {
+  @media (min-width: map.get(tokens.$breakpoints, $breakpoint)) {
+    @content;
+  }
+}
