@@ -22,3 +22,9 @@
     @content;
   }
 }
+
+@mixin respond-down($breakpoint) {
+  @media (max-width: map.get(tokens.$breakpoints, $breakpoint)) {
+    @content;
+  }
+}

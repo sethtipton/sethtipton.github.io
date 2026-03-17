@@ -9,4 +9,17 @@ export default defineConfig({
   site,
   base,
   integrations: [react()],
+  server: {
+    host: true,
+    port: 4321,
+  },
+  vite: {
+    server: {
+      hmr: {
+        host: '192.168.0.16',
+        protocol: 'ws',
+        clientPort: 4321,
+      },
+    },
+  },
 });
