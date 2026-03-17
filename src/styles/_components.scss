@@ -1197,8 +1197,11 @@
     width: 100%;
   }
   .resume-document__header {
-    flex-direction: column;
+    flex-direction: column !important;
     //align-items: flex-start;
+  }
+  .resume-skill h3 {
+    font-weight: 500;
   }
 
   .case-study-card__body {
