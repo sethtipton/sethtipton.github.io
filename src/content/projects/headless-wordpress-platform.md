@@ -2,7 +2,7 @@
 title: Tree City Rentals
 summary: Built a headless WordPress and React rental-search site that kept publishing simple for admins while giving the front end cleaner structure and room to grow.
 problem: The project needed a modern, interactive front end for rental discovery without losing the flexibility of WordPress for ongoing content updates, which made clear boundaries between CMS content, GraphQL data, and presentation especially important.
-role: Front-End Engineer / WordPress Builder
+role: Senior Front-End Engineer
 impact:
   - Built the project end to end as the sole engineer, pairing a headless WordPress backend with a React and TypeScript frontend.
   - Kept CMS content, GraphQL-delivered data, and React presentation logic clearly separated.

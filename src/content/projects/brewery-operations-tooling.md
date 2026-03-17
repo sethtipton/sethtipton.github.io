@@ -2,7 +2,7 @@
 title: Belltower Brewing
 summary: A site built on WordPress for a local brewery with a focused React pairing experience, keeping day-to-day publishing simple while adding a richer product-style recommendation flow.
 problem: The site needed to stay easy to update through WordPress while supporting a more interactive beer discovery experience without turning the whole front end into a heavy app.
-role: Product Builder / Front-End Engineer
+role: Senior Front-End Engineer
 impact:
   - Built the project end to end, including the custom WordPress theme, the React pairing experience, the supporting integrations, and the admin-facing content workflow.
   - Kept the site on a traditional WordPress foundation and used React only where the product experience actually benefited from it.

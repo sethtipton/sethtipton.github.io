@@ -36,6 +36,7 @@ export const heroContent = {
   name: 'Seth Tipton',
   title: 'Senior Front-End Engineer',
   statement: [
+    'Curious by nature. Passionate by choice.',
     'I design and build fast, accessible, scalable web interfaces with React, TypeScript, and modern JavaScript, specializing in design systems and shared component architecture.',
     'My work centers on UI systems, performance, and turning complex requirements into clean, durable front-end architecture that teams can extend with confidence.',
   ],

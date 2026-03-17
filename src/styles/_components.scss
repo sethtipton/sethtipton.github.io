@@ -75,6 +75,7 @@
   align-items: center;
   color: var(--color-text);
   text-decoration: none;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
 }
 
 .site-signature {
@@ -332,7 +333,7 @@
 }
 
 .lead--section {
-  max-width: 46rem;
+  max-width: none;
   font-size: clamp(1.05rem, 1.8vw, 1.2rem);
 }
 
@@ -1179,7 +1180,7 @@
   }
 
   .project-visual--hover-meta .case-study-card__meta--overlay .eyebrow {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
   }
 
   .project-visual--hover-meta .project-visual__hover-panel .status-note {
