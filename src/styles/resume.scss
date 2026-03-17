@@ -5,6 +5,7 @@
   --resume-page-margin-right: 0.55in;
   --resume-page-margin-bottom: 0.58in;
   --resume-page-margin-left: 0.55in;
+  --resume-shell-padding: 1em;
 }
 
 .resume-document {
@@ -318,15 +319,13 @@ body.resume-print {
 
 body.resume-print main {
   display: block;
-  //padding: clamp(var(--space-4), 4vw, var(--space-7));
 }
 
 .resume-print-shell {
   width: min(100%, var(--resume-page-width));
   min-height: var(--resume-page-height);
   margin-inline: auto;
-  padding: var(--resume-page-margin-top) var(--resume-page-margin-right)
-    var(--resume-page-margin-bottom) var(--resume-page-margin-left);
+  padding: var(--resume-shell-padding);
   background: var(--color-white);
   box-shadow: none;
 }
@@ -375,13 +374,14 @@ body.resume-print main {
   }
 
   .resume-print-shell {
+    --resume-shell-padding: var(--resume-page-margin-top)
+      var(--resume-page-margin-right) var(--resume-page-margin-bottom)
+      var(--resume-page-margin-left);
     width: auto;
     min-height: auto;
     margin: 0;
-    //padding: 0;
     background: transparent;
     box-shadow: none;
-    //padding: 0.5em;
   }
 
   .resume-document__actions {
