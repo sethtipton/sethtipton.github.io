@@ -11,18 +11,6 @@ html {
   scroll-padding-top: 6rem;
 }
 
-@include mixins.respond-down(md) {
-  html {
-    border: 2px solid orange;
-  }
-}
-
-@include mixins.respond-down(sm) {
-  html {
-    border: 2px solid pink;
-  }
-}
-
 body {
   margin: 0;
   min-width: 20rem;

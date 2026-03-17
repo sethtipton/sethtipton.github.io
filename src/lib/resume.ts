@@ -4,7 +4,7 @@ import { resolveHref } from './links';
 import { withBase } from './paths';
 
 export const RESUME_ENTRY_ID = 'seth-tipton';
-export const RESUME_PDF_FILE_NAME = 'resume.pdf';
+export const RESUME_PDF_FILE_NAME = 'seth_tipton_resume.pdf';
 
 export type ResumeEntry = CollectionEntry<'resume'>;
 export type ResumeContact = ResumeEntry['data']['contacts'][number];

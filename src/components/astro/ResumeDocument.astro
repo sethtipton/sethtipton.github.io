@@ -5,6 +5,7 @@ import {
   getResumeLink,
   getResumePdfHref,
   getResumePrintHref,
+  RESUME_PDF_FILE_NAME,
 } from '../../lib/resume';
 import WorkHistoryItem from './WorkHistoryItem.astro';
 import '../../styles/resume.scss';
@@ -58,7 +59,7 @@ const printHref = getResumePrintHref(base);
       <div class="resume-document__actions">
         <div class="button-row">
           {!isDev ? (
-            <a class="button-link" href={pdfHref} download>
+            <a class="button-link" href={pdfHref} download={RESUME_PDF_FILE_NAME}>
               Download PDF
             </a>
           ) : (

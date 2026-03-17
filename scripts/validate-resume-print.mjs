@@ -7,6 +7,7 @@ import { JSDOM } from 'jsdom';
 const distDir = path.resolve('dist');
 const resumeSourcePath = path.resolve('src/content/resume/seth-tipton.md');
 const base = normalizeBase(process.env.BASE_PATH ?? '/');
+const pdfFileName = 'seth_tipton_resume.pdf';
 const printHtmlPath =
   base === '/'
     ? path.join(distDir, 'resume', 'print', 'index.html')
@@ -17,7 +18,7 @@ const printHtmlPath =
         'print',
         'index.html',
       );
-const pdfPath = path.join(distDir, 'resume.pdf');
+const pdfPath = path.join(distDir, pdfFileName);
 
 const [html, pdfStats, pdfBuffer, resumeSource] = await Promise.all([
   readFile(printHtmlPath, 'utf8'),
@@ -37,7 +38,7 @@ assert(
   'Expected a location field in the resume source frontmatter.',
 );
 
-assert(pdfStats.size > 0, 'dist/resume.pdf is empty.');
+assert(pdfStats.size > 0, `dist/${pdfFileName} is empty.`);
 
 const dom = new JSDOM(html);
 const { document } = dom.window;

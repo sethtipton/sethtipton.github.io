@@ -8,11 +8,12 @@ import { chromium } from 'playwright';
 const distDir = path.resolve('dist');
 const base = normalizeBase(process.env.BASE_PATH ?? '/');
 const printPath = joinUrl(base, 'resume/print/');
-const rootPdfPath = path.join(distDir, 'resume.pdf');
+const pdfFileName = 'seth_tipton_resume.pdf';
+const rootPdfPath = path.join(distDir, pdfFileName);
 const basePdfPath =
   base === '/'
     ? null
-    : path.join(distDir, base.replace(/^\/|\/$/g, ''), 'resume.pdf');
+    : path.join(distDir, base.replace(/^\/|\/$/g, ''), pdfFileName);
 
 const mimeTypes = new Map([
   ['.css', 'text/css; charset=utf-8'],
