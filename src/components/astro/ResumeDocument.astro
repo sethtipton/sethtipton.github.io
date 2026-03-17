@@ -59,7 +59,11 @@ const printHref = getResumePrintHref(base);
       <div class="resume-document__actions">
         <div class="button-row">
           {!isDev ? (
-            <a class="button-link" href={pdfHref} download={RESUME_PDF_FILE_NAME}>
+            <a
+              class="button-link"
+              href={pdfHref}
+              download={RESUME_PDF_FILE_NAME}
+            >
               Download PDF
             </a>
           ) : (
