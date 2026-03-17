@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666665 8.4666666"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      :root {
+        color: #000000;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color: #ffffff;
+        }
+      }
+    </style>
+  </defs>
+
+  <g id="layer1">
+    <path
+       style="fill:none;stroke:currentColor;stroke-width:0.8;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 3.7524559,3.3487869 c 0,0 0.091129,-0.7359371 -0.1826516,-0.9132579 C 3.1701974,2.1767136 1.453502,2.7514837 1.450581,3.1740767 1.4462925,3.7945058 4.2128262,4.075124 3.9679963,5.2864821 3.8751329,5.7459472 2.5494329,6.3169236 1.8476495,6.2235639 0.0462227,5.9839165 0.69615056,5.1117717 0.69615056,5.1117717"
+       id="path1" />
+    <path
+       style="fill:none;stroke:currentColor;stroke-width:0.8;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 6.1274649,3.0007218 c 0,0 0.1089444,0.8770203 0.1639886,1.4872666 0.048099,0.5332452 0.052791,1.6943243 0.052791,1.6943243"
+       id="path9" />
+    <path
+       style="display:inline;fill:none;stroke:currentColor;stroke-width:0.8;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 4.7881885,2.3605751 c 0,0 -0.038585,0.3064728 0.3255964,0.3176549 C 5.617375,2.693692 5.5442852,2.640531 6.1412562,2.599321 6.7571209,2.556805 7.8810788,2.506396 7.8810788,2.506396"
+       id="path10" />
+  </g>
+</svg>

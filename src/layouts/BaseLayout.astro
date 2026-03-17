@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import Footer from '../components/astro/Footer.astro';
 import Header from '../components/astro/Header.astro';
 import { siteMeta } from '../data/site';
+import { withBase } from '../lib/paths';
 import '../styles/global.scss';
 
 interface Props {
@@ -22,6 +23,7 @@ const themeColor = siteMeta.themeColor;
 
 const pageTitle =
   title === siteMeta.title ? title : `${title} | ${siteMeta.title}`;
+const base = import.meta.env.BASE_URL;
 const canonicalUrl = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).toString()
   : Astro.url.toString();
@@ -39,6 +41,22 @@ const socialImageUrl = Astro.site
     <meta name="robots" content="index,follow" />
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content={themeColor.light} />
+    <link
+      rel="icon"
+      href={withBase('/favicon.svg', base)}
+      sizes="any"
+      type="image/svg+xml"
+    />
+    <link
+      rel="icon"
+      href={withBase('/favicon-32x32.png', base)}
+      sizes="32x32"
+      type="image/png"
+    />
+    <link
+      rel="apple-touch-icon"
+      href={withBase('/apple-touch-icon.png', base)}
+    />
     <link rel="canonical" href={canonicalUrl} />
     <meta property="og:site_name" content={siteMeta.title} />
     <meta property="og:title" content={pageTitle} />

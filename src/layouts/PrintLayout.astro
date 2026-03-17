@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/paths';
 import '../styles/global.scss';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const { title = 'Print', description = '', bodyClass } = Astro.props;
+const base = import.meta.env.BASE_URL;
 const canonicalUrl = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).toString()
   : Astro.url.toString();
@@ -21,6 +23,22 @@ const canonicalUrl = Astro.site
     <meta name="description" content={description} />
     <meta name="robots" content="noindex,nofollow" />
     <meta name="generator" content={Astro.generator} />
+    <link
+      rel="icon"
+      href={withBase('/favicon.svg', base)}
+      sizes="any"
+      type="image/svg+xml"
+    />
+    <link
+      rel="icon"
+      href={withBase('/favicon-32x32.png', base)}
+      sizes="32x32"
+      type="image/png"
+    />
+    <link
+      rel="apple-touch-icon"
+      href={withBase('/apple-touch-icon.png', base)}
+    />
     <link rel="canonical" href={canonicalUrl} />
     <title>{title}</title>
   </head>
