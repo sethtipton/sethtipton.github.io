@@ -12,14 +12,19 @@ stack:
   - Astro
   - TypeScript
   - Sass
-  - GSAP
   - Astro Content Collections
+  - GSAP
+  - Vite
+  - Playwright
+  - Vitest
+  - ESLint
+  - Prettier
 links:
   live: https://sethtipton.github.io
   repo: https://github.com/sethtipton/sethtipton.github.io
 featured: true
 order: 5
-thumbnail: ./images/performance-accessibility.svg
+thumbnail: ./images/sethtipton-github-io-dark-top.webp
 status: Personal site platform
 note: The site acts as both a public portfolio and a working front-end system, so the implementation evolves alongside the content it presents.
 futureApi:
