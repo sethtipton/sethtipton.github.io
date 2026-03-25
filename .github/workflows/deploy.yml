@@ -21,6 +21,7 @@ jobs:
     env:
       ASTRO_TELEMETRY_DISABLED: '1'
       SITE_URL: https://${{ github.repository_owner }}.github.io
+      PUBLIC_STYLE_TRANSFER_API_URL: https://project-qp07y.vercel.app/api/style-transfer
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
