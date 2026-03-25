@@ -19,28 +19,29 @@ stack:
 links:
   live: https://www.treecityrentals.com/
   repo: https://github.com/sethtipton/treecityrentals
+published: false
 featured: true
 order: 4
 thumbnail: ./images/tree-city-rentals.svg
 status: Headless CMS build
-note: The public repo covers the front-end application layer; production deployment details can be added later if needed.
+note: The public repository focuses on the React front end and content-delivery layer rather than the WordPress backend or hosting setup.
 futureApi:
   projectKey: wp-platform
   endpointHint: /projects/headless-wordpress
 ---
 
-### Context
+### Scale and scope
 
 Tree City Rentals was built as a rental-search experience rather than a traditional WordPress theme. The goal was to get a cleaner React front end without losing the practical content workflow WordPress already gives to multiple admins.
 
 That made the boundaries matter. A headless setup only helps if content, data delivery, and UI stay clearly separated instead of turning into the same old coupling in a different stack.
 
-### What I focused on
+### Ownership and approach
 
 I built the project end to end as the sole engineer. My focus was on keeping WordPress as the content source while making the React front end cleaner and easier to extend than a template-heavy theme.
 
 I leaned on shared UI primitives, clean page templates, and layout composition patterns so the front end could stay consistent without becoming rigid. GraphQL handled content delivery from WordPress, and the React app stayed focused on presentation and interaction.
 
-### Why it mattered
+### Business and engineering impact
 
 The value here was not just swapping stacks. It was creating a setup that made content easier to update, reduced WordPress theme sprawl, and left room for future iteration without a rebuild. The result was a cleaner rental-search front end that still kept publishing practical for admins.

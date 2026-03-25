@@ -41,4 +41,4 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Validate project
-        run: npm run validate
+        run: npm run validate:full

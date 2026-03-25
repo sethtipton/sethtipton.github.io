@@ -7,13 +7,18 @@ export type LinkItem = {
 export const siteMeta = {
   title: 'Seth Tipton',
   description:
-    'Senior Front-End Engineer building fast, accessible, scalable web experiences with React and TypeScript.',
+    'Senior Front-End Engineer building design systems, front-end platforms, and accessible product UI.',
   themeColor: {
     light: '#f3efe7',
     dark: '#0e1419',
   },
+  email: 'sethtipton@gmail.com',
+  jobTitle: 'Senior Front-End Engineer',
+  sameAs: [
+    'https://github.com/sethtipton',
+    'https://www.linkedin.com/in/sethtipton',
+  ],
   url: 'https://sethtipton.github.io',
-  socialImage: '/social-card.svg',
 } as const;
 
 export const primaryNav: LinkItem[] = [
@@ -34,17 +39,22 @@ export const socialLinks: LinkItem[] = [
 
 export const heroContent = {
   name: 'Seth Tipton',
-  title: 'Senior Front-End Engineer',
+  title:
+    'I design and build the foundations that teams, platforms, and products need to scale.',
   statement: [
-    'Curious by nature. Passionate by choice.',
-    'I design and build fast, accessible, scalable web interfaces with React, TypeScript, and modern JavaScript, specializing in design systems and shared component architecture.',
-    'My work centers on UI systems, performance, and turning complex requirements into clean, durable front-end architecture that teams can extend with confidence.',
+    'I focus on the systems that make shared product work more reliable at scale, including component libraries, durable UI patterns, reusable logic, and CMS or product integrations that support real team workflows.',
+    'My work is strongest where fast delivery and responsible ownership overlap, especially in accessibility, performance, rollout safety, editor experience, and standards that remain useful long after launch. I’ve built across enterprise platforms, commerce, CMS-driven experiences, and product UI, using AI to strengthen implementation and QA while keeping thoughtful engineering decisions at the center.',
   ],
   ctas: [
-    { label: 'View work', href: '/work/' },
-    { label: 'Resume', href: '/resume/' },
+    { label: 'See case studies', href: '/work/' },
+    { label: 'View resume', href: '/resume/' },
   ],
-  trustRow: ['React', 'Accessibility', 'Performance'],
+  trustRow: [
+    '15+ years across web, product, and platform work',
+    '200+ shared components',
+    '34 languages / 76 countries',
+    '~15% faster page loads',
+  ],
 } as const;
 
 export const contactLinks: LinkItem[] = [
@@ -52,4 +62,5 @@ export const contactLinks: LinkItem[] = [
   { label: 'Resume', href: '/resume/' },
 ];
 
-export const availabilityNote = 'Available for senior front-end work.';
+export const availabilityNote =
+  'Best fit: front-end platform, design systems, and product UI roles that need strong standards and hands-on execution.';

@@ -1,32 +1,32 @@
 export const buildPrinciples = [
   {
-    title: 'Performance first',
+    title: 'Performance that compounds',
     summary:
-      'I aim for the lightest, clearest implementation that delivers the right experience without unnecessary overhead.',
+      'I look for implementation choices that keep products fast now and easier to tune as the surface area grows.',
   },
   {
-    title: 'Accessibility by default',
+    title: 'Accessibility in the interaction model',
     summary:
-      'Accessibility is built into the structure and behavior of the interface from the start.',
+      'Keyboard support, semantics, focus behavior, and screen reader paths belong in the implementation, not a cleanup pass.',
   },
   {
-    title: 'Systems over one-offs',
+    title: 'Shared systems over one-offs',
     summary:
-      'I prefer reusable patterns over isolated fixes so teams can move faster without creating inconsistency.',
+      'I turn repeated UI and state problems into patterns teams can reuse instead of re-solving them feature by feature.',
   },
   {
-    title: 'Minimal, durable architecture',
+    title: 'Rollouts teams can trust',
     summary:
-      'I choose approaches that stay understandable, adaptable, and maintainable as products evolve.',
+      'Configuration, testing, migration, and failure states matter when shared front-end changes land across multiple surfaces.',
   },
   {
-    title: 'Editor and developer experience matter',
+    title: 'Standards that support mentoring',
     summary:
-      'Better authoring and development workflows reduce friction, improve quality, and support long-term delivery.',
+      'Documentation, code review, and clear defaults help other engineers extend the work without inheriting hidden traps.',
   },
   {
-    title: 'Semantics before styling',
+    title: 'Practical tooling, bounded AI',
     summary:
-      'I start with meaningful structure and interaction patterns so the interface stays accessible, resilient, and easier to extend.',
+      'I use tooling and AI where they reduce friction, support QA, and protect quality without replacing engineering judgment.',
   },
 ] as const;

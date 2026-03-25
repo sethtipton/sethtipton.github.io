@@ -9,12 +9,12 @@
 }
 
 .section-shell--contrast {
-  border-block: 1px solid var(--color-border-subtle);
+  border-block: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
   background:
     linear-gradient(
       180deg,
-      var(--color-surface-strong-soft),
-      var(--color-background-overlay)
+      color-mix(in srgb, var(--color-surface-strong) 95%, transparent),
+      color-mix(in srgb, var(--color-background) 45%, transparent)
     ),
     var(--color-surface-strong);
 }
@@ -28,6 +28,9 @@
     .case-study-card__body {
       padding: clamp(var(--space-5), 4vw, var(--space-6));
     }
+  }
+  &.style-transfer__panel {
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   }
 }
 
@@ -67,9 +70,9 @@
 
 .surface-hover {
   transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease;
+    transform var(--site-motion-fast) ease,
+    border-color var(--site-motion-fast) ease,
+    background-color var(--site-motion-fast) ease;
 }
 
 .surface-hover:is(:hover, :focus-visible) {

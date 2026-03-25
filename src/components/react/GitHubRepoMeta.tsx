@@ -85,18 +85,6 @@ export default function GitHubRepoMeta({ repoUrl }: GitHubRepoMetaProps) {
     return null;
   }
 
-  if (status === 'loading') {
-    return (
-      <p className="repo-activity repo-activity--status" role="status">
-        Loading public repo metadata…
-      </p>
-    );
-  }
-
-  if (status !== 'success' || !data) {
-    return null;
-  }
-
   return (
     <section className="repo-activity surface-card" aria-labelledby={titleId}>
       <div className="repo-activity__header">
@@ -104,39 +92,56 @@ export default function GitHubRepoMeta({ repoUrl }: GitHubRepoMetaProps) {
         <h3 id={titleId}>GitHub snapshot</h3>
       </div>
 
-      <dl className="repo-activity__grid">
-        <div>
-          <dt>Last push</dt>
-          <dd>
-            <time dateTime={data.pushed_at}>
-              {dateFormatter.format(new Date(data.pushed_at))}
-            </time>
-          </dd>
-        </div>
-        <div>
-          <dt>Default branch</dt>
-          <dd>{data.default_branch}</dd>
-        </div>
-        <div>
-          <dt>Stars</dt>
-          <dd>{data.stargazers_count}</dd>
-        </div>
-        <div>
-          <dt>Open issues / PRs</dt>
-          <dd>{data.open_issues_count}</dd>
-        </div>
-      </dl>
+      {status === 'loading' && (
+        <p className="repo-activity repo-activity--status" role="status">
+          Loading public repo metadata…
+        </p>
+      )}
 
-      <p className="repo-activity__note">
-        Fetched from the public GitHub repository so the case study can show
-        recent activity without changing the static content model.
-      </p>
+      {status === 'success' && data ? (
+        <>
+          <dl className="repo-activity__grid">
+            <div>
+              <dt>Last push</dt>
+              <dd>
+                <time dateTime={data.pushed_at}>
+                  {dateFormatter.format(new Date(data.pushed_at))}
+                </time>
+              </dd>
+            </div>
+            <div>
+              <dt>Default branch</dt>
+              <dd>{data.default_branch}</dd>
+            </div>
+            <div>
+              <dt>Stars</dt>
+              <dd>{data.stargazers_count}</dd>
+            </div>
+            <div>
+              <dt>Open issues / PRs</dt>
+              <dd>{data.open_issues_count}</dd>
+            </div>
+          </dl>
+
+          <p className="repo-activity__note">
+            Fetched from the public GitHub repository so the case study can show
+            recent activity without changing the static content model.
+          </p>
+        </>
+      ) : null}
+
+      {status === 'error' && (
+        <p className="repo-activity__note">
+          Live GitHub metadata is temporarily unavailable. The repository link
+          below still points to the public project.
+        </p>
+      )}
 
       <a
         className="repo-activity__link"
-        href={data.html_url}
+        href={data?.html_url ?? repoUrl}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         Open repository
       </a>

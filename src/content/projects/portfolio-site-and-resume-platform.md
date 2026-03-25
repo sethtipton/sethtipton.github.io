@@ -32,20 +32,20 @@ futureApi:
   endpointHint: /projects/portfolio-site
 ---
 
-### Context
+### Scale and scope
 
-The site needed to do more than list projects. It had to support longer case studies, structured resume content, and ongoing iteration without becoming a pile of one-off pages.
+I created the site to do more than list projects. It had to support longer case studies, structured resume content, and ongoing iteration without becoming a pile of one-off pages.
 
 Because it also acts as a front-end sample, the implementation mattered as much as the content. It needed to feel intentional, load quickly, and stay easy to maintain.
 
-### What I focused on
+### Ownership and approach
 
 I built the site end to end in Astro, partly as a showcase and partly as a practical way to learn the framework. The main goal was to create a structured publishing setup instead of a collection of loosely connected pages.
 
 I used shared data schemas, reusable layouts, and a clear split between content and templates so the site could stay consistent as it grew. Token-driven styling keeps the visual system flexible, and Astro content collections make it easy to update case studies and resume data across multiple views without duplicating structure.
 
-Client-side behavior stays intentionally narrow. The baseline remains static-first, with a few targeted enhancements layered in where they add value without changing the overall performance profile.
+Client-side behavior stays intentionally narrow. The baseline remains static-first, with targeted enhancements such as the theme explorer layered in where they add clear value without changing the overall performance.
 
-### Why it mattered
+### Business and engineering impact
 
 A portfolio should reflect the same level of judgment it talks about. For me, that meant building something fast, maintainable, and structured enough to evolve cleanly. Treating it like a publishing system instead of a one-off marketing page makes it a better representation of how I approach front-end work.

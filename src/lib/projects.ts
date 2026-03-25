@@ -6,7 +6,9 @@ export type ProjectEntry = CollectionEntry<'projects'>;
 
 export async function getProjects() {
   const projects = await getCollection('projects');
-  return projects.sort((left, right) => left.data.order - right.data.order);
+  return projects
+    .filter(({ data }) => data.published)
+    .sort((left, right) => left.data.order - right.data.order);
 }
 
 export async function getFeaturedProjects(limit = 4) {

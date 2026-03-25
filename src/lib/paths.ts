@@ -1,10 +1,11 @@
-export function withBase(path: string, base: string) {
+export function withBase(path: string, base = '/') {
   if (!path.startsWith('/')) {
     return path;
   }
 
   const origin = 'https://example.com';
-  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+  const safeBase = base || '/';
+  const normalizedBase = safeBase.endsWith('/') ? safeBase : `${safeBase}/`;
   const baseUrl = new URL(normalizedBase, origin);
 
   if (path === '/') {

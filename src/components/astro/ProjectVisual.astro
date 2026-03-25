@@ -1,4 +1,5 @@
 ---
+import InternalLink from './InternalLink.astro';
 import type { ProjectEntry } from '../../lib/projects';
 
 interface Props {
@@ -41,10 +42,10 @@ const visualClass = [
 >
   {
     href ? (
-      <a
+      <InternalLink
         class="project-visual__link"
         href={href}
-        aria-label={`Open ${project.data.title} case study`}
+        aria-label={title ? undefined : `Open ${project.data.title} case study`}
       >
         {thumbnail ? (
           <img
@@ -85,13 +86,13 @@ const visualClass = [
                 height="87"
               />
             </svg>
-            <h3
+            <h2
               class="case-study-card__title project-visual__title"
               transition:name={titleTransitionName}
               transition:animate={titleTransitionName ? 'initial' : undefined}
             >
               <span class="project-visual__title-text">{title}</span>
-            </h3>
+            </h2>
           </div>
         )}
 
@@ -149,7 +150,7 @@ const visualClass = [
             </div>
           </>
         )}
-      </a>
+      </InternalLink>
     ) : (
       <>
         {thumbnail ? (
@@ -191,13 +192,13 @@ const visualClass = [
                 height="87"
               />
             </svg>
-            <h3
+            <h2
               class="case-study-card__title project-visual__title"
               transition:name={titleTransitionName}
               transition:animate={titleTransitionName ? 'initial' : undefined}
             >
               <span class="project-visual__title-text">{title}</span>
-            </h3>
+            </h2>
           </div>
         )}
       </>

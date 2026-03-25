@@ -3,12 +3,18 @@ import type { ResumeExperienceItem } from '../../lib/resume';
 
 interface Props {
   item: ResumeExperienceItem;
+  bulletLimit?: number;
   compact?: boolean;
   interactive?: boolean;
 }
 
-const { item, compact = false, interactive = true } = Astro.props;
-const bullets = compact ? item.bullets.slice(0, 2) : item.bullets;
+const { item, bulletLimit, compact = false, interactive = true } = Astro.props;
+const bullets =
+  typeof bulletLimit === 'number'
+    ? item.bullets.slice(0, bulletLimit)
+    : compact
+      ? item.bullets.slice(0, 2)
+      : item.bullets;
 ---
 
 <article

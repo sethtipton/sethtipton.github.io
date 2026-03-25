@@ -1,0 +1,422 @@
+[
+  {
+    "id": "neubrutalism",
+    "name": "Neubrutalism",
+    "prompt": "Neubrutalism — flat fills, heavy borders, loud contrast.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "modular-tiles",
+      "category": "graphic",
+      "tags": ["flat", "heavy-border", "poster", "contrast"],
+      "notes": "Keep it graphic and blunt rather than decorative or soft."
+    },
+    "palette": {
+      "background": { "light": "#fff4d6", "dark": "#121212" },
+      "backgroundAlt": { "light": "#f1e1b7", "dark": "#1d1d1d" },
+      "surface": { "light": "#fff9eb", "dark": "#171717" },
+      "surfaceStrong": { "light": "#f4dfaa", "dark": "#262626" },
+      "surfaceTint": { "light": "#ffe8c6", "dark": "#201b17" },
+      "surfacePaper": { "light": "#fffdf6", "dark": "#141414" },
+      "text": { "light": "#111111", "dark": "#f4efe6" },
+      "muted": { "light": "#5b5449", "dark": "#c1b8aa" },
+      "accent": { "light": "#111111", "dark": "#f7f3eb" },
+      "accentStrong": { "light": "#ff5a36", "dark": "#ff7b5f" },
+      "focus": { "light": "#115e59", "dark": "#5eead4" }
+    },
+    "fonts": {
+      "sans": "neo-grotesk",
+      "serif": "default"
+    },
+    "density": "compact",
+    "surfaceStyle": "flat",
+    "buttonStyle": "hard-edge",
+    "radiusProfile": "sharp",
+    "pattern": "grid",
+    "motion": "snappy"
+  },
+  {
+    "id": "claymorphism",
+    "name": "Claymorphism",
+    "prompt": "Claymorphism — soft, rounded, puffy surfaces.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "soft-blob",
+      "category": "surface",
+      "tags": ["soft", "rounded", "warm", "puffy"],
+      "notes": "Favor warmth and cushion over translucency or chrome."
+    },
+    "palette": {
+      "background": { "light": "#f7efe6", "dark": "#201a18" },
+      "backgroundAlt": { "light": "#efe4d8", "dark": "#2a2320" },
+      "surface": { "light": "#fff8f1", "dark": "#2c2522" },
+      "surfaceStrong": { "light": "#eadbcc", "dark": "#382f2a" },
+      "surfaceTint": { "light": "#ffe3d1", "dark": "#43312c" },
+      "surfacePaper": { "light": "#fffaf5", "dark": "#241d1a" },
+      "text": { "light": "#3a2c27", "dark": "#f7ede6" },
+      "muted": { "light": "#8a7267", "dark": "#cfb7ad" },
+      "accent": { "light": "#f08a5d", "dark": "#ffb38a" },
+      "accentStrong": { "light": "#d96c52", "dark": "#ffd1b6" },
+      "focus": { "light": "#7c3aed", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "humanist",
+      "serif": "default"
+    },
+    "density": "airy",
+    "surfaceStyle": "paper",
+    "buttonStyle": "pill",
+    "radiusProfile": "puffy",
+    "pattern": "none",
+    "motion": "calm"
+  },
+  {
+    "id": "retrofuturism",
+    "name": "Retrofuturism",
+    "prompt": "Retrofuturism — sleek sci-fi without going full neon.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "folded-ribbon",
+      "category": "future",
+      "tags": ["sleek", "sci-fi", "steel", "restrained"],
+      "notes": "Keep the mood cool and aspirational without spilling into Y2K candy color."
+    },
+    "palette": {
+      "background": { "light": "#eef4f8", "dark": "#0a111c" },
+      "backgroundAlt": { "light": "#e0ebf2", "dark": "#101a28" },
+      "surface": { "light": "#f9fcff", "dark": "#132033" },
+      "surfaceStrong": { "light": "#d6e5f0", "dark": "#1a2b3f" },
+      "surfaceTint": { "light": "#e9f6ff", "dark": "#183248" },
+      "surfacePaper": { "light": "#fcfeff", "dark": "#0e1825" },
+      "text": { "light": "#16212e", "dark": "#edf5ff" },
+      "muted": { "light": "#62788c", "dark": "#9fb7c9" },
+      "accent": { "light": "#3f9fcf", "dark": "#6ed0ff" },
+      "accentStrong": { "light": "#2b76a3", "dark": "#9fe5ff" },
+      "focus": { "light": "#0ea5e9", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "neo-grotesk",
+      "serif": "editorial"
+    },
+    "density": "balanced",
+    "surfaceStyle": "glass",
+    "buttonStyle": "pill",
+    "radiusProfile": "balanced",
+    "pattern": "tilt",
+    "motion": "calm"
+  },
+  {
+    "id": "y2k-futurism",
+    "name": "Y2K Futurism",
+    "prompt": "Y2K Futurism — chrome, glow, synthetic color, early-digital optimism.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "radial-burst",
+      "category": "future",
+      "tags": ["chrome", "glow", "synthetic", "optimistic"],
+      "notes": "This is the loud future preset. Keep it more synthetic than sleek."
+    },
+    "palette": {
+      "background": { "light": "#f4f6ff", "dark": "#0d1023" },
+      "backgroundAlt": { "light": "#e6ebff", "dark": "#141832" },
+      "surface": { "light": "#fcfdff", "dark": "#171c3d" },
+      "surfaceStrong": { "light": "#dbe2ff", "dark": "#252b57" },
+      "surfaceTint": { "light": "#eff2ff", "dark": "#302f63" },
+      "surfacePaper": { "light": "#ffffff", "dark": "#10132b" },
+      "text": { "light": "#1f2440", "dark": "#f6f7ff" },
+      "muted": { "light": "#7078ab", "dark": "#b3baf0" },
+      "accent": { "light": "#5b6dff", "dark": "#8ea2ff" },
+      "accentStrong": { "light": "#ff4fd8", "dark": "#ff98ea" },
+      "focus": { "light": "#2563eb", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "neo-grotesk",
+      "serif": "editorial"
+    },
+    "density": "balanced",
+    "surfaceStyle": "glow",
+    "buttonStyle": "pill",
+    "radiusProfile": "soft",
+    "pattern": "grid",
+    "motion": "snappy"
+  },
+  {
+    "id": "frutiger-aero",
+    "name": "Frutiger Aero",
+    "prompt": "Frutiger Aero — aqua, green, and sky tones with glossy optimistic surfaces.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "layered-wave",
+      "category": "future",
+      "tags": ["aqua", "glossy", "green", "optimistic"],
+      "notes": "Keep it bright and glossy, but cleaner than a novelty wallpaper aesthetic."
+    },
+    "palette": {
+      "background": { "light": "#eefcff", "dark": "#0b1c23" },
+      "backgroundAlt": { "light": "#ddf6fb", "dark": "#112832" },
+      "surface": { "light": "#f9ffff", "dark": "#13303a" },
+      "surfaceStrong": { "light": "#cfeff0", "dark": "#1c3e48" },
+      "surfaceTint": { "light": "#e3fbff", "dark": "#1c4957" },
+      "surfacePaper": { "light": "#ffffff", "dark": "#0f252d" },
+      "text": { "light": "#12313c", "dark": "#eaffff" },
+      "muted": { "light": "#5e8591", "dark": "#9fd0d4" },
+      "accent": { "light": "#22c7b8", "dark": "#5eead4" },
+      "accentStrong": { "light": "#4aa3ff", "dark": "#93c5fd" },
+      "focus": { "light": "#0f766e", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "humanist",
+      "serif": "default"
+    },
+    "density": "airy",
+    "surfaceStyle": "glass",
+    "buttonStyle": "soft",
+    "radiusProfile": "soft",
+    "pattern": "tilt",
+    "motion": "calm"
+  },
+  {
+    "id": "editorial-minimal",
+    "name": "Editorial Minimal",
+    "prompt": "Editorial Minimal — restrained, premium, typographic, neutral surfaces.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "contour-lines",
+      "category": "editorial",
+      "tags": ["premium", "neutral", "typography", "restrained"],
+      "notes": "Let typography and pacing do more work than color or pattern."
+    },
+    "palette": {
+      "background": { "light": "#f7f4ee", "dark": "#161310" },
+      "backgroundAlt": { "light": "#ece5db", "dark": "#1f1a16" },
+      "surface": { "light": "#fffdf8", "dark": "#1c1713" },
+      "surfaceStrong": { "light": "#e6ddd0", "dark": "#2b241e" },
+      "surfaceTint": { "light": "#f2ebe1", "dark": "#2b241d" },
+      "surfacePaper": { "light": "#fffefb", "dark": "#181410" },
+      "text": { "light": "#241d19", "dark": "#f4eee6" },
+      "muted": { "light": "#74675c", "dark": "#bbada1" },
+      "accent": { "light": "#2f2a26", "dark": "#f6f2ec" },
+      "accentStrong": { "light": "#8c6b4f", "dark": "#d0ae88" },
+      "focus": { "light": "#0f766e", "dark": "#5eead4" }
+    },
+    "fonts": {
+      "sans": "humanist",
+      "serif": "editorial"
+    },
+    "density": "balanced",
+    "surfaceStyle": "paper",
+    "buttonStyle": "outline",
+    "radiusProfile": "balanced",
+    "pattern": "none",
+    "motion": "calm"
+  },
+  {
+    "id": "soft-ui",
+    "name": "Soft UI",
+    "prompt": "Soft UI — understated depth, gentle contrast, friendly surfaces.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "inset-frames",
+      "category": "surface",
+      "tags": ["friendly", "gentle", "subtle-depth", "neutral"],
+      "notes": "Keep the depth understated so it does not collapse into glass or clay."
+    },
+    "palette": {
+      "background": { "light": "#eef2f8", "dark": "#1b2230" },
+      "backgroundAlt": { "light": "#e3e9f2", "dark": "#222c3c" },
+      "surface": { "light": "#f7f9fc", "dark": "#263243" },
+      "surfaceStrong": { "light": "#d8e0ec", "dark": "#304056" },
+      "surfaceTint": { "light": "#edf3fb", "dark": "#34465f" },
+      "surfacePaper": { "light": "#fbfcfe", "dark": "#202937" },
+      "text": { "light": "#223048", "dark": "#edf3fb" },
+      "muted": { "light": "#70829a", "dark": "#b0bfd3" },
+      "accent": { "light": "#5b7cfa", "dark": "#8ba5ff" },
+      "accentStrong": { "light": "#7b5cff", "dark": "#b49dff" },
+      "focus": { "light": "#0ea5e9", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "humanist",
+      "serif": "default"
+    },
+    "density": "balanced",
+    "surfaceStyle": "paper",
+    "buttonStyle": "soft",
+    "radiusProfile": "soft",
+    "pattern": "none",
+    "motion": "calm"
+  },
+  {
+    "id": "monochrome-terminal",
+    "name": "Monochrome Terminal",
+    "prompt": "Monochrome Terminal — terminal-inspired but cleaner and more intentional.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "scanline-band",
+      "category": "system",
+      "tags": ["mono", "terminal", "scanlines", "restrained"],
+      "notes": "Terminal references should feel precise and intentional, not retro parody."
+    },
+    "palette": {
+      "background": { "light": "#eef1ee", "dark": "#0a0d0a" },
+      "backgroundAlt": { "light": "#dde2dd", "dark": "#101410" },
+      "surface": { "light": "#f9fbf9", "dark": "#111611" },
+      "surfaceStrong": { "light": "#d0d7d0", "dark": "#1a221a" },
+      "surfaceTint": { "light": "#e6ece6", "dark": "#1a251d" },
+      "surfacePaper": { "light": "#fcfefc", "dark": "#0d120d" },
+      "text": { "light": "#152117", "dark": "#dbe9dc" },
+      "muted": { "light": "#5f6f62", "dark": "#95a798" },
+      "accent": { "light": "#1f5b33", "dark": "#7fe3a0" },
+      "accentStrong": { "light": "#0f3a1f", "dark": "#b9ffd0" },
+      "focus": { "light": "#0f766e", "dark": "#fef08a" }
+    },
+    "fonts": {
+      "sans": "terminal",
+      "serif": "default"
+    },
+    "density": "balanced",
+    "surfaceStyle": "flat",
+    "buttonStyle": "hard-edge",
+    "radiusProfile": "tight",
+    "pattern": "scanlines",
+    "motion": "off"
+  },
+  {
+    "id": "noir-interface",
+    "name": "Noir Interface",
+    "prompt": "Noir Interface — dark, cinematic, muted accents.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "constellation",
+      "category": "atmospheric",
+      "tags": ["dark", "cinematic", "muted", "noir"],
+      "notes": "Favor matte darkness and muted burgundy over luminous neon."
+    },
+    "palette": {
+      "background": { "light": "#ece7e1", "dark": "#0d0f13" },
+      "backgroundAlt": { "light": "#dfd7cf", "dark": "#141820" },
+      "surface": { "light": "#f8f3ed", "dark": "#151923" },
+      "surfaceStrong": { "light": "#d6cec4", "dark": "#202633" },
+      "surfaceTint": { "light": "#e7dfd8", "dark": "#232938" },
+      "surfacePaper": { "light": "#fcf8f3", "dark": "#10141b" },
+      "text": { "light": "#201b18", "dark": "#ece6dd" },
+      "muted": { "light": "#736963", "dark": "#a59b93" },
+      "accent": { "light": "#7a6b64", "dark": "#b8a59a" },
+      "accentStrong": { "light": "#7d3f4c", "dark": "#be6a78" },
+      "focus": { "light": "#2563eb", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "humanist",
+      "serif": "oldstyle"
+    },
+    "density": "compact",
+    "surfaceStyle": "paper",
+    "buttonStyle": "soft",
+    "radiusProfile": "tight",
+    "pattern": "none",
+    "motion": "calm"
+  },
+  {
+    "id": "ambient-glow",
+    "name": "Ambient Glow",
+    "prompt": "Ambient Glow — dark base with soft luminous accents.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "offset-rings",
+      "category": "atmospheric",
+      "tags": ["dark", "luminous", "soft", "plum"],
+      "notes": "Keep the glow diffused and atmospheric rather than synthetic or chrome-heavy."
+    },
+    "palette": {
+      "background": { "light": "#f5f4fb", "dark": "#0b0f1d" },
+      "backgroundAlt": { "light": "#ebe8fa", "dark": "#12182a" },
+      "surface": { "light": "#ffffff", "dark": "#151c33" },
+      "surfaceStrong": { "light": "#ddd9f7", "dark": "#202a48" },
+      "surfaceTint": { "light": "#f0edff", "dark": "#28325c" },
+      "surfacePaper": { "light": "#fcfbff", "dark": "#101528" },
+      "text": { "light": "#1c2138", "dark": "#eef1ff" },
+      "muted": { "light": "#6f7297", "dark": "#adb2da" },
+      "accent": { "light": "#8a63ff", "dark": "#b79bff" },
+      "accentStrong": { "light": "#ff9a6b", "dark": "#ffc38f" },
+      "focus": { "light": "#38bdf8", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "neo-grotesk",
+      "serif": "editorial"
+    },
+    "density": "balanced",
+    "surfaceStyle": "glow",
+    "buttonStyle": "soft",
+    "radiusProfile": "soft",
+    "pattern": "none",
+    "motion": "calm"
+  },
+  {
+    "id": "chromatic-minimal",
+    "name": "Chromatic Minimal",
+    "prompt": "Chromatic Minimal — mostly restrained with one vivid accent family.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "angled-panel",
+      "category": "editorial",
+      "tags": ["minimal", "neutral", "single-accent", "cobalt"],
+      "notes": "Keep the surfaces quiet and let one accent family do the contrast work."
+    },
+    "palette": {
+      "background": { "light": "#f6f7f9", "dark": "#111317" },
+      "backgroundAlt": { "light": "#eceef2", "dark": "#181b21" },
+      "surface": { "light": "#ffffff", "dark": "#161a21" },
+      "surfaceStrong": { "light": "#dee3ea", "dark": "#232834" },
+      "surfaceTint": { "light": "#f0f3f8", "dark": "#202532" },
+      "surfacePaper": { "light": "#fcfdff", "dark": "#13161c" },
+      "text": { "light": "#151922", "dark": "#f1f4fa" },
+      "muted": { "light": "#6e7786", "dark": "#acb5c6" },
+      "accent": { "light": "#4f46e5", "dark": "#8b7cff" },
+      "accentStrong": { "light": "#6d5cff", "dark": "#b3a7ff" },
+      "focus": { "light": "#2563eb", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "neo-grotesk",
+      "serif": "default"
+    },
+    "density": "balanced",
+    "surfaceStyle": "flat",
+    "buttonStyle": "outline",
+    "radiusProfile": "balanced",
+    "pattern": "none",
+    "motion": "calm"
+  },
+  {
+    "id": "toasted-marshmallow",
+    "name": "Toasted Marshmallow",
+    "prompt": "Toasted Marshmallow — stone, sand, paper, and bronze-leaning restraint.",
+    "source": "preset",
+    "meta": {
+      "artworkFamily": "paper-cut",
+      "category": "neutral",
+      "tags": ["stone", "sand", "paper", "bronze"],
+      "notes": "Let warmth come from material tone rather than loud accent color."
+    },
+    "palette": {
+      "background": { "light": "#f4efe7", "dark": "#191511" },
+      "backgroundAlt": { "light": "#e8dfd3", "dark": "#221c17" },
+      "surface": { "light": "#fffaf4", "dark": "#1d1814" },
+      "surfaceStrong": { "light": "#ddd2c4", "dark": "#2a231d" },
+      "surfaceTint": { "light": "#eee4d7", "dark": "#2d251e" },
+      "surfacePaper": { "light": "#fffdf8", "dark": "#18130f" },
+      "text": { "light": "#2d241d", "dark": "#f0e6dc" },
+      "muted": { "light": "#7a6a5d", "dark": "#b7a79a" },
+      "accent": { "light": "#8b6a4d", "dark": "#c89a6f" },
+      "accentStrong": { "light": "#a97142", "dark": "#deb386" },
+      "focus": { "light": "#0f766e", "dark": "#fde68a" }
+    },
+    "fonts": {
+      "sans": "humanist",
+      "serif": "oldstyle"
+    },
+    "density": "airy",
+    "surfaceStyle": "paper",
+    "buttonStyle": "soft",
+    "radiusProfile": "soft",
+    "pattern": "none",
+    "motion": "calm"
+  }
+]

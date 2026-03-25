@@ -1,6 +1,7 @@
 ---
+import InternalLink from './InternalLink.astro';
 import ProjectVisual from './ProjectVisual.astro';
-import { getExternalLinkProps } from '../../lib/links';
+import { getExternalLinkProps, isOutboundHref } from '../../lib/links';
 import type { ProjectEntry } from '../../lib/projects';
 import { getProjectLinks, getProjectTransitionNames } from '../../lib/projects';
 
@@ -69,9 +70,13 @@ const actionLinks = [
               >
                 {actionLinks.map((link) => (
                   <li>
-                    <a href={link.href} {...getExternalLinkProps(link.href)}>
-                      {link.label}
-                    </a>
+                    {isOutboundHref(link.href) ? (
+                      <a href={link.href} {...getExternalLinkProps(link.href)}>
+                        {link.label}
+                      </a>
+                    ) : (
+                      <InternalLink href={link.href}>{link.label}</InternalLink>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -87,9 +92,13 @@ const actionLinks = [
             >
               {actionLinks.map((link) => (
                 <li>
-                  <a href={link.href} {...getExternalLinkProps(link.href)}>
-                    {link.label}
-                  </a>
+                  {isOutboundHref(link.href) ? (
+                    <a href={link.href} {...getExternalLinkProps(link.href)}>
+                      {link.label}
+                    </a>
+                  ) : (
+                    <InternalLink href={link.href}>{link.label}</InternalLink>
+                  )}
                 </li>
               ))}
             </ul>
@@ -105,20 +114,32 @@ const actionLinks = [
       >
         {project.data.summary}
       </p>
-      <p
-        class="case-study-card__problem"
-        transition:name={transitionNames.problem}
-        transition:animate="initial"
-      >
-        {project.data.problem}
-      </p>
+      {
+        hoverMeta ? (
+          <p class="card-note">{project.data.impact[0]}</p>
+        ) : (
+          <p
+            class="case-study-card__problem"
+            transition:name={transitionNames.problem}
+            transition:animate="initial"
+          >
+            {project.data.problem}
+          </p>
+        )
+      }
     </header>
 
-    <ul
-      class="impact-list impact-list--compact"
-      aria-label={`${project.data.title} impact`}
-    >
-      {project.data.impact.map((item) => <li>{item}</li>)}
-    </ul>
+    {
+      !hoverMeta && (
+        <ul
+          class="impact-list impact-list--compact"
+          aria-label={`${project.data.title} impact`}
+        >
+          {project.data.impact.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      )
+    }
   </div>
 </article>

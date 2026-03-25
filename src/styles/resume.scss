@@ -87,6 +87,7 @@
 
 .resume-document__section-heading {
   break-after: avoid;
+  page-break-after: avoid;
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-border-muted);
   margin-bottom: var(--space-4);
@@ -123,6 +124,7 @@
 
 .experience-card__header {
   break-after: avoid;
+  page-break-after: avoid;
 }
 
 .experience-card__title {
@@ -154,6 +156,7 @@
 .pdf-entry,
 .experience-card__header {
   break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .pdf-entry__bullets {
@@ -170,6 +173,7 @@
 .resume-skill,
 .resume-education {
   break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .resume-skill h3,
@@ -260,6 +264,7 @@
 
 .resume-document--print section[aria-labelledby='skills-title'] {
   break-before: page;
+  page-break-before: always;
 }
 
 .resume-document--print .experience-card {
@@ -311,6 +316,23 @@
 }
 
 body.resume-print {
+  // Keep the print resume on a fixed light palette, independent of site theme.
+  --color-background: #fff;
+  --color-background-alt: #fff;
+  --color-surface: #fff;
+  --color-surface-strong: #fff;
+  --color-surface-tint: #fff;
+  --color-surface-paper: #fff;
+  --color-surface-paper-soft: #fff;
+  --color-text: #1f2933;
+  --color-muted: #52606d;
+  --color-accent: #0f766e;
+  --color-accent-strong: #115e59;
+  --color-focus: #0284c7;
+  --color-border: rgb(31 41 51 / 0.14);
+  --color-border-strong: rgb(31 41 51 / 0.28);
+  --color-border-muted: rgb(31 41 51 / 0.12);
+  --color-border-subtle: rgb(31 41 51 / 0.08);
   color-scheme: light;
   background: var(--color-white);
   -webkit-print-color-adjust: exact;

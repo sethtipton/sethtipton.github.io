@@ -1,114 +1,202 @@
+@mixin fallback-dark-theme-core-tokens {
+  --color-background: #0e1419;
+  --color-background-alt: #162028;
+  --color-surface: #121a20;
+  --color-surface-strong: #18232c;
+  --color-surface-tint: #1d2933;
+  --color-surface-paper: #10181f;
+  --color-text: #e8eef5;
+  --color-muted: #a3b3c3;
+  --color-accent: #247c75;
+  --color-accent-strong: #1f6a64;
+  --color-focus: #67c8ff;
+  --shadow-soft-color: rgb(0 0 0 / 0.32);
+  --shadow-card-color: rgb(0 0 0 / 0.24);
+}
+
+@mixin fallback-dark-theme-derived-tokens {
+  --color-accent-soft: rgb(36 124 117 / 0.11);
+  --color-accent-tint: rgb(36 124 117 / 0.12);
+  --color-accent-tint-subtle: rgb(36 124 117 / 0.08);
+  --color-accent-border: rgb(36 124 117 / 0.18);
+  --color-accent-strong-tint: rgb(31 106 100 / 0.16);
+  --color-border: rgb(232 238 245 / 0.14);
+  --color-border-strong: rgb(232 238 245 / 0.28);
+  --color-border-muted: rgb(232 238 245 / 0.12);
+  --color-border-subtle: rgb(232 238 245 / 0.08);
+  --color-link-underline: rgb(36 124 117 / 0.45);
+  --color-selection: rgb(103 200 255 / 0.2);
+  --color-header-background: rgb(14 20 25 / 0.84);
+  --color-background-overlay: rgb(14 20 25 / 0.45);
+  --color-background-alt-overlay: rgb(22 32 40 / 0.45);
+  --color-surface-soft: rgb(18 26 32 / 0.76);
+  --color-surface-strong-soft: rgb(24 35 44 / 0.95);
+  --color-surface-panel: rgb(18 26 32 / 0.94);
+  --color-surface-panel-strong: rgb(18 26 32 / 0.96);
+  --color-surface-panel-soft: rgb(18 26 32 / 0.7);
+  --color-surface-tint-soft: rgb(29 41 51 / 0.88);
+  --color-surface-tint-soft-strong: rgb(29 41 51 / 0.86);
+  --color-surface-overlay: rgb(18 26 32 / 0.72);
+  --color-surface-paper-soft: rgb(16 24 31 / 0.94);
+  --color-white-soft: rgb(255 255 255 / 0.5);
+  --color-white-gloss: rgb(255 255 255 / 0.4);
+  --surface-card-background:
+    linear-gradient(165deg, rgb(18 26 32 / 0.92), rgb(27 38 47 / 0.86)),
+    var(--color-surface);
+}
+
 :root {
   color-scheme: light dark;
   --color-transparent: transparent;
   --color-white: #ffffff;
+  --color-background: #f3efe7;
   --color-background: light-dark(#f3efe7, #0e1419);
+  --color-background-alt: #e8dfd2;
   --color-background-alt: light-dark(#e8dfd2, #162028);
+  --color-surface: #fffdf9;
   --color-surface: light-dark(#fffdf9, #121a20);
+  --color-surface-strong: #efe7dc;
   --color-surface-strong: light-dark(#efe7dc, #18232c);
+  --color-surface-tint: #f7f1e8;
   --color-surface-tint: light-dark(#f7f1e8, #1d2933);
+  --color-surface-paper: #fffdf8;
   --color-surface-paper: light-dark(#fffdf8, #10181f);
+  --color-text: #1f2933;
   --color-text: light-dark(#1f2933, #e8eef5);
+  --color-muted: #52606d;
   --color-muted: light-dark(#52606d, #a3b3c3);
+  --color-accent: #0f766e;
   --color-accent: light-dark(#0f766e, #247c75);
+  --color-accent-strong: #115e59;
   --color-accent-strong: light-dark(#115e59, #1f6a64);
+  --color-focus: #0284c7;
   --color-focus: light-dark(#0284c7, #67c8ff);
+  --color-accent-soft: rgb(15 118 110 / 0.11);
   --color-accent-soft: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  --color-accent-tint: rgb(15 118 110 / 0.12);
   --color-accent-tint: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  --color-accent-tint-subtle: rgb(15 118 110 / 0.08);
   --color-accent-tint-subtle: color-mix(
     in srgb,
     var(--color-accent) 8%,
     transparent
   );
+  --color-accent-border: rgb(15 118 110 / 0.18);
   --color-accent-border: color-mix(
     in srgb,
     var(--color-accent) 18%,
     transparent
   );
+  --color-accent-strong-tint: rgb(17 94 89 / 0.16);
   --color-accent-strong-tint: color-mix(
     in srgb,
     var(--color-accent-strong) 16%,
     transparent
   );
+  --color-border: rgb(31 41 51 / 0.14);
   --color-border: color-mix(in srgb, var(--color-text) 14%, transparent);
+  --color-border-strong: rgb(31 41 51 / 0.28);
   --color-border-strong: color-mix(in srgb, var(--color-text) 28%, transparent);
+  --color-border-muted: rgb(31 41 51 / 0.12);
   --color-border-muted: color-mix(in srgb, var(--color-text) 12%, transparent);
+  --color-border-subtle: rgb(31 41 51 / 0.08);
   --color-border-subtle: color-mix(in srgb, var(--color-text) 8%, transparent);
+  --color-link-underline: rgb(15 118 110 / 0.45);
   --color-link-underline: color-mix(
     in srgb,
     var(--color-accent) 45%,
     transparent
   );
+  --color-selection: rgb(2 132 199 / 0.2);
   --color-selection: color-mix(in srgb, var(--color-focus) 20%, transparent);
+  --color-header-background: rgb(243 239 231 / 0.84);
   --color-header-background: color-mix(
     in srgb,
     var(--color-background) 84%,
     transparent
   );
+  --color-background-overlay: rgb(243 239 231 / 0.45);
   --color-background-overlay: color-mix(
     in srgb,
     var(--color-background) 45%,
     transparent
   );
+  --color-background-alt-overlay: rgb(232 223 210 / 0.45);
   --color-background-alt-overlay: color-mix(
     in srgb,
     var(--color-background-alt) 45%,
     transparent
   );
+  --color-surface-soft: rgb(255 253 249 / 0.76);
   --color-surface-soft: color-mix(
     in srgb,
     var(--color-surface) 76%,
     transparent
   );
+  --color-surface-strong-soft: rgb(239 231 220 / 0.95);
   --color-surface-strong-soft: color-mix(
     in srgb,
     var(--color-surface-strong) 95%,
     transparent
   );
+  --color-surface-panel: rgb(255 253 249 / 0.94);
   --color-surface-panel: color-mix(
     in srgb,
     var(--color-surface) 94%,
     transparent
   );
+  --color-surface-panel-strong: rgb(255 253 249 / 0.96);
   --color-surface-panel-strong: color-mix(
     in srgb,
     var(--color-surface) 96%,
     transparent
   );
+  --color-surface-panel-soft: rgb(255 253 249 / 0.7);
   --color-surface-panel-soft: color-mix(
     in srgb,
     var(--color-surface) 70%,
     transparent
   );
+  --color-surface-tint-soft: rgb(247 241 232 / 0.88);
   --color-surface-tint-soft: color-mix(
     in srgb,
     var(--color-surface-tint) 88%,
     transparent
   );
+  --color-surface-tint-soft-strong: rgb(247 241 232 / 0.86);
   --color-surface-tint-soft-strong: color-mix(
     in srgb,
     var(--color-surface-tint) 86%,
     transparent
   );
+  --color-surface-overlay: rgb(255 253 249 / 0.72);
   --color-surface-overlay: color-mix(
     in srgb,
     var(--color-surface) 72%,
     transparent
   );
+  --color-surface-paper-soft: rgb(255 253 248 / 0.94);
   --color-surface-paper-soft: color-mix(
     in srgb,
     var(--color-surface-paper) 94%,
     transparent
   );
+  --color-white-soft: rgb(255 255 255 / 0.5);
   --color-white-soft: color-mix(in srgb, var(--color-white) 50%, transparent);
+  --color-white-gloss: rgb(255 255 255 / 0.4);
   --color-white-gloss: color-mix(in srgb, var(--color-white) 40%, transparent);
+  --shadow-soft-color: rgb(31 41 51 / 0.08);
   --shadow-soft-color: light-dark(rgb(31 41 51 / 0.08), rgb(0 0 0 / 0.32));
+  --shadow-card-color: rgb(31 41 51 / 0.06);
   --shadow-card-color: light-dark(rgb(31 41 51 / 0.06), rgb(0 0 0 / 0.24));
   --shadow-soft: 0 20px 50px var(--shadow-soft-color);
   --shadow-card: 0 12px 28px var(--shadow-card-color);
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.5rem;
+  --radius-sm-base: 0.5rem;
+  --radius-md-base: 0.875rem;
+  --radius-lg-base: 1.5rem;
+  --radius-sm: var(--radius-sm-base);
+  --radius-md: var(--radius-md-base);
+  --radius-lg: var(--radius-lg-base);
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -118,11 +206,70 @@
   --space-7: 3rem;
   --space-8: 4rem;
   --space-9: 6rem;
-  --container-width: 72rem;
+  --container-width: 75rem;
   --content-width: 48rem;
-  /* --font-sans: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', sans-serif; */
-  /* --font-serif:
-    'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif; */
+  --surface-border-width: 1px;
+  --control-border-width: 1px;
+  --surface-card-background:
+    linear-gradient(165deg, rgb(255 253 249 / 0.92), rgb(247 241 232 / 0.78)),
+    var(--color-surface);
+  --surface-card-background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--color-surface) 92%, transparent),
+      color-mix(
+        in srgb,
+        var(--color-surface-tint) 34%,
+        var(--color-surface) 66%
+      )
+    ),
+    var(--color-surface);
+  --surface-card-border-color: var(--color-border);
+  --surface-card-shadow: var(--shadow-soft);
+  --panel-blur: 0px;
+  --site-header-blur: 20px;
+  --site-header-background: var(--color-header-background);
+  --site-header-height: 5rem;
+  --site-header-shell-height: var(--site-header-height);
+  --button-primary-background: var(--color-accent);
+  --button-primary-background-hover: var(--color-accent-strong);
+  --button-primary-border-color: var(--color-transparent);
+  --button-primary-color: var(--color-white);
+  --button-primary-shadow: var(--shadow-card);
+  --button-secondary-background: var(--color-surface-soft);
+  --button-secondary-background-hover: var(--color-surface);
+  --button-secondary-border-color: var(--color-border-strong);
+  --button-secondary-color: var(--color-text);
+  --button-secondary-shadow: none;
+  --button-font-weight: 700;
+  --button-letter-spacing: 0;
+  --button-text-transform: none;
+  --control-background: var(--button-secondary-background);
+  --control-background-hover: var(--button-secondary-background-hover);
+  --control-border-color: var(--button-secondary-border-color);
+  --control-border-color-hover: var(--color-text);
+  --site-motion-fast: 160ms;
+  --site-motion-medium: 220ms;
+  --site-motion-slow: 320ms;
+  --surface-hover-translate-y: -0.1rem;
+  --site-pattern-opacity: 1;
+  --site-pattern-secondary-opacity: 1;
+  --site-overlay-opacity: 1;
+  --site-noise-opacity: 0;
+  --site-pattern-accent: var(--color-accent);
+  --site-pattern-text: var(--color-text);
+  --site-pattern-line-size: 28px;
+  --site-pattern-line-thickness: 1px;
+  --site-body-pattern-primary: none;
+  --site-body-pattern-secondary: none;
+  //Panel Width
+  --style-transfer-panel-width: min(30rem, calc(100vw - 2rem));
+  --style-transfer-panel-expanded-width: min(80rem, calc(100vw - 2rem));
+
+  //--style-transfer-globe-width: min(100%, 24rem);
+  //--style-transfer-globe-height: clamp(18rem, 40vw, 24rem);
+  --style-transfer-globe-width: 14rem;
+  --style-transfer-globe-height: 14rem;
   --font-sans:
     Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, sans-serif;
@@ -135,12 +282,40 @@
   color-scheme: light;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @supports not (color: light-dark(white, black)) {
+      @include fallback-dark-theme-core-tokens;
+      @include fallback-dark-theme-derived-tokens;
+    }
+
+    @supports (color: light-dark(white, black)) {
+      @supports not (background: color-mix(in srgb, black 50%, transparent)) {
+        @include fallback-dark-theme-derived-tokens;
+      }
+    }
+  }
+}
+
 :root[data-theme='dark'] {
   color-scheme: dark;
+
+  @supports not (color: light-dark(white, black)) {
+    @include fallback-dark-theme-core-tokens;
+    @include fallback-dark-theme-derived-tokens;
+  }
+
+  @supports (color: light-dark(white, black)) {
+    @supports not (background: color-mix(in srgb, black 50%, transparent)) {
+      @include fallback-dark-theme-derived-tokens;
+    }
+  }
 }
 
 $breakpoints: (
-  sm: 40rem,
+  xxs: 34rem,
+  xs: 38rem,
+  sm: 42rem,
   md: 48rem,
   lg: 72rem,
 );

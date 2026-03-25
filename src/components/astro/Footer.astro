@@ -1,12 +1,17 @@
 ---
 import HeroPattern from './HeroPattern.astro';
+import InternalLink from './InternalLink.astro';
 import {
   availabilityNote,
   contactLinks,
   primaryNav,
   siteMeta,
 } from '../../data/site';
-import { getExternalLinkProps, resolveHref } from '../../lib/links';
+import {
+  getExternalLinkProps,
+  isOutboundHref,
+  resolveHref,
+} from '../../lib/links';
 import { withBase } from '../../lib/paths';
 
 const base = import.meta.env.BASE_URL;
@@ -14,6 +19,9 @@ const resolvedContactLinks = contactLinks.map((item) => ({
   ...item,
   href: resolveHref(item, base),
 }));
+const footerContactLinks = resolvedContactLinks.filter(
+  (item) => item.href !== withBase('/resume/', base),
+);
 ---
 
 <footer class="site-footer">
@@ -21,7 +29,9 @@ const resolvedContactLinks = contactLinks.map((item) => ({
 
   <div class="container site-footer__inner">
     <div class="flow-sm">
-      <a class="site-brand" href={withBase('/', base)}>{siteMeta.title}</a>
+      <InternalLink class="site-brand" href={withBase('/', base)}>
+        {siteMeta.title}
+      </InternalLink>
       <p class="text-muted">
         Front-end engineering for products that need clarity, consistency, and
         room to evolve. Focused on shared components, accessible interaction,
@@ -35,7 +45,9 @@ const resolvedContactLinks = contactLinks.map((item) => ({
         {
           primaryNav.map((item) => (
             <li>
-              <a href={withBase(item.href, base)}>{item.label}</a>
+              <InternalLink href={withBase(item.href, base)}>
+                {item.label}
+              </InternalLink>
             </li>
           ))
         }
@@ -43,11 +55,15 @@ const resolvedContactLinks = contactLinks.map((item) => ({
 
       <ul class="link-list" aria-label="External links">
         {
-          resolvedContactLinks.map((item) => (
+          footerContactLinks.map((item) => (
             <li>
-              <a href={item.href} {...getExternalLinkProps(item.href)}>
-                {item.label}
-              </a>
+              {isOutboundHref(item.href) ? (
+                <a href={item.href} {...getExternalLinkProps(item.href)}>
+                  {item.label}
+                </a>
+              ) : (
+                <InternalLink href={item.href}>{item.label}</InternalLink>
+              )}
             </li>
           ))
         }

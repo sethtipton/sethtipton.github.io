@@ -1,0 +1,34 @@
+{
+  "id": "ocean-technical",
+  "name": "Ocean Technical",
+  "prompt": "Ocean Technical — crisp marine blue system with precise technical restraint.",
+  "source": "preset",
+  "meta": {
+    "category": "system",
+    "tags": ["marine", "technical", "cool", "structured"],
+    "notes": "Aim for clarity first, with accent color doing more work than surface effects."
+  },
+  "palette": {
+    "background": { "light": "#f4fbff", "dark": "#07131a" },
+    "backgroundAlt": { "light": "#e6f3fb", "dark": "#0c1b24" },
+    "surface": { "light": "#ffffff", "dark": "#10222d" },
+    "surfaceStrong": { "light": "#d9ebf5", "dark": "#16303d" },
+    "surfaceTint": { "light": "#eaf7ff", "dark": "#183845" },
+    "surfacePaper": { "light": "#fbfdff", "dark": "#0b1820" },
+    "text": { "light": "#12303f", "dark": "#e6f6ff" },
+    "muted": { "light": "#5d7b8c", "dark": "#8fb5c9" },
+    "accent": { "light": "#1570ef", "dark": "#5bb8ff" },
+    "accentStrong": { "light": "#0d4ea6", "dark": "#8cd3ff" },
+    "focus": { "light": "#0f766e", "dark": "#fde68a" }
+  },
+  "fonts": {
+    "sans": "neo-grotesk",
+    "serif": "default"
+  },
+  "density": "balanced",
+  "surfaceStyle": "glass",
+  "buttonStyle": "outline",
+  "radiusProfile": "balanced",
+  "pattern": "grid",
+  "motion": "calm"
+}

@@ -11,10 +11,11 @@
 }
 
 @mixin card-surface {
-  border: 1px solid var(--color-border);
+  border: var(--surface-border-width) solid var(--surface-card-border-color);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-soft);
+  background: var(--surface-card-background);
+  box-shadow: var(--surface-card-shadow);
+  backdrop-filter: blur(var(--panel-blur));
 }
 
 @mixin respond-up($breakpoint) {
@@ -24,7 +25,7 @@
 }
 
 @mixin respond-down($breakpoint) {
-  @media (max-width: map.get(tokens.$breakpoints, $breakpoint)) {
+  @media (max-width: calc(#{map.get(tokens.$breakpoints, $breakpoint)} - 0.02px)) {
     @content;
   }
 }

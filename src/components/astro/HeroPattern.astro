@@ -87,8 +87,8 @@ const patternSvg = bgTiltRaw
     const setFinalState = () => {
       gsap.set(svg, { opacity: 1 });
       gsap.set(paths, {
-        opacity: 0.05,
-        strokeWidth: 20,
+        opacity: 0.1,
+        strokeWidth: 24,
         strokeDashoffset: 0,
         clearProps: 'strokeDasharray',
       });
@@ -121,15 +121,15 @@ const patternSvg = bgTiltRaw
         })
         .set(svg, { opacity: 1 })
         .set(paths, {
-          opacity: 0.05,
-          strokeWidth: 1,
+          opacity: 0.08,
+          strokeWidth: 2,
         })
         .to(
           paths,
           {
             strokeDashoffset: 0,
-            opacity: 0.08,
-            strokeWidth: 30,
+            opacity: 0.14,
+            strokeWidth: 34,
             duration: 10,
             stagger: {
               each: 1,
@@ -141,8 +141,8 @@ const patternSvg = bgTiltRaw
         .to(
           paths,
           {
-            opacity: 0.05,
-            strokeWidth: 20,
+            opacity: 0.1,
+            strokeWidth: 24,
             duration: 5,
             ease: 'power1.out',
           },
@@ -150,7 +150,10 @@ const patternSvg = bgTiltRaw
         );
     };
 
-    if (root.dataset.sitePatternTrigger === 'view') {
+    if (
+      root.dataset.sitePatternTrigger === 'view' &&
+      typeof IntersectionObserver === 'function'
+    ) {
       const observer = new IntersectionObserver(
         (entries) => {
           const isVisible = entries.some((entry) => entry.isIntersecting);

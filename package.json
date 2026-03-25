@@ -10,6 +10,8 @@
     "build:site": "astro build",
     "build:resume-pdf": "node ./scripts/generate-resume-pdf.mjs",
     "preview": "astro preview",
+    "presets:summary": "tsx ./scripts/style-transfer-presets.mjs summary",
+    "presets:validate": "tsx ./scripts/style-transfer-presets.mjs validate",
     "typecheck": "astro check",
     "check": "npm run typecheck",
     "validate:resume": "node ./scripts/validate-resume-print.mjs",
@@ -18,13 +20,23 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "test": "vitest",
-    "test:run": "vitest run",
-    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run test:run && npm run build && npm run validate:resume"
+    "test:unit": "vitest run --exclude src/test/routesSmoke.test.ts",
+    "test:smoke:built": "vitest run src/test/routesSmoke.test.ts",
+    "test:smoke": "npm run build:site && npm run test:smoke:built",
+    "test:run": "npm run test:unit && npm run test:smoke",
+    "validate:fast": "npm run format:check && npm run lint && npm run typecheck && npm run test:unit",
+    "validate:full": "npm run validate:fast && npm run build && npm run test:smoke:built && npm run validate:resume",
+    "validate": "npm run validate:full"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
+    "d3-geo-voronoi": "^2.1.0",
     "gsap": "^3.14.2",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "three": "^0.182.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
@@ -42,11 +54,12 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.4.0",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.0.1",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
     "sass": "^1.97.3",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
     "vitest": "^4.0.18"

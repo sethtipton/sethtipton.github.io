@@ -50,4 +50,35 @@ describe('GitHubRepoMeta', () => {
     expect(screen.getByText('Mar 6, 2026')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('renders a stable fallback when the GitHub fetch fails', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <GitHubRepoMeta repoUrl="https://github.com/sethtipton/belltower-brewing" />,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'Live GitHub metadata is temporarily unavailable. The repository link below still points to the public project.',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByRole('heading', { name: 'GitHub snapshot' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open repository' }),
+    ).toHaveAttribute(
+      'href',
+      'https://github.com/sethtipton/belltower-brewing',
+    );
+  });
 });

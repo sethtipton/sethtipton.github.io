@@ -1,0 +1,46 @@
+---
+import InternalLink from '../components/astro/InternalLink.astro';
+import { withBase } from '../lib/paths';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title="Page not found"
+  description="The page you were looking for doesn't exist or may have moved."
+  robots="noindex,nofollow"
+>
+  <section class="page-shell">
+    <div class="container flow-xl">
+      <header class="page-intro page-intro--wide flow">
+        <p class="eyebrow eyebrow--muted">404</p>
+        <h1>Page not found.</h1>
+        <p class="lead">
+          The page you were looking for doesn't exist or may have moved.
+        </p>
+        <p class="text-muted">
+          Try one of the main routes below to get back on track.
+        </p>
+      </header>
+
+      <div class="button-row">
+        <InternalLink class="button-link" href={withBase('/', base)}>
+          Home
+        </InternalLink>
+        <InternalLink
+          class="button-link button-link--secondary"
+          href={withBase('/work/', base)}
+        >
+          Work
+        </InternalLink>
+        <InternalLink
+          class="button-link button-link--secondary"
+          href={withBase('/resume/', base)}
+        >
+          Resume
+        </InternalLink>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

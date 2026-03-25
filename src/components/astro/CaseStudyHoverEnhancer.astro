@@ -9,11 +9,13 @@
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     ).matches;
-    const supportsHover = window.matchMedia(
+    const supportsDesktopHover = window.matchMedia(
       '(hover: hover) and (pointer: fine)',
     ).matches;
+    const hasTouchPointer = window.matchMedia('(any-pointer: coarse)').matches;
 
-    if (prefersReducedMotion || !supportsHover) {
+    // Touch-capable devices keep the static scrim/panel fallback instead.
+    if (prefersReducedMotion || !supportsDesktopHover || hasTouchPointer) {
       return;
     }
 

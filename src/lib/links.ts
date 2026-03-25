@@ -21,7 +21,7 @@ export function getExternalLinkProps(href: string) {
   return isHttpHref(href)
     ? {
         target: '_blank' as const,
-        rel: 'noreferrer' as const,
+        rel: 'noopener noreferrer' as const,
       }
     : {};
 }

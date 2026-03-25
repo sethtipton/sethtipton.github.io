@@ -1,10 +1,11 @@
 ---
 import { render } from 'astro:content';
 
+import InternalLink from '../../components/astro/InternalLink.astro';
 import ProjectVisual from '../../components/astro/ProjectVisual.astro';
 import GitHubRepoMeta from '../../components/react/GitHubRepoMeta';
 import { parseGitHubRepoUrl } from '../../lib/github';
-import { getExternalLinkProps } from '../../lib/links';
+import { getExternalLinkProps, isOutboundHref } from '../../lib/links';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   getProjectLinks,
@@ -59,12 +60,12 @@ const hasPublicRepo = Boolean(links.repo && parseGitHubRepoUrl(links.repo));
     <div class="container flow-xl">
       <section class="project-hero">
         <div class="project-hero__content flow">
-          <a
+          <InternalLink
             class="inline-link inline-link--back"
             href={withBase('/work/', base)}
           >
             Back to all work
-          </a>
+          </InternalLink>
 
           <div class="flow-sm">
             <h1
@@ -106,9 +107,13 @@ const hasPublicRepo = Boolean(links.repo && parseGitHubRepoUrl(links.repo));
             {
               publicLinks.map((link) => (
                 <li>
-                  <a href={link.href} {...getExternalLinkProps(link.href)}>
-                    {link.label}
-                  </a>
+                  {isOutboundHref(link.href) ? (
+                    <a href={link.href} {...getExternalLinkProps(link.href)}>
+                      {link.label}
+                    </a>
+                  ) : (
+                    <InternalLink href={link.href}>{link.label}</InternalLink>
+                  )}
                 </li>
               ))
             }
@@ -125,20 +130,8 @@ const hasPublicRepo = Boolean(links.repo && parseGitHubRepoUrl(links.repo));
       <div class="project-layout">
         <div class="project-main flow-lg">
           <section class="surface-card project-section flow">
-            <p class="eyebrow eyebrow--muted">Overview</p>
-            <h2>What the project needed</h2>
-            <p>{project.data.summary}</p>
-          </section>
-
-          <section class="surface-card project-section flow">
-            <p class="eyebrow eyebrow--muted">Problem</p>
-            <h2>The challenge</h2>
-            <p>{project.data.problem}</p>
-          </section>
-
-          <section class="surface-card project-section flow">
-            <p class="eyebrow eyebrow--muted">Approach / implementation</p>
-            <h2>How I approached the work</h2>
+            <p class="eyebrow eyebrow--muted">Scale / ownership</p>
+            <h2>What the system had to support and what I owned</h2>
             <div class="content-body">
               <Content />
             </div>
@@ -146,7 +139,7 @@ const hasPublicRepo = Boolean(links.repo && parseGitHubRepoUrl(links.repo));
 
           <section class="surface-card project-section flow">
             <p class="eyebrow eyebrow--muted">Impact</p>
-            <h2>What moved the work forward</h2>
+            <h2>What changed for the product and the teams</h2>
             <ul class="impact-list">
               {project.data.impact.map((item) => <li>{item}</li>)}
             </ul>
@@ -197,19 +190,25 @@ const hasPublicRepo = Boolean(links.repo && parseGitHubRepoUrl(links.repo));
               {
                 publicLinks.map((link) => (
                   <li>
-                    <a href={link.href} {...getExternalLinkProps(link.href)}>
-                      {link.label}
-                    </a>
+                    {isOutboundHref(link.href) ? (
+                      <a href={link.href} {...getExternalLinkProps(link.href)}>
+                        {link.label}
+                      </a>
+                    ) : (
+                      <InternalLink href={link.href}>{link.label}</InternalLink>
+                    )}
                   </li>
                 ))
               }
             </ul>
-            {project.data.note && <p class="card-note">{project.data.note}</p>}
+            {
+              /*{project.data.note && <p class="card-note">{project.data.note}</p>}*/
+            }
           </section>
 
           {
             hasPublicRepo && links.repo && (
-              <GitHubRepoMeta client:visible repoUrl={links.repo} />
+              <GitHubRepoMeta client:idle repoUrl={links.repo} />
             )
           }
         </aside>

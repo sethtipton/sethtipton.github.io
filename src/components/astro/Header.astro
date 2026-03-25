@@ -1,6 +1,8 @@
 ---
 import SocialIcon from './SocialIcon.astro';
 import SiteSignature from './SiteSignature.astro';
+import InternalLink from './InternalLink.astro';
+import StyleTransferMount from './StyleTransferMount.astro';
 import { primaryNav, siteMeta, socialLinks } from '../../data/site';
 import { getExternalLinkProps, resolveHref } from '../../lib/links';
 import { withBase } from '../../lib/paths';
@@ -22,82 +24,80 @@ const headerLinks = socialLinks.slice(0, 3).map((item) => ({
 }));
 ---
 
-<header class="site-header">
+<header class="site-header" data-site-header>
   <div class="container site-header__inner">
-    <a
+    <InternalLink
       class="site-brand"
       href={withBase('/', base)}
       aria-label={siteMeta.title}
     >
       <SiteSignature />
-    </a>
+    </InternalLink>
 
-    <div class="site-header__nav">
-      <nav aria-label="Primary">
-        <ul class="site-nav">
-          {
-            navLinks.map((item) => {
-              const href = normalizePath(item.href);
-              const active =
-                href === withBase('/', base)
-                  ? currentPath === href
-                  : currentPath.startsWith(href);
+    <nav class="site-header__primary" aria-label="Primary">
+      <ul class="site-nav">
+        {
+          navLinks.map((item) => {
+            const href = normalizePath(item.href);
+            const active =
+              href === withBase('/', base)
+                ? currentPath === href
+                : currentPath.startsWith(href);
 
-              return (
-                <li>
-                  <a
-                    href={item.href}
-                    aria-current={active ? 'page' : undefined}
-                  >
-                    {active ? (
-                      <span
-                        class="site-nav__chip site-nav__chip--active"
-                        transition:name="site-nav-active-chip"
-                        transition:animate="initial"
-                      >
-                        <span
-                          class="site-nav__active-pill"
-                          aria-hidden="true"
-                        />
-                        <span class="site-nav__label">{item.label}</span>
-                      </span>
-                    ) : (
-                      <span class="site-nav__chip">
-                        <span class="site-nav__label">{item.label}</span>
-                      </span>
-                    )}
-                  </a>
-                </li>
-              );
-            })
-          }
-        </ul>
-      </nav>
-
-      <div class="site-header__actions">
-        <ul class="site-header__links" aria-label="External links">
-          {
-            headerLinks.map((item) => (
+            return (
               <li>
-                <a
-                  class="social-link social-link--header"
+                <InternalLink
                   href={item.href}
-                  aria-label={item.label}
-                  title={item.label}
-                  {...getExternalLinkProps(item.href)}
+                  aria-current={active ? 'page' : undefined}
                 >
-                  <SocialIcon name={item.icon} />
-                </a>
+                  {active ? (
+                    <span
+                      class="site-nav__chip site-nav__chip--active"
+                      transition:name="site-nav-active-chip"
+                      transition:animate="initial"
+                    >
+                      <span class="site-nav__active-pill" aria-hidden="true" />
+                      <span class="site-nav__label">{item.label}</span>
+                    </span>
+                  ) : (
+                    <span class="site-nav__chip">
+                      <span class="site-nav__label">{item.label}</span>
+                    </span>
+                  )}
+                </InternalLink>
               </li>
-            ))
-          }
-        </ul>
+            );
+          })
+        }
+      </ul>
+    </nav>
 
-        <button class="theme-toggle" type="button" data-theme-toggle>
-          <span class="theme-toggle__label">Theme</span>
-          <span class="theme-toggle__value" data-theme-toggle-value>Auto</span>
-        </button>
-      </div>
+    <ul class="site-header__links" aria-label="External links">
+      {
+        headerLinks.map((item) => (
+          <li>
+            <a
+              class="social-link social-link--header"
+              href={item.href}
+              aria-label={item.label}
+              title={item.label}
+              {...getExternalLinkProps(item.href)}
+            >
+              <SocialIcon name={item.icon} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="site-header__style-transfer">
+      <StyleTransferMount />
     </div>
   </div>
 </header>
+
+<script>
+  import { initializeSiteHeaderState } from '../../lib/headerBehavior';
+
+  initializeSiteHeaderState();
+</script>

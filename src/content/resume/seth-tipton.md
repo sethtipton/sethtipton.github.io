@@ -1,8 +1,8 @@
 ---
 name: Seth Tipton
-role: Senior Front-End Web Developer
+role: Senior Front-End Engineer
 location: Kent, OH
-description: Resume for Seth Tipton, a front-end engineer focused on design systems, accessibility, performance, and scalable UI architecture.
+description: Resume for Seth Tipton, a Senior Front-End Engineer focused on design systems, accessibility, performance, and scalable UI architecture.
 profile: Senior Front-End Engineer with 15+ years of experience building design systems, accessible interfaces, and performant front ends. I create scalable UI architecture and front-end standards that improve consistency, maintainability, and delivery speed.
 contacts:
   - label: Email
@@ -13,7 +13,7 @@ contacts:
     href: https://www.linkedin.com/in/sethtipton
     text: linkedin.com/in/sethtipton
     external: true
-  - label: Github
+  - label: GitHub
     href: https://github.com/sethtipton/
     text: github.com/sethtipton/
     external: true
@@ -35,7 +35,7 @@ experience:
     bullets:
       - Built responsive websites for healthcare, retail, and professional-services clients.
       - Translated design mockups into polished, cross-browser interfaces using HTML, CSS, and JavaScript.
-      - Unified content management and custom back-end functionality to improve client workflows and support flexible site architecture..
+      - Unified content management and custom back-end functionality to improve client workflows and support flexible site architecture.
   - company: Amtrust
     title: Senior Front-End Developer
     years: 2011 - 2012
@@ -54,7 +54,7 @@ experience:
     bullets:
       - Maintained WKSU and Folk Alley WordPress sites, building interactive features that showcased stories and improved fundraising outcomes.
 skills:
-  - category: Frontend Engineering
+  - category: Front-End Engineering
     items:
       - React
       - TypeScript
@@ -82,7 +82,7 @@ skills:
       - Semantic HTML
       - ARIA
       - Axe DevTools
-      - Voiceover
+      - VoiceOver
   - category: Testing
     items:
       - Playwright
@@ -91,7 +91,7 @@ skills:
       - React Testing Library
   - category: Tooling & Dev Workflow
     items:
-      - Git / GitHub / Github Actions
+      - Git / GitHub / GitHub Actions
       - Vite
       - Webpack
       - Node.js

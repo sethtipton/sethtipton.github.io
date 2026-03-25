@@ -1,6 +1,6 @@
 ---
 title: Belltower Brewing
-summary: A site built on WordPress for a local brewery with a focused React pairing experience, keeping day-to-day publishing simple while adding a richer product-style recommendation flow.
+summary: A site built on WordPress for a local brewery with a pairing experience built in React, keeping day-to-day publishing simple while adding a richer product-style recommendation flow.
 problem: The site needed to stay easy to update through WordPress while supporting a more interactive beer discovery experience without turning the whole front end into a heavy app.
 role: Senior Front-End Engineer
 impact:
@@ -20,7 +20,7 @@ stack:
   - Untappd API
   - Google Sheets
 links:
-  live: http://www.belltowerbrewing.com
+  live: https://www.belltowerbrewing.com
   repo: https://github.com/sethtipton/belltower-brewing
 featured: true
 order: 3
@@ -32,13 +32,13 @@ futureApi:
   endpointHint: /projects/brewery-tools
 ---
 
-### Context
+### Scale and scope
 
-Belltower Brewing is a brewery site first, but it also needed a more interesting recommendation experience than a typical brand site. The project had to support regular publishing through WordPress while giving visitors a better way to explore beers, pairings, and flights.
+Belltower Brewing is a brewery site first, but the owners wanted a more interesting recommendation experience. The project had to support regular publishing through WordPress while giving visitors a better way to explore beers, pairings, and flights.
 
 That meant keeping the editorial side straightforward while adding a more product-like interaction layer in a focused part of the site.
 
-### What I focused on
+### Ownership and approach
 
 I built the project end to end, from the custom theme through the pairing experience, integrations, and admin-facing publishing flow.
 
@@ -48,7 +48,7 @@ The pairing experience is more than a filter. Users move through a short guided 
 
 I packaged the feature as a WordPress plugin with both shortcode and Gutenberg block support, and only enqueue its React assets when the embed is actually present. I also combined WordPress-managed content with external sources like Untappd and Google Sheets so the site could stay current without code changes for every menu update.
 
-### Why it mattered
+### Business and engineering impact
 
 This project is a good example of front-end judgment, not just front-end implementation. The challenge was to add the right interaction in the right place. By keeping WordPress as the publishing foundation and layering in a focused React experience, I made the site more useful without making the whole build harder to own.
 

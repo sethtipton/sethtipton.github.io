@@ -1,6 +1,7 @@
 ---
+import InternalLink from './InternalLink.astro';
 import type { ResumeEntry } from '../../lib/resume';
-import { getExternalLinkProps } from '../../lib/links';
+import { getExternalLinkProps, isOutboundHref } from '../../lib/links';
 import {
   getResumeLink,
   getResumePdfHref,
@@ -44,9 +45,13 @@ const printHref = getResumePrintHref(base);
           return (
             <li class="resume-document__contact">
               <span class="resume-document__contact-label">{item.label}:</span>
-              <a href={href} {...getExternalLinkProps(href)}>
-                {item.text}
-              </a>
+              {isOutboundHref(href) ? (
+                <a href={href} {...getExternalLinkProps(href)}>
+                  {item.text}
+                </a>
+              ) : (
+                <InternalLink href={href}>{item.text}</InternalLink>
+              )}
             </li>
           );
         })
@@ -72,9 +77,12 @@ const printHref = getResumePrintHref(base);
               view while running the dev server.
             </p>
           )}
-          <a class="button-link button-link--secondary" href={printHref}>
+          <InternalLink
+            class="button-link button-link--secondary"
+            href={printHref}
+          >
             Print-friendly view
-          </a>
+          </InternalLink>
         </div>
       </div>
     )

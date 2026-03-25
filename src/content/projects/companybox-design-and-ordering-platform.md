@@ -26,13 +26,13 @@ thumbnail: ./images/companybox-top.webp
 status: Packaging commerce platform
 ---
 
-### Context
+### Scale and scope
 
 CompanyBox was not a single storefront. It was a connected product made up of multiple Angular apps spanning customer ordering, design creation, a FedEx-branded partner experience, internal operations, and builder tools for reusable creative assets.
 
 The complexity was in the front end as much as the backend. Product configuration, pricing, design state, uploads, validation, ordering, and internal workflows all had to stay aligned across different audiences and different apps.
 
-### What I focused on
+### Ownership and approach
 
 I treated the work as one codebase with multiple entry points, not a set of unrelated apps. The core structure was a shared Angular foundation for domain models, business services, auth and configuration injection, and design tooling that each surface could build on.
 
@@ -40,6 +40,6 @@ Much of the product complexity lived in the UI. Pricing and product rules were A
 
 I used service-driven state instead of a centralized store, which kept the apps modular while still sharing typed business logic and consistent behavior. I also leaned on end-to-end testing to protect a high-risk area where design, commerce, and internal operations met.
 
-### Why it mattered
+### Business and engineering impact
 
 In a custom-product business, front-end inconsistency turns into operational pain quickly. Misaligned pricing, broken project state, weak validation, or disconnected upload flows affect quoting, ordering, and internal team efficiency. A shared foundation made it possible to support customer, partner, and internal workflows without rebuilding the same logic in parallel.
