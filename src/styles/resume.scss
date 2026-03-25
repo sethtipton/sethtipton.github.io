@@ -259,12 +259,17 @@
 }
 
 .resume-document--print .experience-list {
+  display: block;
   gap: 0.48rem;
 }
 
 .resume-document--print section[aria-labelledby='skills-title'] {
   break-before: page;
   page-break-before: always;
+}
+
+.resume-document--print .experience-list > * + * {
+  margin-top: 0.48rem;
 }
 
 .resume-document--print .experience-card {
@@ -370,6 +375,8 @@ body.resume-print main {
   background: var(--color-white);
   box-shadow: none;
   padding: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .resume-document--print .surface-hover,
@@ -429,5 +436,7 @@ body.resume-print main {
     //border-color: var(--color-border);
     //background: var(--color-white);
     box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
