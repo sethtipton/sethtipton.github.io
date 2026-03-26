@@ -80,7 +80,7 @@ try {
 
   const previewUrl = `http://127.0.0.1:${serverAddress.port}${printPath}`;
 
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ channel: 'chromium', headless: true });
   const page = await browser.newPage();
   await page.goto(previewUrl, { waitUntil: 'networkidle' });
   await page.emulateMedia({ media: 'print' });
