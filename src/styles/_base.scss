@@ -35,11 +35,6 @@ main {
   display: block;
 }
 
-main:focus {
-  outline: 3px solid var(--color-focus);
-  outline-offset: var(--space-2);
-}
-
 img {
   display: block;
   max-width: 100%;

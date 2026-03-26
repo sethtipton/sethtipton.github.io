@@ -75,7 +75,18 @@
     background-color var(--site-motion-fast) ease;
 }
 
-.surface-hover:is(:hover, :focus-visible) {
+.surface-hover:hover,
+.surface-hover:is(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [role='button'],
+    [role='link'],
+    [tabindex]:not([tabindex='-1'])
+  ):focus-visible {
   transform: translateY(var(--surface-hover-translate-y, -1px));
   border-color: var(--surface-hover-border-color, var(--color-border-strong));
   background-color: var(--surface-hover-background, var(--color-surface));
