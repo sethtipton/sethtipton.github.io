@@ -1,5 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm ci",
-  "buildCommand": "PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install --force chromium --no-shell && PLAYWRIGHT_BROWSERS_PATH=0 npm run build"
+  "buildCommand": "npm run build:site"
 }
