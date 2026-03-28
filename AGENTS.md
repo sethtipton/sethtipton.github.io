@@ -8,6 +8,7 @@
 - Use `npm run build:site` for fast site-only verification and `npm run build` when you also need the generated resume PDF.
 - Content-driven case studies live in `src/content/projects/`, shared Astro components live in `src/components/astro/`, React islands live in `src/components/react/`, and global styling lives in `src/styles/`.
 - See `docs/architecture.md` for the repo-wide route, layout, content, env, and subsystem map.
+- The theme remix API is deployed from the sibling repo at `/Users/sethtipton/Documents/Sites/style-transfer-api`. The Vercel function lives at `/Users/sethtipton/Documents/Sites/style-transfer-api/api/style-transfer.ts` and the shared schema lives at `/Users/sethtipton/Documents/Sites/style-transfer-api/lib/style-transfer-schema.ts`. When either of those files changes, redeploy from `/Users/sethtipton/Documents/Sites/style-transfer-api` with `vercel deploy --prod`.
 - The site base path changes in CI for GitHub Pages. Be careful with hard-coded root-relative links and prefer the existing path helpers/utilities already in the repo.
 - For frontend debugging, use Playwright MCP to reproduce user flows and verify UI states, and use Chrome DevTools MCP to inspect DOM, console, network, and performance causes. In practice: reproduce with Playwright, diagnose with DevTools, then verify the fix with Playwright again.
 - Never use the user's active browser session for Playwright or DevTools MCP checks. Always open a separate headless MCP browser session in an isolated context for reproduction, inspection, and verification.

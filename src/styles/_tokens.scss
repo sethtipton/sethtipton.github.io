@@ -15,7 +15,7 @@
 }
 
 @mixin fallback-dark-theme-derived-tokens {
-  --color-accent-soft: rgb(36 124 117 / 0.11);
+  --color-accent-soft: rgb(36 124 117 / 0.2);
   --color-accent-tint: rgb(36 124 117 / 0.12);
   --color-accent-tint-subtle: rgb(36 124 117 / 0.08);
   --color-accent-border: rgb(36 124 117 / 0.18);
@@ -71,8 +71,8 @@
   --color-accent-strong: light-dark(#115e59, #1f6a64);
   --color-focus: #0284c7;
   --color-focus: light-dark(#0284c7, #67c8ff);
-  --color-accent-soft: rgb(15 118 110 / 0.11);
-  --color-accent-soft: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  --color-accent-soft: rgb(15 118 110 / 0.2);
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 20%, transparent);
   --color-accent-tint: rgb(15 118 110 / 0.12);
   --color-accent-tint: color-mix(in srgb, var(--color-accent) 12%, transparent);
   --color-accent-tint-subtle: rgb(15 118 110 / 0.08);
@@ -251,6 +251,28 @@
   --site-motion-fast: 160ms;
   --site-motion-medium: 220ms;
   --site-motion-slow: 320ms;
+  --site-motion-enter: 220ms;
+  --site-motion-item-enter: 190ms;
+  --site-motion-exit: 170ms;
+  --site-motion-view-fast: 360ms;
+  --site-motion-view-medium: 420ms;
+  --site-motion-view-slow: 520ms;
+  --site-motion-loop-feedback: 1350ms;
+  --site-motion-loop-decorative-fast: 1700ms;
+  --site-motion-loop-decorative-slow: 3200ms;
+  --site-motion-stagger-sm: 32ms;
+  --site-motion-stagger-md: 40ms;
+  --site-motion-distance-sm: 8px;
+  --site-motion-distance-md: 18px;
+  --site-motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --site-motion-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --site-motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --site-motion-ease-in-out: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  --site-motion-ease-linear: linear;
+  --site-motion-feedback-play-state: running;
+  --site-motion-feedback-iteration-count: infinite;
+  --site-motion-decorative-play-state: running;
+  --site-motion-decorative-iteration-count: infinite;
   --surface-hover-translate-y: -0.1rem;
   --site-pattern-opacity: 1;
   --site-pattern-secondary-opacity: 1;

@@ -9,14 +9,19 @@ type StyleTransferAccessibilityPairingDefinition = {
   foregroundRole: StyleTransferThemeColorRole;
   backgroundRole: StyleTransferThemeColorRole;
   target: number;
-  isCore: boolean;
+  tier: 'core' | 'informational' | 'support';
 };
 
 export type StyleTransferAccessibilityPairingId =
   | 'text-on-background'
   | 'text-on-surface'
+  | 'text-on-surface-strong'
+  | 'text-on-surface-tint'
   | 'muted-on-background'
   | 'muted-on-surface'
+  | 'muted-on-background-alt'
+  | 'muted-on-surface-strong'
+  | 'muted-on-surface-tint'
   | 'accent-strong-on-background'
   | 'accent-strong-on-surface'
   | 'focus-on-background'
@@ -30,7 +35,7 @@ const pairingDefinitions = [
     foregroundRole: 'text',
     backgroundRole: 'background',
     target: 4.5,
-    isCore: true,
+    tier: 'core',
   },
   {
     id: 'text-on-surface',
@@ -38,7 +43,23 @@ const pairingDefinitions = [
     foregroundRole: 'text',
     backgroundRole: 'surface',
     target: 4.5,
-    isCore: true,
+    tier: 'core',
+  },
+  {
+    id: 'text-on-surface-strong',
+    label: 'Text on elevated surface',
+    foregroundRole: 'text',
+    backgroundRole: 'surfaceStrong',
+    target: 4.5,
+    tier: 'support',
+  },
+  {
+    id: 'text-on-surface-tint',
+    label: 'Text on tinted surface',
+    foregroundRole: 'text',
+    backgroundRole: 'surfaceTint',
+    target: 4.5,
+    tier: 'support',
   },
   {
     id: 'muted-on-background',
@@ -46,7 +67,7 @@ const pairingDefinitions = [
     foregroundRole: 'muted',
     backgroundRole: 'background',
     target: 4.5,
-    isCore: false,
+    tier: 'support',
   },
   {
     id: 'muted-on-surface',
@@ -54,7 +75,31 @@ const pairingDefinitions = [
     foregroundRole: 'muted',
     backgroundRole: 'surface',
     target: 4.5,
-    isCore: false,
+    tier: 'support',
+  },
+  {
+    id: 'muted-on-background-alt',
+    label: 'Muted text on alternate background',
+    foregroundRole: 'muted',
+    backgroundRole: 'backgroundAlt',
+    target: 4.5,
+    tier: 'support',
+  },
+  {
+    id: 'muted-on-surface-strong',
+    label: 'Muted text on elevated surface',
+    foregroundRole: 'muted',
+    backgroundRole: 'surfaceStrong',
+    target: 4.5,
+    tier: 'support',
+  },
+  {
+    id: 'muted-on-surface-tint',
+    label: 'Muted text on tinted surface',
+    foregroundRole: 'muted',
+    backgroundRole: 'surfaceTint',
+    target: 4.5,
+    tier: 'support',
   },
   {
     id: 'accent-strong-on-background',
@@ -62,7 +107,7 @@ const pairingDefinitions = [
     foregroundRole: 'accentStrong',
     backgroundRole: 'background',
     target: 4.5,
-    isCore: false,
+    tier: 'informational',
   },
   {
     id: 'accent-strong-on-surface',
@@ -70,7 +115,7 @@ const pairingDefinitions = [
     foregroundRole: 'accentStrong',
     backgroundRole: 'surface',
     target: 4.5,
-    isCore: false,
+    tier: 'informational',
   },
   {
     id: 'focus-on-background',
@@ -78,7 +123,7 @@ const pairingDefinitions = [
     foregroundRole: 'focus',
     backgroundRole: 'background',
     target: 3,
-    isCore: false,
+    tier: 'informational',
   },
   {
     id: 'focus-on-surface',
@@ -86,7 +131,7 @@ const pairingDefinitions = [
     foregroundRole: 'focus',
     backgroundRole: 'surface',
     target: 3,
-    isCore: false,
+    tier: 'informational',
   },
   {
     id: 'accent-on-background',
@@ -94,7 +139,7 @@ const pairingDefinitions = [
     foregroundRole: 'accent',
     backgroundRole: 'background',
     target: 2,
-    isCore: false,
+    tier: 'informational',
   },
 ] as const satisfies readonly StyleTransferAccessibilityPairingDefinition[];
 
@@ -102,7 +147,12 @@ export const styleTransferAccessibilityPairingDefinitions = pairingDefinitions;
 
 export const styleTransferAccessibilityCorePairingIds =
   pairingDefinitions.flatMap((definition) =>
-    definition.isCore ? [definition.id] : [],
+    definition.tier === 'core' ? [definition.id] : [],
+  );
+
+export const styleTransferAccessibilitySupportPairingIds =
+  pairingDefinitions.flatMap((definition) =>
+    definition.tier === 'support' ? [definition.id] : [],
   );
 
 export type StyleTransferAccessibilityPairing = {
@@ -116,13 +166,18 @@ export type StyleTransferAccessibilityPairing = {
   passesLight: boolean;
   passesDark: boolean;
   isCore: boolean;
+  isSupport: boolean;
+  tier: 'core' | 'informational' | 'support';
 };
 
 export type StyleTransferAccessibilityAnalysis = {
   pairings: StyleTransferAccessibilityPairing[];
   corePairings: StyleTransferAccessibilityPairing[];
+  supportPairings: StyleTransferAccessibilityPairing[];
   corePassCount: number;
   coreTotal: number;
+  supportPassCount: number;
+  supportTotal: number;
   notes: string[];
   surfaceSeparation: {
     light: number;
@@ -189,12 +244,14 @@ function createAccessibilityPairing(
     dark,
     foregroundRole: definition.foregroundRole,
     id: definition.id,
-    isCore: definition.isCore,
+    isCore: definition.tier === 'core',
+    isSupport: definition.tier === 'support',
     label: definition.label,
     light,
     passesDark: dark >= definition.target,
     passesLight: light >= definition.target,
     target: definition.target,
+    tier: definition.tier,
   };
 }
 
@@ -205,7 +262,11 @@ export function analyzeStyleTransferThemeAccessibility(
     createAccessibilityPairing(definition, theme),
   );
   const corePairings = pairings.filter((pairing) => pairing.isCore);
+  const supportPairings = pairings.filter((pairing) => pairing.isSupport);
   const corePassCount = corePairings.filter(
+    (pairing) => pairing.passesLight && pairing.passesDark,
+  ).length;
+  const supportPassCount = supportPairings.filter(
     (pairing) => pairing.passesLight && pairing.passesDark,
   ).length;
   const surfaceSeparation = {
@@ -230,6 +291,16 @@ export function analyzeStyleTransferThemeAccessibility(
     );
   }
 
+  if (supportPassCount === supportPairings.length) {
+    notes.push(
+      'Support text stays readable across the alternate, elevated, and tinted surfaces in both modes.',
+    );
+  } else {
+    notes.push(
+      'Support text drops below the target threshold on at least one supporting surface.',
+    );
+  }
+
   if (surfaceSeparation.light >= 1.08 && surfaceSeparation.dark >= 1.08) {
     notes.push(
       'Surface layers stay visually distinct from the page background in both modes.',
@@ -246,6 +317,9 @@ export function analyzeStyleTransferThemeAccessibility(
     coreTotal: corePairings.length,
     notes,
     pairings,
+    supportPairings,
+    supportPassCount,
+    supportTotal: supportPairings.length,
     surfaceSeparation,
   };
 }

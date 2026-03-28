@@ -32,6 +32,10 @@ const patternSvg = bgTiltRaw
 
 <script>
   import { gsap } from 'gsap';
+  import {
+    getRuntimeStyleTransferMotionProfile,
+    motionMsToSeconds,
+  } from '../../lib/style-transfer/motion';
 
   const patternWindow = window as typeof window & {
     __sitePatternEnhancerBound?: boolean;
@@ -52,10 +56,6 @@ const patternSvg = bgTiltRaw
     'color-mix(in srgb, var(--color-accent-strong) 54%, var(--color-background) 46%)',
     'color-mix(in srgb, var(--color-accent) 52%, var(--color-white) 48%)',
   ];
-  const prefersReducedMotion = window.matchMedia(
-    '(prefers-reduced-motion: reduce)',
-  ).matches;
-
   const initializePattern = (root: Element) => {
     if (
       !(root instanceof HTMLElement) ||
@@ -94,7 +94,11 @@ const patternSvg = bgTiltRaw
       });
     };
 
-    if (prefersReducedMotion) {
+    const motion = getRuntimeStyleTransferMotionProfile(
+      document.documentElement,
+    );
+
+    if (!motion.decorativeEnabled) {
       setFinalState();
       return;
     }
@@ -116,7 +120,7 @@ const patternSvg = bgTiltRaw
       gsap
         .timeline({
           defaults: {
-            ease: 'power2.out',
+            ease: motion.easings.standard.gsap,
           },
         })
         .set(svg, { opacity: 1 })
@@ -130,9 +134,12 @@ const patternSvg = bgTiltRaw
             strokeDashoffset: 0,
             opacity: 0.14,
             strokeWidth: 34,
-            duration: 10,
+            duration: motionMsToSeconds(
+              motion.durations.viewSlow * 2 +
+                motion.durations.loopDecorativeFast,
+            ),
             stagger: {
-              each: 1,
+              each: motionMsToSeconds(motion.stagger.md * 20),
               from: 'random',
             },
           },
@@ -143,8 +150,10 @@ const patternSvg = bgTiltRaw
           {
             opacity: 0.1,
             strokeWidth: 24,
-            duration: 5,
-            ease: 'power1.out',
+            duration: motionMsToSeconds(
+              motion.durations.viewSlow + motion.durations.loopDecorativeFast,
+            ),
+            ease: motion.easings.exit.gsap,
           },
           '-=0.3',
         );

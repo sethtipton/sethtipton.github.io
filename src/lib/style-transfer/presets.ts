@@ -1,5 +1,6 @@
 import presetCatalog from './preset-catalog.json';
 import { createDefaultStyleTransferArtworkPreview } from './artwork';
+import { ensurePresetStyleTransferThemeCompliance } from './compliance';
 import {
   deriveStyleTransferApplication,
   type StyleTransferApplication,
@@ -13,16 +14,21 @@ import {
 
 const styleTransferPresetCatalogEntries =
   styleTransferPresetCatalogSchema.parse(presetCatalog);
+const styleTransferPresetMetaById = new Map(
+  styleTransferPresetCatalogEntries.map((entry) => [entry.id, entry.meta]),
+);
 
 export const styleTransferPresetThemes = styleTransferPresetCatalogEntries.map(
   ({ meta, ...theme }) => {
     void meta;
 
-    return styleTransferThemeRecordSchema.parse({
+    const parsedTheme = styleTransferThemeRecordSchema.parse({
       ...theme,
       radiusProfile:
         theme.radiusProfile ?? resolveStyleTransferRadiusProfile(theme),
     }) as StyleTransferThemeRecord;
+
+    return ensurePresetStyleTransferThemeCompliance(parsedTheme).theme;
   },
 );
 
@@ -33,13 +39,14 @@ export const styleTransferPresetApplications = Object.fromEntries(
   ]),
 ) satisfies Record<string, StyleTransferApplication>;
 
-export const styleTransferPresetSummaries =
-  styleTransferPresetCatalogEntries.map(({ meta, ...theme }) => ({
+export const styleTransferPresetSummaries = styleTransferPresetThemes.map(
+  (theme) => ({
     artwork: createDefaultStyleTransferArtworkPreview(theme, {
-      preferredFamily: meta?.artworkFamily,
+      preferredFamily: styleTransferPresetMetaById.get(theme.id)?.artworkFamily,
       source: 'preset',
     }),
     id: theme.id,
     name: theme.name,
     prompt: theme.prompt,
-  }));
+  }),
+);

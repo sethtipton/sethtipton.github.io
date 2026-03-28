@@ -70,6 +70,7 @@ describe('style transfer theme contracts', () => {
     );
 
     expect(record.id).toBe('glacial-editorial');
+    expect(record.name).toBe('Glacial Editorial With Cobalt Accents');
     expect(record.source).toBe('prompt');
     expect(record.prompt).toBe('glacial editorial with cobalt accents');
     expect(record.radiusProfile).toBe('soft');

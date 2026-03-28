@@ -13,6 +13,11 @@ import {
   type ResolvedStyleTransferArtworkState,
 } from '../../lib/style-transfer/controller';
 import { isStyleTransferDebugEnabled } from '../../lib/style-transfer/debug';
+import {
+  getRuntimeStyleTransferMotionProfile,
+  motionMsToSeconds,
+  type StyleTransferMotionProfile,
+} from '../../lib/style-transfer/motion';
 
 function logHeroDebug(message: string, details?: unknown) {
   if (!isStyleTransferDebugEnabled()) {
@@ -88,6 +93,7 @@ function resetHeroArtwork(
 function animateStrokeDraw(
   svg: SVGSVGElement,
   config: StyleTransferArtworkRenderConfig,
+  motion: StyleTransferMotionProfile,
 ) {
   const shapes = getGeometryShapes(svg);
   const strokeShapes = shapes.filter((shape) => shape.hasAttribute('stroke'));
@@ -121,48 +127,53 @@ function animateStrokeDraw(
   gsap
     .timeline({
       defaults: {
-        ease: 'power2.out',
+        ease: motion.easings.standard.gsap,
       },
     })
     .to(svg, {
       opacity: 1,
-      duration: 0.28,
+      duration: motionMsToSeconds(motion.durations.fast),
     })
     .to(
       drawableShapes,
       {
-        duration: 1.4,
+        duration: motionMsToSeconds(
+          motion.durations.viewSlow + motion.durations.itemEnter,
+        ),
         opacity: (_index: number, target: SVGElement) =>
           getFinalShapeOpacity(target),
         strokeDashoffset: 0,
         strokeWidth: (_index: number, target: SVGElement) =>
           Number.parseFloat(target.getAttribute('stroke-width') ?? '') ||
           config.strokeWidth,
-        stagger: 0.08,
+        stagger: motionMsToSeconds(motion.stagger.md),
       },
       0,
     )
     .to(
       shapes.filter((shape) => !drawableShapes.includes(shape)),
       {
-        duration: 0.8,
+        duration: motionMsToSeconds(motion.durations.itemEnter),
         opacity: (_index: number, target: SVGElement) =>
           getFinalShapeOpacity(target),
         y: 0,
-        stagger: 0.04,
+        stagger: motionMsToSeconds(motion.stagger.sm),
       },
-      0.18,
+      motionMsToSeconds(motion.stagger.md),
     );
 }
 
-function animatePanelStagger(svg: SVGSVGElement) {
+function animatePanelStagger(
+  svg: SVGSVGElement,
+  motion: StyleTransferMotionProfile,
+) {
   const shapes = getGeometryShapes(svg);
 
   gsap.set(svg, { opacity: 0.18 });
   gsap.set(shapes, {
     opacity: 0,
     scale: 0.9,
-    y: 24,
+    y: motion.distances.md,
     rotate: (_index: number) => (_index % 2 === 0 ? -4 : 4),
     transformOrigin: '50% 50%',
   });
@@ -170,41 +181,44 @@ function animatePanelStagger(svg: SVGSVGElement) {
   gsap
     .timeline({
       defaults: {
-        ease: 'power3.out',
+        ease: motion.easings.emphasized.gsap,
       },
     })
     .to(svg, {
       opacity: 1,
-      duration: 0.32,
+      duration: motionMsToSeconds(motion.durations.fast),
     })
     .to(
       shapes,
       {
-        duration: 0.9,
+        duration: motionMsToSeconds(motion.durations.enter),
         opacity: (_index: number, target: SVGElement) =>
           getFinalShapeOpacity(target),
         rotate: 0,
         scale: 1,
         y: 0,
-        stagger: 0.08,
+        stagger: motionMsToSeconds(motion.stagger.md),
       },
       0,
     )
     .to(
       shapes,
       {
-        duration: 0.35,
+        duration: motionMsToSeconds(motion.durations.exit),
         scale: 1.01,
         yoyo: true,
         repeat: 1,
-        stagger: 0.04,
-        ease: 'power1.inOut',
+        stagger: motionMsToSeconds(motion.stagger.sm),
+        ease: motion.easings.inOut.gsap,
       },
-      0.25,
+      motionMsToSeconds(motion.stagger.md * 2),
     );
 }
 
-function animateOrbitalPulse(svg: SVGSVGElement) {
+function animateOrbitalPulse(
+  svg: SVGSVGElement,
+  motion: StyleTransferMotionProfile,
+) {
   const shapes = getGeometryShapes(svg);
   const nodeShapes = shapes.filter((shape) => {
     const type = shape.getAttribute('data-style-transfer-shape-type');
@@ -221,22 +235,22 @@ function animateOrbitalPulse(svg: SVGSVGElement) {
   gsap
     .timeline({
       defaults: {
-        ease: 'power2.out',
+        ease: motion.easings.standard.gsap,
       },
     })
     .to(svg, {
       opacity: 1,
       rotate: 0,
-      duration: 0.55,
+      duration: motionMsToSeconds(motion.durations.enter),
     })
     .to(
       nodeShapes,
       {
-        duration: 1,
+        duration: motionMsToSeconds(motion.durations.enter),
         opacity: (_index: number, target: SVGElement) =>
           getFinalShapeOpacity(target),
         scale: 1,
-        stagger: 0.05,
+        stagger: motionMsToSeconds(motion.stagger.sm),
       },
       0,
     )
@@ -246,93 +260,100 @@ function animateOrbitalPulse(svg: SVGSVGElement) {
           shape.getAttribute('data-style-transfer-shape-type') === 'ellipse',
       ),
       {
-        duration: 0.5,
+        duration: motionMsToSeconds(motion.durations.exit),
         scale: 1.08,
         yoyo: true,
         repeat: 1,
-        stagger: 0.06,
-        ease: 'sine.inOut',
+        stagger: motionMsToSeconds(motion.stagger.sm * 1.25),
+        ease: motion.easings.inOut.gsap,
       },
-      0.2,
+      motionMsToSeconds(motion.stagger.md),
     );
 }
 
-function animateBandSweep(svg: SVGSVGElement) {
+function animateBandSweep(
+  svg: SVGSVGElement,
+  motion: StyleTransferMotionProfile,
+) {
   const shapes = getGeometryShapes(svg);
 
   gsap.set(svg, { opacity: 0.2 });
   gsap.set(shapes, {
     opacity: 0,
-    x: -44,
+    x: motion.distances.md * -2,
   });
 
   gsap
     .timeline({
       defaults: {
-        ease: 'power2.out',
+        ease: motion.easings.standard.gsap,
       },
     })
     .to(svg, {
       opacity: 1,
-      duration: 0.24,
+      duration: motionMsToSeconds(motion.durations.fast),
     })
     .to(
       shapes,
       {
-        duration: 0.7,
+        duration: motionMsToSeconds(motion.durations.itemEnter),
         opacity: (_index: number, target: SVGElement) =>
           getFinalShapeOpacity(target),
-        stagger: 0.03,
+        stagger: motionMsToSeconds(motion.stagger.sm),
         x: 0,
       },
       0,
     );
 }
 
-function animateSoftDrift(svg: SVGSVGElement) {
+function animateSoftDrift(
+  svg: SVGSVGElement,
+  motion: StyleTransferMotionProfile,
+) {
   const shapes = getGeometryShapes(svg);
 
   gsap.set(svg, { opacity: 0.16 });
   gsap.set(shapes, {
     opacity: 0,
     scale: 0.96,
-    y: 18,
+    y: motion.distances.md,
     transformOrigin: '50% 50%',
   });
 
   gsap
     .timeline({
       defaults: {
-        ease: 'power2.out',
+        ease: motion.easings.standard.gsap,
       },
     })
     .to(svg, {
       opacity: 1,
-      duration: 0.3,
+      duration: motionMsToSeconds(motion.durations.fast),
     })
     .to(
       shapes,
       {
-        duration: 1,
+        duration: motionMsToSeconds(motion.durations.enter),
         opacity: (_index: number, target: SVGElement) =>
           getFinalShapeOpacity(target),
         scale: 1,
-        stagger: 0.08,
+        stagger: motionMsToSeconds(motion.stagger.md),
         y: 0,
       },
-      0.05,
+      motionMsToSeconds(motion.stagger.sm),
     )
     .to(
       shapes,
       {
-        duration: 0.9,
-        ease: 'sine.inOut',
+        duration: motionMsToSeconds(motion.durations.slow),
+        ease: motion.easings.inOut.gsap,
         repeat: 1,
-        stagger: 0.05,
-        y: (_index: number) => (_index % 2 === 0 ? -5 : 5),
+        stagger: motionMsToSeconds(motion.stagger.sm),
+        y: (_index: number) =>
+          (_index % 2 === 0 ? -motion.distances.sm : motion.distances.sm),
         yoyo: true,
       },
-      0.25,
+      motionMsToSeconds(motion.stagger.md * 2),
     );
 }
 
@@ -344,10 +365,11 @@ function animateHeroArtwork(
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)',
   ).matches;
+  const motion = getRuntimeStyleTransferMotionProfile(document.documentElement);
 
   resetHeroArtwork(svg, config);
 
-  if (prefersReducedMotion) {
+  if (prefersReducedMotion || !motion.decorativeEnabled) {
     return;
   }
 
@@ -361,20 +383,20 @@ function animateHeroArtwork(
 
   switch (profile) {
     case 'stroke-draw':
-      animateStrokeDraw(svg, config);
+      animateStrokeDraw(svg, config, motion);
       break;
     case 'panel-stagger':
-      animatePanelStagger(svg);
+      animatePanelStagger(svg, motion);
       break;
     case 'orbital-pulse':
-      animateOrbitalPulse(svg);
+      animateOrbitalPulse(svg, motion);
       break;
     case 'band-sweep':
-      animateBandSweep(svg);
+      animateBandSweep(svg, motion);
       break;
     case 'soft-drift':
     default:
-      animateSoftDrift(svg);
+      animateSoftDrift(svg, motion);
       break;
   }
 }

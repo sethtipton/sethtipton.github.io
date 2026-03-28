@@ -186,14 +186,40 @@ export function slugifyStyleTransferName(value: string) {
     .slice(0, 48);
 }
 
+function formatPromptThemeName(prompt: string) {
+  const normalizedPrompt = prompt
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, 48)
+    .trim();
+
+  if (!normalizedPrompt) {
+    return '';
+  }
+
+  return normalizedPrompt.replace(/[A-Za-z0-9']+/g, (segment) => {
+    if (/^[A-Z0-9']+$/.test(segment)) {
+      return segment;
+    }
+
+    const lower = segment.toLowerCase();
+
+    return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
+  });
+}
+
 export function createCustomStyleTransferThemeRecord(
   prompt: string,
   payload: StyleTransferModelOutput,
 ): StyleTransferThemeRecord {
   const parsed = styleTransferModelOutputSchema.parse(payload);
-  const name = parsed.styleName.trim();
+  const modelName = parsed.styleName.trim();
+  const name = formatPromptThemeName(prompt) || modelName;
   const fallbackId = `custom-${Date.now().toString(36)}`;
-  const id = slugifyStyleTransferName(name) || fallbackId;
+  const id =
+    slugifyStyleTransferName(modelName) ||
+    slugifyStyleTransferName(name) ||
+    fallbackId;
 
   return styleTransferThemeRecordSchema.parse({
     id,

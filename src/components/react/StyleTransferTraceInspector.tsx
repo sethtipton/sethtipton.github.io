@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 
 import StyleTransferArtworkPreview from './StyleTransferArtworkPreview';
 import type { StyleTransferArtworkPreview as StyleTransferArtworkPreviewData } from '../../lib/style-transfer/artwork';
@@ -67,6 +67,7 @@ type StyleTransferTraceStageItemProps = {
   index: number;
   shouldStartOpen: boolean;
   stage: StyleTransferTraceStage;
+  totalStages: number;
 };
 
 function StyleTransferTraceStageItem({
@@ -74,6 +75,7 @@ function StyleTransferTraceStageItem({
   index,
   shouldStartOpen,
   stage,
+  totalStages,
 }: StyleTransferTraceStageItemProps) {
   const detailsRef = useRef<HTMLDetailsElement | null>(null);
   const hasDetails =
@@ -88,7 +90,18 @@ function StyleTransferTraceStageItem({
   }, [shouldStartOpen]);
 
   return (
-    <li className="style-transfer__trace-stage">
+    <li
+      className="style-transfer__trace-stage"
+      style={
+        {
+          '--style-transfer-trace-item-index': index,
+          '--style-transfer-trace-item-reverse-index': Math.max(
+            0,
+            totalStages - index - 1,
+          ),
+        } as CSSProperties
+      }
+    >
       <details
         ref={detailsRef}
         className="style-transfer__trace-stage-accordion accordion-item"
@@ -215,11 +228,6 @@ export default function StyleTransferTraceInspector({
               ? 'How the remix turns into a theme'
               : 'How this preset became a theme'}
           </p>
-          <p className="style-transfer__trace-intro">
-            {trace.source === 'prompt'
-              ? 'A quick trace of the brief, the structured output, and what made it onto the page.'
-              : ''}
-          </p>
         </div>
       </div>
 
@@ -231,6 +239,7 @@ export default function StyleTransferTraceInspector({
             index={index}
             shouldStartOpen={trace.source === 'prompt' && index === 0}
             stage={stage}
+            totalStages={trace.stages.length}
           />
         ))}
       </ol>

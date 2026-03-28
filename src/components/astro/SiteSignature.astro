@@ -24,6 +24,10 @@ const signatureMarkup = signatureSource
 
 <script>
   import { gsap } from 'gsap';
+  import {
+    getRuntimeStyleTransferMotionProfile,
+    motionMsToSeconds,
+  } from '../../lib/style-transfer/motion';
 
   const SIGNATURE_SELECTOR = '[data-site-signature]';
   const SIGNATURE_SESSION_KEY = 'site-signature-animated';
@@ -74,6 +78,9 @@ const signatureMarkup = signatureSource
     const paths = [...signature.querySelectorAll<SVGPathElement>('path')];
     const { start: startStrokeWidth, end: endStrokeWidth } =
       getStrokeWidthRange(signature);
+    const motion = getRuntimeStyleTransferMotionProfile(
+      document.documentElement,
+    );
 
     if (!paths.length) {
       return;
@@ -102,15 +109,20 @@ const signatureMarkup = signatureSource
           opacity: 1,
           strokeDashoffset: 0,
           strokeWidth: endStrokeWidth,
-          duration: Math.max(0.24, Math.min(0.58, length / 140)),
-          ease: 'power1.inOut',
+          duration: motionMsToSeconds(
+            Math.max(
+              motion.signature.minDraw,
+              Math.min(motion.signature.maxDraw, length / 140),
+            ),
+          ),
+          ease: motion.easings.inOut.gsap,
           onComplete: () => {
             gsap.set(path, {
               clearProps: 'strokeDasharray,strokeDashoffset',
             });
           },
         },
-        index === 0 ? 0 : '>-0.04',
+        index === 0 ? 0 : `>-${motionMsToSeconds(motion.signature.overlap)}`,
       );
     });
   };
@@ -154,7 +166,11 @@ const signatureMarkup = signatureSource
       return;
     }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const motion = getRuntimeStyleTransferMotionProfile(
+      document.documentElement,
+    );
+
+    if (!motion.decorativeEnabled) {
       signatures.forEach(setFinalSignatureState);
       return;
     }

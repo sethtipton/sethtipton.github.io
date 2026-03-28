@@ -96,7 +96,7 @@ describe('style transfer traces', () => {
       trace.stages
         .find((stage) => stage.id === 'validation')
         ?.facts.find((fact) => fact.label === 'Readability gate')?.value,
-    ).toBe('Repaired');
+    ).toBe('Passed');
   });
 
   it('creates a synthetic preset trace with the same stage order', () => {
@@ -215,8 +215,13 @@ describe('style transfer accessibility analysis', () => {
     expect(analysis.pairings.map((pairing) => pairing.id)).toEqual([
       'text-on-background',
       'text-on-surface',
+      'text-on-surface-strong',
+      'text-on-surface-tint',
       'muted-on-background',
       'muted-on-surface',
+      'muted-on-background-alt',
+      'muted-on-surface-strong',
+      'muted-on-surface-tint',
       'accent-strong-on-background',
       'accent-strong-on-surface',
       'focus-on-background',

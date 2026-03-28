@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { styleTransferArtworkFamilyOptions } from './artwork';
-import { evaluateStyleTransferThemeCompliance } from './compliance';
+import { ensurePresetStyleTransferThemeCompliance } from './compliance';
 import { styleTransferThemeRecordSchema } from './schema';
 
 export const styleTransferPresetCategoryOptions = [
@@ -53,9 +53,13 @@ export const styleTransferPresetCatalogSchema = z
         seenNames.add(theme.name);
       }
 
-      const compliance = evaluateStyleTransferThemeCompliance(theme);
+      const compliance = ensurePresetStyleTransferThemeCompliance(theme);
+      const failingPairings = [
+        ...compliance.failingCorePairings,
+        ...compliance.failingSupportPairings,
+      ];
 
-      compliance.failingCorePairings.forEach((pairing) => {
+      failingPairings.forEach((pairing) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `${pairing.label} must meet ${pairing.target}:1 in both modes for preset themes.`,

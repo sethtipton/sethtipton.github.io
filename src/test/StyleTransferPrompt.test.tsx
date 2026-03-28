@@ -16,6 +16,34 @@ import {
 
 const launcherThemeLabelPattern = /(default|preset|generated) theme/i;
 
+function createPassingPromptThemePayload() {
+  return styleTransferModelOutputSchema.parse({
+    styleName: 'Y2K Futurism',
+    palette: {
+      background: { light: '#f4f6ff', dark: '#0d1023' },
+      backgroundAlt: { light: '#f7f9ff', dark: '#11152e' },
+      surface: { light: '#fcfdff', dark: '#171c3d' },
+      surfaceStrong: { light: '#fcfdff', dark: '#5d6077' },
+      surfaceTint: { light: '#d5daff', dark: '#343c6c' },
+      surfacePaper: { light: '#f6f8ff', dark: '#11152d' },
+      text: { light: '#1f2440', dark: '#f6f7ff' },
+      muted: { light: '#1f2440', dark: '#f6f7ff' },
+      accent: { light: '#5b6dff', dark: '#8ea2ff' },
+      accentStrong: { light: '#ff4fd8', dark: '#ff98ea' },
+      focus: { light: '#2563eb', dark: '#fde68a' },
+    },
+    fonts: {
+      sans: 'neo-grotesk',
+      serif: 'editorial',
+    },
+    density: 'balanced',
+    surfaceStyle: 'glow',
+    buttonStyle: 'pill',
+    pattern: 'grid',
+    motion: 'snappy',
+  });
+}
+
 const controllerMocks = vi.hoisted(() => ({
   applyGeneratedStyleTransferTheme: vi.fn(),
   applyStyleTransferApplication: vi.fn(),
@@ -46,31 +74,7 @@ vi.mock('../lib/style-transfer/controller', () => ({
 
 function createGeneratedThemeSummary() {
   const prompt = 'glacial editorial with cobalt accents';
-  const payload = styleTransferModelOutputSchema.parse({
-    styleName: 'Glacial Editorial',
-    palette: {
-      background: { light: '#f8fbff', dark: '#0d1520' },
-      backgroundAlt: { light: '#edf3fb', dark: '#132030' },
-      surface: { light: '#ffffff', dark: '#15202b' },
-      surfaceStrong: { light: '#dfe8f2', dark: '#1c2b3a' },
-      surfaceTint: { light: '#eef6ff', dark: '#223344' },
-      surfacePaper: { light: '#fcfeff', dark: '#101923' },
-      text: { light: '#132131', dark: '#e7f1fb' },
-      muted: { light: '#5b6f84', dark: '#9bb0c6' },
-      accent: { light: '#2563eb', dark: '#60a5fa' },
-      accentStrong: { light: '#1d4ed8', dark: '#93c5fd' },
-      focus: { light: '#0ea5e9', dark: '#fde68a' },
-    },
-    fonts: {
-      sans: 'neo-grotesk',
-      serif: 'editorial',
-    },
-    density: 'airy',
-    surfaceStyle: 'glass',
-    buttonStyle: 'outline',
-    pattern: 'grid',
-    motion: 'calm',
-  });
+  const payload = createPassingPromptThemePayload();
   const theme = createCustomStyleTransferThemeRecord(prompt, payload);
 
   return {
@@ -631,33 +635,7 @@ describe('StyleTransferPrompt', () => {
       status: 200,
       statusText: 'OK',
       text: async () =>
-        JSON.stringify({
-          theme: {
-            styleName: 'Glacial Editorial',
-            palette: {
-              background: { light: '#f8fbff', dark: '#0d1520' },
-              backgroundAlt: { light: '#edf3fb', dark: '#132030' },
-              surface: { light: '#ffffff', dark: '#15202b' },
-              surfaceStrong: { light: '#dfe8f2', dark: '#1c2b3a' },
-              surfaceTint: { light: '#eef6ff', dark: '#223344' },
-              surfacePaper: { light: '#fcfeff', dark: '#101923' },
-              text: { light: '#132131', dark: '#e7f1fb' },
-              muted: { light: '#5b6f84', dark: '#9bb0c6' },
-              accent: { light: '#2563eb', dark: '#60a5fa' },
-              accentStrong: { light: '#1d4ed8', dark: '#93c5fd' },
-              focus: { light: '#0ea5e9', dark: '#fde68a' },
-            },
-            fonts: {
-              sans: 'neo-grotesk',
-              serif: 'editorial',
-            },
-            density: 'airy',
-            surfaceStyle: 'glass',
-            buttonStyle: 'outline',
-            pattern: 'grid',
-            motion: 'calm',
-          },
-        }),
+        JSON.stringify({ theme: createPassingPromptThemePayload() }),
     });
 
     vi.stubGlobal('fetch', fetchMock);
@@ -698,33 +676,7 @@ describe('StyleTransferPrompt', () => {
       status: 200,
       statusText: 'OK',
       text: async () =>
-        JSON.stringify({
-          theme: {
-            styleName: 'Glacial Editorial',
-            palette: {
-              background: { light: '#f8fbff', dark: '#0d1520' },
-              backgroundAlt: { light: '#edf3fb', dark: '#132030' },
-              surface: { light: '#ffffff', dark: '#15202b' },
-              surfaceStrong: { light: '#dfe8f2', dark: '#1c2b3a' },
-              surfaceTint: { light: '#eef6ff', dark: '#223344' },
-              surfacePaper: { light: '#fcfeff', dark: '#101923' },
-              text: { light: '#132131', dark: '#e7f1fb' },
-              muted: { light: '#5b6f84', dark: '#9bb0c6' },
-              accent: { light: '#2563eb', dark: '#60a5fa' },
-              accentStrong: { light: '#1d4ed8', dark: '#93c5fd' },
-              focus: { light: '#0ea5e9', dark: '#fde68a' },
-            },
-            fonts: {
-              sans: 'neo-grotesk',
-              serif: 'editorial',
-            },
-            density: 'airy',
-            surfaceStyle: 'glass',
-            buttonStyle: 'outline',
-            pattern: 'grid',
-            motion: 'calm',
-          },
-        }),
+        JSON.stringify({ theme: createPassingPromptThemePayload() }),
     });
 
     vi.stubGlobal('fetch', fetchMock);
@@ -801,33 +753,7 @@ describe('StyleTransferPrompt', () => {
       status: 200,
       statusText: 'OK',
       text: async () =>
-        JSON.stringify({
-          theme: {
-            styleName: 'Glacial Editorial',
-            palette: {
-              background: { light: '#f8fbff', dark: '#0d1520' },
-              backgroundAlt: { light: '#edf3fb', dark: '#132030' },
-              surface: { light: '#ffffff', dark: '#15202b' },
-              surfaceStrong: { light: '#dfe8f2', dark: '#1c2b3a' },
-              surfaceTint: { light: '#eef6ff', dark: '#223344' },
-              surfacePaper: { light: '#fcfeff', dark: '#101923' },
-              text: { light: '#132131', dark: '#e7f1fb' },
-              muted: { light: '#5b6f84', dark: '#9bb0c6' },
-              accent: { light: '#2563eb', dark: '#60a5fa' },
-              accentStrong: { light: '#1d4ed8', dark: '#93c5fd' },
-              focus: { light: '#0ea5e9', dark: '#fde68a' },
-            },
-            fonts: {
-              sans: 'neo-grotesk',
-              serif: 'editorial',
-            },
-            density: 'airy',
-            surfaceStyle: 'glass',
-            buttonStyle: 'outline',
-            pattern: 'grid',
-            motion: 'calm',
-          },
-        }),
+        JSON.stringify({ theme: createPassingPromptThemePayload() }),
     });
 
     await waitFor(() => {
@@ -835,6 +761,193 @@ describe('StyleTransferPrompt', () => {
         document.querySelector('.style-transfer__theme-tick--placeholder'),
       ).toBeFalsy();
     });
+  });
+
+  it('retries once when the first valid remix is still too weak', async () => {
+    const weakThemePayload = {
+      styleName: 'Sunny Editorial',
+      palette: {
+        background: { light: '#f6fbff', dark: '#ffffff' },
+        backgroundAlt: { light: '#ebf3f8', dark: '#ffffff' },
+        surface: { light: '#ffffff', dark: '#000000' },
+        surfaceStrong: { light: '#d7e3ec', dark: '#111111' },
+        surfaceTint: { light: '#eef7fb', dark: '#181818' },
+        surfacePaper: { light: '#fcfefc', dark: '#0d0d0d' },
+        text: { light: '#132131', dark: '#777777' },
+        muted: { light: '#5b6f84', dark: '#888888' },
+        accent: { light: '#2f7aa2', dark: '#4f8bb2' },
+        accentStrong: { light: '#1f5d82', dark: '#999999' },
+        focus: { light: '#0f766e', dark: '#999999' },
+      },
+      fonts: {
+        sans: 'neo-grotesk',
+        serif: 'editorial',
+      },
+      density: 'balanced',
+      surfaceStyle: 'glass',
+      buttonStyle: 'outline',
+      pattern: 'grid',
+      motion: 'calm',
+    };
+    const strongThemePayload = createPassingPromptThemePayload();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: async () => JSON.stringify({ theme: weakThemePayload }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: async () => JSON.stringify({ theme: strongThemePayload }),
+      });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<StyleTransferPrompt />);
+
+    await openPromptPanel();
+
+    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+      target: {
+        value: 'sunshine',
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+    expect(
+      await screen.findByText(/after another pass for readability/i),
+    ).toBeInTheDocument();
+    expect(controllerMocks.applyStyleTransferApplication).toHaveBeenCalledTimes(
+      1,
+    );
+  });
+
+  it('applies the best readable attempt when the prompt cannot be expanded further', async () => {
+    const weakThemePayload = {
+      styleName: 'Sunny Editorial',
+      palette: {
+        background: { light: '#f6fbff', dark: '#ffffff' },
+        backgroundAlt: { light: '#ebf3f8', dark: '#ffffff' },
+        surface: { light: '#ffffff', dark: '#000000' },
+        surfaceStrong: { light: '#d7e3ec', dark: '#111111' },
+        surfaceTint: { light: '#eef7fb', dark: '#181818' },
+        surfacePaper: { light: '#fcfefc', dark: '#0d0d0d' },
+        text: { light: '#132131', dark: '#777777' },
+        muted: { light: '#5b6f84', dark: '#888888' },
+        accent: { light: '#2f7aa2', dark: '#4f8bb2' },
+        accentStrong: { light: '#1f5d82', dark: '#999999' },
+        focus: { light: '#0f766e', dark: '#999999' },
+      },
+      fonts: {
+        sans: 'neo-grotesk',
+        serif: 'editorial',
+      },
+      density: 'balanced',
+      surfaceStyle: 'glass',
+      buttonStyle: 'outline',
+      pattern: 'grid',
+      motion: 'calm',
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => JSON.stringify({ theme: weakThemePayload }),
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<StyleTransferPrompt />);
+
+    await openPromptPanel();
+
+    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+      target: {
+        value: 'a'.repeat(400),
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
+
+    expect(
+      await screen.findByText(
+        /after some local tuning\. it passes, though the palette still leans soft\./i,
+      ),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(controllerMocks.applyStyleTransferApplication).toHaveBeenCalledTimes(
+      1,
+    );
+  });
+
+  it('keeps the prompt notice visible when switching between light and dark modes', async () => {
+    const weakThemePayload = {
+      styleName: 'Sunny Editorial',
+      palette: {
+        background: { light: '#f6fbff', dark: '#ffffff' },
+        backgroundAlt: { light: '#ebf3f8', dark: '#ffffff' },
+        surface: { light: '#ffffff', dark: '#000000' },
+        surfaceStrong: { light: '#d7e3ec', dark: '#111111' },
+        surfaceTint: { light: '#eef7fb', dark: '#181818' },
+        surfacePaper: { light: '#fcfefc', dark: '#0d0d0d' },
+        text: { light: '#132131', dark: '#777777' },
+        muted: { light: '#5b6f84', dark: '#888888' },
+        accent: { light: '#2f7aa2', dark: '#4f8bb2' },
+        accentStrong: { light: '#1f5d82', dark: '#999999' },
+        focus: { light: '#0f766e', dark: '#999999' },
+      },
+      fonts: {
+        sans: 'neo-grotesk',
+        serif: 'editorial',
+      },
+      density: 'balanced',
+      surfaceStyle: 'glass',
+      buttonStyle: 'outline',
+      pattern: 'grid',
+      motion: 'calm',
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => JSON.stringify({ theme: weakThemePayload }),
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<StyleTransferPrompt />);
+
+    await openPromptPanel();
+
+    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+      target: {
+        value: 'sunshine',
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
+
+    const notice = await screen.findByText(
+      /after some local tuning\. it passes, though the palette still leans soft\./i,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /^dark$/i }));
+
+    expect(notice).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /after some local tuning\. it passes, though the palette still leans soft\./i,
+      ),
+    ).toBeInTheDocument();
+    expect(controllerMocks.setStyleTransferMode).toHaveBeenCalledWith('dark');
   });
 
   it('surfaces the backend error message for 400 remix rejections', async () => {
@@ -865,6 +978,44 @@ describe('StyleTransferPrompt', () => {
     expect(
       await screen.findByText(/invalid prompt payload\./i),
     ).toBeInTheDocument();
+  });
+
+  it('keeps remix errors visible when switching between light and dark modes', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      statusText: 'Bad Request',
+      text: async () =>
+        JSON.stringify({
+          error: "That remix didn't quite land. Try a different prompt.",
+        }),
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<StyleTransferPrompt />);
+
+    await openPromptPanel();
+
+    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+      target: {
+        value: 'white one white',
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
+
+    const errorMessage = await screen.findByText(
+      /that remix didn't quite land\. try a different prompt\./i,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /^light$/i }));
+
+    expect(errorMessage).toBeInTheDocument();
+    expect(
+      screen.getByText(/that remix didn't quite land\. try a different prompt\./i),
+    ).toBeInTheDocument();
+    expect(controllerMocks.setStyleTransferMode).toHaveBeenCalledWith('light');
   });
 
   it('shows a live character count and disables submission when the prompt exceeds 400 characters', async () => {
@@ -981,5 +1132,196 @@ describe('StyleTransferPrompt', () => {
     });
 
     expect(screen.getByText(/restored from history/i)).toBeInTheDocument();
+  });
+
+  it('keeps the trace panel mounted in-flow while it animates out on reset', async () => {
+    const generatedTheme = createGeneratedThemeSummary();
+    let controllerState: StyleTransferControllerState = {
+      id: generatedTheme.id,
+      mode: 'auto',
+      name: generatedTheme.name,
+      presetId: null,
+      prompt: generatedTheme.prompt,
+      source: 'prompt',
+    };
+    let activeArtwork: ResolvedStyleTransferArtworkState = {
+      artwork: generatedTheme.artwork,
+      key: `prompt:${generatedTheme.id}`,
+    };
+
+    controllerMocks.getStyleTransferControllerState.mockImplementation(
+      () => controllerState,
+    );
+    controllerMocks.getStyleTransferGeneratedSummaries.mockImplementation(
+      () => [generatedTheme],
+    );
+    controllerMocks.resolveActiveStyleTransferArtwork.mockImplementation(
+      () => activeArtwork,
+    );
+    controllerMocks.resetStyleTransferController.mockImplementation(() => {
+      controllerState = {
+        id: null,
+        mode: 'auto',
+        name: 'Original Canvas',
+        presetId: null,
+        prompt: null,
+        source: 'default',
+      };
+      activeArtwork = {
+        artwork: null,
+        key: null,
+      };
+    });
+
+    render(<StyleTransferPrompt />);
+
+    await openPromptPanel();
+
+    const traceHeading = await screen.findByText(
+      /how the remix turns into a theme/i,
+    );
+    const tracePanel = traceHeading.closest(
+      '.style-transfer__panel-trace',
+    ) as HTMLElement | null;
+
+    expect(tracePanel).not.toBeNull();
+    if (!tracePanel) {
+      throw new Error('Expected the trace panel to render in the prompt.');
+    }
+
+    fireEvent.change(
+      screen.getByRole('slider', { name: /explore and switch themes/i }),
+      {
+        target: { value: '0' },
+      },
+    );
+
+    await waitFor(() => {
+      expect(tracePanel).toHaveAttribute('data-trace-visibility', 'exiting');
+    });
+    expect(traceHeading).toBeInTheDocument();
+  });
+
+  it('clears the prompt notice when switching themes and does not resurrect it when reselecting a generated theme', async () => {
+    const prompt = 'frog';
+    const payload = createPassingPromptThemePayload();
+    const theme = createCustomStyleTransferThemeRecord(prompt, payload);
+    const generatedTheme = {
+      application: deriveStyleTransferApplication(theme),
+      artwork: createDefaultStyleTransferArtworkPreview(theme, {
+        source: 'fallback',
+      }),
+      id: theme.id,
+      name: theme.name,
+      prompt,
+    };
+    let controllerState: StyleTransferControllerState = {
+      id: null,
+      mode: 'auto',
+      name: 'Original Canvas',
+      presetId: null,
+      prompt: null,
+      source: 'default',
+    };
+    let generatedThemes: typeof generatedTheme[] = [];
+    let activeArtwork: ResolvedStyleTransferArtworkState = {
+      artwork: null,
+      key: null,
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => JSON.stringify({ theme: payload }),
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    controllerMocks.getStyleTransferControllerState.mockImplementation(
+      () => controllerState,
+    );
+    controllerMocks.getStyleTransferGeneratedSummaries.mockImplementation(
+      () => generatedThemes,
+    );
+    controllerMocks.resolveActiveStyleTransferArtwork.mockImplementation(
+      () => activeArtwork,
+    );
+    controllerMocks.applyStyleTransferApplication.mockImplementation(() => {
+      generatedThemes = [generatedTheme];
+      controllerState = {
+        id: generatedTheme.id,
+        mode: 'auto',
+        name: generatedTheme.name,
+        presetId: null,
+        prompt: generatedTheme.prompt,
+        source: 'prompt',
+      };
+      activeArtwork = {
+        artwork: generatedTheme.artwork,
+        key: `prompt:${generatedTheme.id}`,
+      };
+      return true;
+    });
+    controllerMocks.resetStyleTransferController.mockImplementation(() => {
+      controllerState = {
+        id: null,
+        mode: 'auto',
+        name: 'Original Canvas',
+        presetId: null,
+        prompt: null,
+        source: 'default',
+      };
+      activeArtwork = {
+        artwork: null,
+        key: null,
+      };
+    });
+    controllerMocks.applyGeneratedStyleTransferTheme.mockImplementation(() => {
+      controllerState = {
+        id: generatedTheme.id,
+        mode: 'auto',
+        name: generatedTheme.name,
+        presetId: null,
+        prompt: generatedTheme.prompt,
+        source: 'prompt',
+      };
+      activeArtwork = {
+        artwork: generatedTheme.artwork,
+        key: `prompt:${generatedTheme.id}`,
+      };
+      return true;
+    });
+
+    render(<StyleTransferPrompt />);
+
+    await openPromptPanel();
+
+    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+      target: { value: prompt },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
+
+    expect(await screen.findByText(/applied "frog"\./i)).toBeInTheDocument();
+
+    fireEvent.change(
+      screen.getByRole('slider', { name: /explore and switch themes/i }),
+      {
+        target: { value: '0' },
+      },
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText(/applied "frog"\./i)).not.toBeInTheDocument();
+    });
+
+    fireEvent.change(
+      screen.getByRole('slider', { name: /explore and switch themes/i }),
+      {
+        target: { value: '1' },
+      },
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText(/applied "frog"\./i)).not.toBeInTheDocument();
+    });
   });
 });

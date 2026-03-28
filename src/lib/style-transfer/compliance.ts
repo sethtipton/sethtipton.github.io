@@ -19,8 +19,14 @@ export type StyleTransferThemeComplianceStatus =
   | 'reject';
 
 export type StyleTransferThemeComplianceMode = 'light' | 'dark';
+export type StyleTransferThemeComplianceAdjustmentKind =
+  | 'derivation'
+  | 'fallback'
+  | 'normalization'
+  | 'repair';
 
 export type StyleTransferThemeComplianceAdjustment = {
+  kind: StyleTransferThemeComplianceAdjustmentKind;
   mode: StyleTransferThemeComplianceMode;
   role: StyleTransferThemeColorRole;
   from: string;
@@ -32,7 +38,10 @@ export type StyleTransferThemeComplianceEvaluation = {
   status: Extract<StyleTransferThemeComplianceStatus, 'pass' | 'reject'>;
   analysis: StyleTransferAccessibilityAnalysis;
   failingCorePairings: StyleTransferAccessibilityPairing[];
+  failingSupportPairings: StyleTransferAccessibilityPairing[];
   passesCorePairings: boolean;
+  passesRequiredPairings: boolean;
+  passesSupportPairings: boolean;
 };
 
 export type StyleTransferThemeComplianceResult = {
@@ -42,44 +51,46 @@ export type StyleTransferThemeComplianceResult = {
   analysis: StyleTransferAccessibilityAnalysis;
   adjustments: StyleTransferThemeComplianceAdjustment[];
   failingCorePairings: StyleTransferAccessibilityPairing[];
+  failingSupportPairings: StyleTransferAccessibilityPairing[];
   notes: string[];
-  failureMessage: null;
+  failureMessage: string | null;
+  passesCorePairings: boolean;
+  passesRequiredPairings: boolean;
+  passesSupportPairings: boolean;
 };
 
 type RepairableRoleConfig = {
-  role: Extract<StyleTransferThemeColorRole, 'text' | 'muted'>;
+  role: Extract<StyleTransferThemeColorRole, 'muted' | 'text'>;
   target: number;
-  backgrounds: Array<
-    Extract<StyleTransferThemeColorRole, 'background' | 'surface'>
-  >;
+  backgrounds: StyleTransferThemeColorRole[];
+};
+
+type EnsureThemeComplianceOptions = {
+  source: 'preset' | 'prompt';
 };
 
 const repairableRoleConfigs: RepairableRoleConfig[] = [
   {
     role: 'text',
     target: 4.5,
-    backgrounds: ['background', 'surface'],
+    backgrounds: ['background', 'surface', 'surfaceStrong', 'surfaceTint'],
   },
   {
     role: 'muted',
     target: 4.5,
-    backgrounds: ['background', 'surface'],
+    backgrounds: [
+      'background',
+      'backgroundAlt',
+      'surface',
+      'surfaceStrong',
+      'surfaceTint',
+    ],
   },
 ];
 
 const repairAnchors = ['#ffffff', '#000000'] as const;
 const repairSteps = 24;
 const structuralRepairSteps = 20;
-const repairablePairingIds = new Set([
-  'text-on-background',
-  'text-on-surface',
-  'muted-on-background',
-  'muted-on-surface',
-  'accent-strong-on-background',
-  'accent-strong-on-surface',
-  'focus-on-background',
-  'focus-on-surface',
-]);
 
 function cloneTheme(theme: StyleTransferThemeRecord) {
   return styleTransferThemeRecordSchema.parse({
@@ -143,13 +154,11 @@ function getFailingCorePairings(analysis: StyleTransferAccessibilityAnalysis) {
   );
 }
 
-function hasRepairablePairingFailures(
+function getFailingSupportPairings(
   analysis: StyleTransferAccessibilityAnalysis,
 ) {
-  return analysis.pairings.some(
-    (pairing) =>
-      repairablePairingIds.has(pairing.id) &&
-      (!pairing.passesLight || !pairing.passesDark),
+  return analysis.supportPairings.filter(
+    (pairing) => !pairing.passesLight || !pairing.passesDark,
   );
 }
 
@@ -160,12 +169,8 @@ function createFailureMessage(pairings: StyleTransferAccessibilityPairing[]) {
     return 'The remix theme could not meet the site readability checks in both modes.';
   }
 
-  const lightStatus = primaryPairing.passesLight
-    ? `light ${formatContrastRatio(primaryPairing.light)}`
-    : `light ${formatContrastRatio(primaryPairing.light)}`;
-  const darkStatus = primaryPairing.passesDark
-    ? `dark ${formatContrastRatio(primaryPairing.dark)}`
-    : `dark ${formatContrastRatio(primaryPairing.dark)}`;
+  const lightStatus = `light ${formatContrastRatio(primaryPairing.light)}`;
+  const darkStatus = `dark ${formatContrastRatio(primaryPairing.dark)}`;
 
   return `${primaryPairing.label} stayed below the ${primaryPairing.target}:1 readability target (${lightStatus}, ${darkStatus}).`;
 }
@@ -177,6 +182,7 @@ function setPaletteValue(
   mode: StyleTransferThemeComplianceMode,
   nextValue: string,
   reason: string,
+  kind: StyleTransferThemeComplianceAdjustmentKind,
 ) {
   const currentValue = theme.palette[role][mode];
 
@@ -187,6 +193,7 @@ function setPaletteValue(
   theme.palette[role][mode] = nextValue;
   adjustments.push({
     from: currentValue,
+    kind,
     mode,
     reason,
     role,
@@ -246,6 +253,189 @@ function findForegroundRepair(
   return null;
 }
 
+function getSurfaceElevationAnchor(background: string, surface: string) {
+  return luminance(surface) >= luminance(background) ? '#ffffff' : '#000000';
+}
+
+function buildDerivedSurfaceStrong(
+  background: string,
+  surface: string,
+  text: string,
+) {
+  const anchor = getSurfaceElevationAnchor(background, surface);
+  let bestCandidate = mixHex(surface, anchor, 0.12);
+
+  for (let step = 1; step <= structuralRepairSteps; step += 1) {
+    const candidate = mixHex(surface, anchor, Math.min(0.3, 0.1 + step * 0.01));
+
+    if (
+      contrastRatio(text, candidate) >= 4.5 &&
+      contrastRatio(candidate, background) >= 1.14
+    ) {
+      bestCandidate = candidate;
+    }
+  }
+
+  return bestCandidate;
+}
+
+function buildDerivedSurfacePaper(
+  background: string,
+  surface: string,
+  text: string,
+) {
+  let bestCandidate = mixHex(background, surface, 0.3);
+
+  for (let step = 1; step <= structuralRepairSteps; step += 1) {
+    const candidate = mixHex(
+      background,
+      surface,
+      Math.min(0.38, 0.24 + step * 0.007),
+    );
+
+    if (
+      contrastRatio(text, candidate) >= 4.5 &&
+      contrastRatio(candidate, background) >= 1.03
+    ) {
+      bestCandidate = candidate;
+    }
+  }
+
+  return bestCandidate;
+}
+
+function buildDerivedSurfaceTint(
+  background: string,
+  surface: string,
+  accent: string,
+  text: string,
+) {
+  let bestCandidate = mixHex(surface, accent, 0.12);
+
+  for (let step = 1; step <= structuralRepairSteps; step += 1) {
+    const candidate = mixHex(
+      surface,
+      accent,
+      Math.min(0.24, 0.08 + step * 0.008),
+    );
+
+    if (
+      contrastRatio(text, candidate) >= 4.5 &&
+      contrastRatio(candidate, background) >= 1.03
+    ) {
+      bestCandidate = candidate;
+    }
+  }
+
+  return bestCandidate;
+}
+
+function deriveSupportSurfacePalette(
+  theme: StyleTransferThemeRecord,
+  adjustments: StyleTransferThemeComplianceAdjustment[],
+  modes: readonly StyleTransferThemeComplianceMode[],
+  kind: Extract<
+    StyleTransferThemeComplianceAdjustmentKind,
+    'derivation' | 'fallback' | 'normalization'
+  >,
+) {
+  modes.forEach((mode) => {
+    const background = theme.palette.background[mode];
+    const surface = theme.palette.surface[mode];
+    const text = theme.palette.text[mode];
+    const accent = theme.palette.accent[mode];
+
+    setPaletteValue(
+      theme,
+      adjustments,
+      'backgroundAlt',
+      mode,
+      mixHex(background, surface, 0.42),
+      `Rebuilt the ${mode} alternate background from the local surface ramp.`,
+      kind,
+    );
+    setPaletteValue(
+      theme,
+      adjustments,
+      'surfacePaper',
+      mode,
+      buildDerivedSurfacePaper(background, surface, text),
+      `Rebuilt the ${mode} paper surface from the local surface ramp.`,
+      kind,
+    );
+    setPaletteValue(
+      theme,
+      adjustments,
+      'surfaceStrong',
+      mode,
+      buildDerivedSurfaceStrong(background, surface, text),
+      `Derived the ${mode} elevated surface from the core palette seed.`,
+      kind,
+    );
+    setPaletteValue(
+      theme,
+      adjustments,
+      'surfaceTint',
+      mode,
+      buildDerivedSurfaceTint(background, surface, accent, text),
+      `Derived the ${mode} tinted surface from the core palette seed.`,
+      kind,
+    );
+  });
+}
+
+function deriveMutedValue(
+  theme: StyleTransferThemeRecord,
+  mode: StyleTransferThemeComplianceMode,
+) {
+  const background = theme.palette.background[mode];
+  const surface = theme.palette.surface[mode];
+  const backgroundAlt = theme.palette.backgroundAlt[mode];
+  const surfaceStrong = theme.palette.surfaceStrong[mode];
+  const surfaceTint = theme.palette.surfaceTint[mode];
+  const text = theme.palette.text[mode];
+  const supportAnchor = mixHex(background, surface, 0.5);
+  let bestCandidate = text;
+
+  for (let step = 1; step <= repairSteps + 6; step += 1) {
+    const candidate = mixHex(text, supportAnchor, step / (repairSteps + 6));
+
+    if (
+      contrastRatio(candidate, background) >= 4.5 &&
+      contrastRatio(candidate, backgroundAlt) >= 4.5 &&
+      contrastRatio(candidate, surface) >= 4.5 &&
+      contrastRatio(candidate, surfaceStrong) >= 4.5 &&
+      contrastRatio(candidate, surfaceTint) >= 4.5 &&
+      contrastRatio(text, candidate) >= 1.15
+    ) {
+      bestCandidate = candidate;
+      continue;
+    }
+
+    break;
+  }
+
+  return bestCandidate;
+}
+
+function deriveMutedPalette(
+  theme: StyleTransferThemeRecord,
+  adjustments: StyleTransferThemeComplianceAdjustment[],
+  modes: readonly StyleTransferThemeComplianceMode[],
+) {
+  modes.forEach((mode) => {
+    setPaletteValue(
+      theme,
+      adjustments,
+      'muted',
+      mode,
+      deriveMutedValue(theme, mode),
+      `Derived the ${mode} muted text token from the local text and surface ramp.`,
+      'derivation',
+    );
+  });
+}
+
 function buildSafeDarkBackground(currentBackground: string, accent: string) {
   const tinted = mixHex(currentBackground, accent, 0.14);
 
@@ -291,6 +481,7 @@ function normalizePromptDarkStructure(
     'dark',
     nextBackground,
     'Normalized the dark background to a safe reading anchor.',
+    'normalization',
   );
 
   const nextSurface = buildSafeDarkSurface(
@@ -304,51 +495,11 @@ function normalizePromptDarkStructure(
     'surface',
     'dark',
     nextSurface,
-    'Lifted the dark surface above the page background while preserving dark-mode contrast.',
+    'Lifted the dark surface above the page background while preserving contrast.',
+    'normalization',
   );
 
-  setPaletteValue(
-    theme,
-    adjustments,
-    'backgroundAlt',
-    'dark',
-    mixHex(theme.palette.background.dark, theme.palette.surface.dark, 0.4),
-    'Rebuilt the dark alternate background from the normalized dark ramp.',
-  );
-  setPaletteValue(
-    theme,
-    adjustments,
-    'surfacePaper',
-    'dark',
-    mixHex(theme.palette.background.dark, theme.palette.surface.dark, 0.24),
-    'Aligned the dark paper surface with the normalized dark ramp.',
-  );
-  setPaletteValue(
-    theme,
-    adjustments,
-    'surfaceStrong',
-    'dark',
-    ensureContrastWithAnchor(
-      mixHex(theme.palette.surface.dark, '#ffffff', 0.08),
-      '#ffffff',
-      5.6,
-      '#000000',
-    ),
-    'Adjusted the dark strong surface for clearer elevation and legibility.',
-  );
-  setPaletteValue(
-    theme,
-    adjustments,
-    'surfaceTint',
-    'dark',
-    ensureContrastWithAnchor(
-      mixHex(theme.palette.surface.dark, theme.palette.accent.dark, 0.2),
-      '#ffffff',
-      4.8,
-      '#000000',
-    ),
-    'Retinted the dark accent surface to stay readable as a supporting layer.',
-  );
+  deriveSupportSurfacePalette(theme, adjustments, ['dark'], 'normalization');
 }
 
 function applyFallbackDarkMode(
@@ -371,6 +522,7 @@ function applyFallbackDarkMode(
     'dark',
     anchoredBackground,
     'Applied the fallback dark background ramp.',
+    'fallback',
   );
   setPaletteValue(
     theme,
@@ -379,101 +531,23 @@ function applyFallbackDarkMode(
     'dark',
     anchoredSurface,
     'Applied the fallback dark surface ramp.',
+    'fallback',
   );
-  setPaletteValue(
-    theme,
-    adjustments,
-    'backgroundAlt',
-    'dark',
-    mixHex(anchoredBackground, anchoredSurface, 0.4),
-    'Applied the fallback dark alternate background ramp.',
-  );
-  setPaletteValue(
-    theme,
-    adjustments,
-    'surfacePaper',
-    'dark',
-    mixHex(anchoredBackground, anchoredSurface, 0.24),
-    'Applied the fallback dark paper ramp.',
-  );
-  setPaletteValue(
-    theme,
-    adjustments,
-    'surfaceStrong',
-    'dark',
-    ensureContrastWithAnchor(
-      mixHex(anchoredSurface, '#ffffff', 0.08),
-      '#ffffff',
-      5.6,
-      '#000000',
-    ),
-    'Applied the fallback dark elevated surface ramp.',
-  );
-  setPaletteValue(
-    theme,
-    adjustments,
-    'surfaceTint',
-    'dark',
-    ensureContrastWithAnchor(
-      mixHex(anchoredSurface, theme.palette.accent.dark, 0.2),
-      '#ffffff',
-      4.8,
-      '#000000',
-    ),
-    'Applied the fallback dark tinted surface ramp.',
-  );
+  deriveSupportSurfacePalette(theme, adjustments, ['dark'], 'fallback');
 }
 
-export function evaluateStyleTransferThemeCompliance(
+function repairReadableForegroundRoles(
   theme: StyleTransferThemeRecord,
-): StyleTransferThemeComplianceEvaluation {
-  const analysis = analyzeStyleTransferThemeAccessibility(theme);
-  const failingCorePairings = getFailingCorePairings(analysis);
-
-  return {
-    analysis,
-    failingCorePairings,
-    passesCorePairings: failingCorePairings.length === 0,
-    status: failingCorePairings.length === 0 ? 'pass' : 'reject',
-  };
-}
-
-export function ensurePromptStyleTransferThemeCompliance(
-  theme: StyleTransferThemeRecord,
-): StyleTransferThemeComplianceResult {
-  const initialEvaluation = evaluateStyleTransferThemeCompliance(theme);
-
-  if (!hasRepairablePairingFailures(initialEvaluation.analysis)) {
-    return {
-      adjustments: [],
-      analysis: initialEvaluation.analysis,
-      failureMessage: null,
-      failingCorePairings: [],
-      initialAnalysis: initialEvaluation.analysis,
-      notes: [
-        'The theme cleared the readability gate without semantic repairs.',
-      ],
-      status: 'pass',
-      theme,
-    };
-  }
-
-  const candidateTheme = cloneTheme(theme);
-  const adjustments: StyleTransferThemeComplianceAdjustment[] = [];
-  const hasDarkCoreFailure = initialEvaluation.failingCorePairings.some(
-    (pairing) => !pairing.passesDark,
-  );
-
-  if (hasDarkCoreFailure) {
-    normalizePromptDarkStructure(candidateTheme, adjustments);
-  }
-
-  repairableRoleConfigs.forEach(({ backgrounds, role, target }) => {
-    (['light', 'dark'] as const).forEach((mode) => {
+  adjustments: StyleTransferThemeComplianceAdjustment[],
+  roles: readonly RepairableRoleConfig[],
+  modes: readonly StyleTransferThemeComplianceMode[],
+) {
+  roles.forEach(({ backgrounds, role, target }) => {
+    modes.forEach((mode) => {
       const backgroundValues = backgrounds.map(
-        (backgroundRole) => candidateTheme.palette[backgroundRole][mode],
+        (backgroundRole) => theme.palette[backgroundRole][mode],
       );
-      const current = candidateTheme.palette[role][mode];
+      const current = theme.palette[role][mode];
       const passes = backgroundValues.every(
         (background) => contrastRatio(current, background) >= target,
       );
@@ -494,119 +568,235 @@ export function ensurePromptStyleTransferThemeCompliance(
         return;
       }
 
-      candidateTheme.palette[role][mode] = repaired;
-      adjustments.push({
-        from: current,
-        mode,
-        reason: `Raised ${mode} ${role} contrast against ${backgrounds.join(' and ')}.`,
+      setPaletteValue(
+        theme,
+        adjustments,
         role,
-        to: repaired,
-      });
+        mode,
+        repaired,
+        `Raised ${mode} ${role} contrast against ${backgrounds.join(', ')}.`,
+        'repair',
+      );
     });
   });
+}
+
+function resolveComplianceStatus(
+  adjustments: StyleTransferThemeComplianceAdjustment[],
+) {
+  if (
+    adjustments.some(
+      (adjustment) =>
+        adjustment.kind === 'normalization' || adjustment.kind === 'fallback',
+    )
+  ) {
+    return 'normalized' as const;
+  }
+
+  if (adjustments.some((adjustment) => adjustment.kind === 'repair')) {
+    return 'repaired' as const;
+  }
+
+  return 'pass' as const;
+}
+
+function createComplianceNotes(
+  source: EnsureThemeComplianceOptions['source'],
+  status: Exclude<StyleTransferThemeComplianceStatus, 'reject'>,
+  adjustments: StyleTransferThemeComplianceAdjustment[],
+  finalEvaluation: StyleTransferThemeComplianceEvaluation,
+) {
+  const repairCount = adjustments.filter(
+    (adjustment) => adjustment.kind === 'repair',
+  ).length;
+  const normalizationCount = adjustments.filter(
+    (adjustment) =>
+      adjustment.kind === 'normalization' || adjustment.kind === 'fallback',
+  ).length;
+  const notes: string[] = [];
+
+  if (status === 'pass') {
+    notes.push(
+      source === 'prompt'
+        ? 'The theme cleared the readability gate after rebuilding its support palette locally.'
+        : 'The preset support palette was rebuilt locally without requiring contrast repairs.',
+    );
+  }
+
+  if (repairCount > 0) {
+    notes.push(
+      `Adjusted ${repairCount} semantic text value${repairCount === 1 ? '' : 's'} to keep support text readable across the site surfaces.`,
+    );
+  }
+
+  if (normalizationCount > 0) {
+    notes.push(
+      'The dark palette ramp needed structural normalization before the theme could be applied safely.',
+    );
+  }
+
+  if (!finalEvaluation.passesSupportPairings) {
+    notes.push(
+      'Support text still falls below the target threshold on at least one supporting surface.',
+    );
+  }
+
+  return notes;
+}
+
+function createComplianceResult(
+  source: EnsureThemeComplianceOptions['source'],
+  theme: StyleTransferThemeRecord,
+  initialAnalysis: StyleTransferAccessibilityAnalysis,
+  adjustments: StyleTransferThemeComplianceAdjustment[],
+  evaluation: StyleTransferThemeComplianceEvaluation,
+) {
+  const status = resolveComplianceStatus(adjustments);
+  const failingPairings = [
+    ...evaluation.failingCorePairings,
+    ...evaluation.failingSupportPairings,
+  ];
+
+  return {
+    adjustments,
+    analysis: evaluation.analysis,
+    failureMessage: evaluation.passesRequiredPairings
+      ? null
+      : createFailureMessage(failingPairings),
+    failingCorePairings: evaluation.failingCorePairings,
+    failingSupportPairings: evaluation.failingSupportPairings,
+    initialAnalysis,
+    notes: createComplianceNotes(source, status, adjustments, evaluation),
+    passesCorePairings: evaluation.passesCorePairings,
+    passesRequiredPairings: evaluation.passesRequiredPairings,
+    passesSupportPairings: evaluation.passesSupportPairings,
+    status,
+    theme,
+  } satisfies StyleTransferThemeComplianceResult;
+}
+
+export function evaluateStyleTransferThemeCompliance(
+  theme: StyleTransferThemeRecord,
+): StyleTransferThemeComplianceEvaluation {
+  const analysis = analyzeStyleTransferThemeAccessibility(theme);
+  const failingCorePairings = getFailingCorePairings(analysis);
+  const failingSupportPairings = getFailingSupportPairings(analysis);
+  const passesCorePairings = failingCorePairings.length === 0;
+  const passesSupportPairings = failingSupportPairings.length === 0;
+
+  return {
+    analysis,
+    failingCorePairings,
+    failingSupportPairings,
+    passesCorePairings,
+    passesRequiredPairings: passesCorePairings && passesSupportPairings,
+    passesSupportPairings,
+    status: passesCorePairings && passesSupportPairings ? 'pass' : 'reject',
+  };
+}
+
+function ensureStyleTransferThemeCompliance(
+  theme: StyleTransferThemeRecord,
+  options: EnsureThemeComplianceOptions,
+) {
+  const candidateTheme = cloneTheme(theme);
+  const adjustments: StyleTransferThemeComplianceAdjustment[] = [];
+
+  deriveSupportSurfacePalette(
+    candidateTheme,
+    adjustments,
+    ['light', 'dark'],
+    'derivation',
+  );
+  deriveMutedPalette(candidateTheme, adjustments, ['light', 'dark']);
 
   let repairedTheme = styleTransferThemeRecordSchema.parse(candidateTheme);
+  const initialEvaluation = evaluateStyleTransferThemeCompliance(repairedTheme);
+
+  if (initialEvaluation.passesRequiredPairings) {
+    return createComplianceResult(
+      options.source,
+      repairedTheme,
+      initialEvaluation.analysis,
+      adjustments,
+      initialEvaluation,
+    );
+  }
+
+  const hasDarkCoreFailure = initialEvaluation.failingCorePairings.some(
+    (pairing) => !pairing.passesDark,
+  );
+
+  if (hasDarkCoreFailure) {
+    normalizePromptDarkStructure(candidateTheme, adjustments);
+  }
+
+  repairReadableForegroundRoles(
+    candidateTheme,
+    adjustments,
+    [repairableRoleConfigs[0]!],
+    ['light', 'dark'],
+  );
+  deriveMutedPalette(candidateTheme, adjustments, ['light', 'dark']);
+  repairReadableForegroundRoles(
+    candidateTheme,
+    adjustments,
+    [repairableRoleConfigs[1]!],
+    ['light', 'dark'],
+  );
+
+  repairedTheme = styleTransferThemeRecordSchema.parse(candidateTheme);
   let finalEvaluation = evaluateStyleTransferThemeCompliance(repairedTheme);
 
-  if (finalEvaluation.passesCorePairings) {
-    return {
+  if (finalEvaluation.passesRequiredPairings) {
+    return createComplianceResult(
+      options.source,
+      repairedTheme,
+      initialEvaluation.analysis,
       adjustments,
-      analysis: finalEvaluation.analysis,
-      failureMessage: null,
-      failingCorePairings: [],
-      initialAnalysis: initialEvaluation.analysis,
-      notes: [
-        hasDarkCoreFailure
-          ? `Normalized the dark palette and adjusted ${adjustments.length} semantic color value${adjustments.length === 1 ? '' : 's'} to keep the core readability pairings within target.`
-          : `Adjusted ${adjustments.length} semantic color value${adjustments.length === 1 ? '' : 's'} to keep the core readability pairings within target.`,
-      ],
-      status: hasDarkCoreFailure ? 'normalized' : 'repaired',
-      theme: repairedTheme,
-    };
+      finalEvaluation,
+    );
   }
 
   applyFallbackDarkMode(candidateTheme, adjustments);
-
-  repairableRoleConfigs.forEach(({ backgrounds, role, target }) => {
-    const backgroundValues = backgrounds.map(
-      (backgroundRole) => candidateTheme.palette[backgroundRole].dark,
-    );
-    const current = candidateTheme.palette[role].dark;
-    const repaired = findForegroundRepair(
-      current,
-      backgroundValues,
-      '#ffffff',
-      target,
-    );
-
-    if (!repaired || repaired === current) {
-      return;
-    }
-
-    setPaletteValue(
-      candidateTheme,
-      adjustments,
-      role,
-      'dark',
-      repaired,
-      `Finalized dark ${role} against the fallback dark ramp.`,
-    );
-  });
+  repairReadableForegroundRoles(
+    candidateTheme,
+    adjustments,
+    repairableRoleConfigs,
+    ['dark'],
+  );
+  deriveMutedPalette(candidateTheme, adjustments, ['dark']);
+  repairReadableForegroundRoles(
+    candidateTheme,
+    adjustments,
+    [repairableRoleConfigs[1]!],
+    ['dark'],
+  );
 
   repairedTheme = styleTransferThemeRecordSchema.parse(candidateTheme);
   finalEvaluation = evaluateStyleTransferThemeCompliance(repairedTheme);
 
-  if (finalEvaluation.passesCorePairings) {
-    return {
-      adjustments,
-      analysis: finalEvaluation.analysis,
-      failureMessage: null,
-      failingCorePairings: [],
-      initialAnalysis: initialEvaluation.analysis,
-      notes: [
-        'The original dark palette could not sustain readable text across the page and surface layers, so the system synthesized a safe dark ramp before applying the theme.',
-        `Adjusted ${adjustments.length} semantic color value${adjustments.length === 1 ? '' : 's'} during normalization.`,
-      ],
-      status: 'normalized',
-      theme: repairedTheme,
-    };
-  }
-
-  const hardSafeTheme = cloneTheme(repairedTheme);
-
-  setPaletteValue(
-    hardSafeTheme,
+  return createComplianceResult(
+    options.source,
+    repairedTheme,
+    initialEvaluation.analysis,
     adjustments,
-    'text',
-    'dark',
-    '#f3f7fb',
-    'Applied a hard-safe dark text fallback.',
+    finalEvaluation,
   );
-  setPaletteValue(
-    hardSafeTheme,
-    adjustments,
-    'muted',
-    'dark',
-    '#c7d2de',
-    'Applied a hard-safe dark muted text fallback.',
-  );
+}
 
-  repairedTheme = styleTransferThemeRecordSchema.parse(hardSafeTheme);
-  finalEvaluation = evaluateStyleTransferThemeCompliance(repairedTheme);
+export function ensurePromptStyleTransferThemeCompliance(
+  theme: StyleTransferThemeRecord,
+) {
+  return ensureStyleTransferThemeCompliance(theme, {
+    source: 'prompt',
+  });
+}
 
-  return {
-    adjustments,
-    analysis: finalEvaluation.analysis,
-    failureMessage: null,
-    failingCorePairings: finalEvaluation.failingCorePairings,
-    initialAnalysis: initialEvaluation.analysis,
-    notes: [
-      'The original dark palette was rebuilt into a safe fallback ramp before the theme reached the page.',
-      finalEvaluation.passesCorePairings
-        ? 'The final fallback satisfies the core readability checks.'
-        : createFailureMessage(finalEvaluation.failingCorePairings),
-    ],
-    status: 'normalized',
-    theme: repairedTheme,
-  };
+export function ensurePresetStyleTransferThemeCompliance(
+  theme: StyleTransferThemeRecord,
+) {
+  return ensureStyleTransferThemeCompliance(theme, {
+    source: 'preset',
+  });
 }

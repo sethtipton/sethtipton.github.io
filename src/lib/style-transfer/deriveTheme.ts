@@ -4,6 +4,11 @@ import type {
   StyleTransferThemeRecord,
   StyleTransferThemeSource,
 } from './schema';
+import {
+  createStyleTransferMotionCssVars,
+  getThemeMotionProfile,
+  styleTransferMotionCssVarKeys,
+} from './motion';
 import { resolveStyleTransferRadiusProfile } from './schema';
 
 type StyleTransferDatasetKey =
@@ -101,24 +106,6 @@ const radiusProfileConfig = {
     sm: number;
   }
 >;
-
-const motionConfig = {
-  off: {
-    fast: '0.01ms',
-    medium: '0.01ms',
-    slow: '0.01ms',
-  },
-  calm: {
-    fast: '180ms',
-    medium: '260ms',
-    slow: '360ms',
-  },
-  snappy: {
-    fast: '120ms',
-    medium: '180ms',
-    slow: '260ms',
-  },
-} as const;
 
 const surfaceConfig = {
   flat: {
@@ -325,9 +312,7 @@ export const styleTransferCssVarKeys = [
   '--control-background-hover',
   '--control-border-color',
   '--control-border-color-hover',
-  '--site-motion-fast',
-  '--site-motion-medium',
-  '--site-motion-slow',
+  ...styleTransferMotionCssVarKeys,
   '--surface-hover-translate-y',
   '--site-pattern-opacity',
   '--site-pattern-secondary-opacity',
@@ -343,7 +328,8 @@ export function deriveStyleTransferApplication(
   theme: StyleTransferThemeRecord,
 ): StyleTransferApplication {
   const density = densityConfig[theme.density];
-  const motion = motionConfig[theme.motion];
+  const motion = getThemeMotionProfile(theme);
+  const motionCssVars = createStyleTransferMotionCssVars(motion);
   const surface = surfaceConfig[theme.surfaceStyle];
   const button = buttonConfig[theme.buttonStyle];
   const radiusProfile = resolveStyleTransferRadiusProfile(theme);
@@ -427,9 +413,7 @@ export function deriveStyleTransferApplication(
       '--control-background-hover': 'var(--button-secondary-background-hover)',
       '--control-border-color': 'var(--button-secondary-border-color)',
       '--control-border-color-hover': 'var(--color-text)',
-      '--site-motion-fast': motion.fast,
-      '--site-motion-medium': motion.medium,
-      '--site-motion-slow': motion.slow,
+      ...motionCssVars,
       '--surface-hover-translate-y': density.hoverLift,
       '--site-pattern-opacity': patternOpacity[theme.pattern],
       '--site-pattern-secondary-opacity':

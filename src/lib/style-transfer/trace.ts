@@ -595,7 +595,6 @@ export function createRestoredPromptStyleTransferTrace({
 
 export function createPromptStyleTransferTrace({
   accessibility,
-  apiPrompt,
   application,
   artwork,
   compliance,
@@ -625,24 +624,9 @@ export function createPromptStyleTransferTrace({
             label: 'Original length',
             value: `${prompt.length} chars`,
           },
-          {
-            label: 'API prompt',
-            value: prompt === apiPrompt ? 'Passed through' : 'Normalized',
-          },
         ],
         data: {
           highlight: prompt,
-          views:
-            prompt === apiPrompt
-              ? undefined
-              : [
-                  {
-                    id: 'normalized-prompt',
-                    kind: 'text',
-                    label: 'API prompt',
-                    value: apiPrompt,
-                  },
-                ],
         },
       },
       {
@@ -651,10 +635,10 @@ export function createPromptStyleTransferTrace({
         status: 'complete',
         title: 'What came back',
         summary:
-          'The remix API returned a typed theme proposal and optional artwork slots instead of freeform CSS or markup.',
+          'The remix API returned a typed theme proposal and optional artwork slots. The proposal is then normalized locally before application rather than turning directly into runtime CSS.',
         facts: [
           {
-            label: 'Theme name',
+            label: 'Model-proposed name',
             value: responseTheme.styleName,
           },
           {
@@ -698,7 +682,7 @@ export function createPromptStyleTransferTrace({
         status: 'complete',
         title: 'Validation',
         summary:
-          'The response was checked locally before the theme was allowed onto the page.',
+          'The proposal was rebuilt and validated locally. Support surfaces and muted text were normalized from the site semantic palette rules, then readability was checked across both core and support surfaces.',
         facts: [
           {
             label: 'Theme schema',
@@ -718,7 +702,10 @@ export function createPromptStyleTransferTrace({
           },
         ],
         data: {
-          notes: compliance.notes,
+          notes: [
+            ...compliance.notes,
+            'If a generated theme is readable but still weak on surface separation or support-text quality, the system can retry once or more, then apply the strongest readable result.',
+          ],
           views: [
             {
               id: 'validated-theme',
@@ -758,6 +745,10 @@ export function createPromptStyleTransferTrace({
         summary:
           'The accepted theme was compiled into the site design grammar: semantic colors, type stacks, spacing, surfaces, controls, motion, and pattern tokens.',
         facts: [
+          {
+            label: 'Applied name',
+            value: themeRecord.name,
+          },
           {
             label: 'Fonts',
             value: `${formatEnumLabel(themeRecord.fonts.sans)} / ${formatEnumLabel(themeRecord.fonts.serif)}`,

@@ -70,9 +70,9 @@
 
 .surface-hover {
   transition:
-    transform var(--site-motion-fast) ease,
-    border-color var(--site-motion-fast) ease,
-    background-color var(--site-motion-fast) ease;
+    transform var(--site-motion-fast) var(--site-motion-ease-standard),
+    border-color var(--site-motion-fast) var(--site-motion-ease-standard),
+    background-color var(--site-motion-fast) var(--site-motion-ease-standard);
 }
 
 .surface-hover:hover,

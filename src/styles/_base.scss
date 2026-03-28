@@ -28,7 +28,7 @@ body {
   font-family: var(--font-sans);
   line-height: 1.6;
   text-rendering: optimizeLegibility;
-  font-weight: 300;
+  font-weight: 200;
 }
 
 main {
@@ -46,11 +46,12 @@ a {
   text-decoration-color: var(--color-link-underline);
   text-underline-offset: 0.2em;
   transition:
-    color var(--site-motion-fast) ease,
-    border-color var(--site-motion-fast) ease,
-    background-color var(--site-motion-fast) ease,
-    transform var(--site-motion-fast) ease,
-    text-decoration-color var(--site-motion-fast) ease;
+    color var(--site-motion-fast) var(--site-motion-ease-standard),
+    border-color var(--site-motion-fast) var(--site-motion-ease-standard),
+    background-color var(--site-motion-fast) var(--site-motion-ease-standard),
+    transform var(--site-motion-fast) var(--site-motion-ease-standard),
+    text-decoration-color var(--site-motion-fast)
+      var(--site-motion-ease-standard);
 }
 
 a:hover {
@@ -106,7 +107,7 @@ ol {
   //max-width: 42rem;
   color: var(--color-muted);
   font-size: clamp(1.125rem, 2vw, 1.35rem);
-  font-weight: 300;
+  //font-weight: 300;
 }
 
 .skip-link {

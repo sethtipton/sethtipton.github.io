@@ -8,6 +8,10 @@ import {
 import type { StoredStyleTransferApplication } from './controller';
 import type { StyleTransferArtworkPreview } from './artwork';
 import type { StyleTransferThemeColorRole } from './schema';
+import {
+  getStyleTransferMotionProfile,
+  type StyleTransferMotionLevel,
+} from './motion';
 
 type ThemeGlobeSource = 'default' | 'preset' | 'prompt';
 
@@ -194,7 +198,7 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
   const random = createRandom(createThemeGlobeCacheKey(input));
   const surfaceStyle = input.dataset.styleSurface ?? 'flat';
   const density = input.dataset.styleDensity ?? 'balanced';
-  const motion = input.dataset.styleMotion ?? 'calm';
+  const motion = (input.dataset.styleMotion ?? 'calm') as StyleTransferMotionLevel;
   const buttonStyle = input.dataset.styleButton ?? 'soft';
   const pattern = input.dataset.stylePattern ?? 'none';
 
@@ -264,8 +268,7 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
         ? 0.12
         : 0.05;
 
-  const rotationSpeed =
-    motion === 'snappy' ? 0.12 : motion === 'off' ? 0.07 : 0.09;
+  const rotationSpeed = getStyleTransferMotionProfile(motion).globeRotationSpeed;
 
   const waveFrequency =
     pattern === 'scanlines'
