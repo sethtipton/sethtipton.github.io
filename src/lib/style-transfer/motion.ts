@@ -1,4 +1,7 @@
-import { styleTransferMotionOptions, type StyleTransferThemeRecord } from './schema';
+import {
+  styleTransferMotionOptions,
+  type StyleTransferThemeRecord,
+} from './schema';
 
 export type StyleTransferMotionLevel =
   (typeof styleTransferMotionOptions)[number];
@@ -242,7 +245,10 @@ const motionProfiles = {
       sm: 24,
     },
   },
-} as const satisfies Record<StyleTransferMotionLevel, StyleTransferMotionProfile>;
+} as const satisfies Record<
+  StyleTransferMotionLevel,
+  StyleTransferMotionProfile
+>;
 
 function formatMs(value: number) {
   return `${Math.max(1, Math.round(value))}ms`;
@@ -310,7 +316,9 @@ export function motionMsToSeconds(value: number) {
   return Math.max(0.001, value / 1000);
 }
 
-export function getRuntimeStyleTransferMotionProfile(root?: HTMLElement | null) {
+export function getRuntimeStyleTransferMotionProfile(
+  root?: HTMLElement | null,
+) {
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
     typeof window.matchMedia === 'function' &&
@@ -320,7 +328,9 @@ export function getRuntimeStyleTransferMotionProfile(root?: HTMLElement | null) 
     return motionProfiles.off;
   }
 
-  const motion = root?.dataset.styleMotion as StyleTransferMotionLevel | undefined;
+  const motion = root?.dataset.styleMotion as
+    | StyleTransferMotionLevel
+    | undefined;
 
   return getStyleTransferMotionProfile(motion);
 }

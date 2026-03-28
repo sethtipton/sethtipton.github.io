@@ -198,7 +198,8 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
   const random = createRandom(createThemeGlobeCacheKey(input));
   const surfaceStyle = input.dataset.styleSurface ?? 'flat';
   const density = input.dataset.styleDensity ?? 'balanced';
-  const motion = (input.dataset.styleMotion ?? 'calm') as StyleTransferMotionLevel;
+  const motion = (input.dataset.styleMotion ??
+    'calm') as StyleTransferMotionLevel;
   const buttonStyle = input.dataset.styleButton ?? 'soft';
   const pattern = input.dataset.stylePattern ?? 'none';
 
@@ -268,7 +269,8 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
         ? 0.12
         : 0.05;
 
-  const rotationSpeed = getStyleTransferMotionProfile(motion).globeRotationSpeed;
+  const rotationSpeed =
+    getStyleTransferMotionProfile(motion).globeRotationSpeed;
 
   const waveFrequency =
     pattern === 'scanlines'

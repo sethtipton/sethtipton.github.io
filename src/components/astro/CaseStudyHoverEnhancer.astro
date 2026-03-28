@@ -19,11 +19,7 @@
     const hasTouchPointer = window.matchMedia('(any-pointer: coarse)').matches;
 
     // Touch-capable devices keep the static scrim/panel fallback instead.
-    if (
-      prefersReducedMotion ||
-      !supportsDesktopHover ||
-      hasTouchPointer
-    ) {
+    if (prefersReducedMotion || !supportsDesktopHover || hasTouchPointer) {
       return;
     }
 

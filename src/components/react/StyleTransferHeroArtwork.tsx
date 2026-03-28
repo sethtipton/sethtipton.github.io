@@ -350,7 +350,7 @@ function animateSoftDrift(
         repeat: 1,
         stagger: motionMsToSeconds(motion.stagger.sm),
         y: (_index: number) =>
-          (_index % 2 === 0 ? -motion.distances.sm : motion.distances.sm),
+          _index % 2 === 0 ? -motion.distances.sm : motion.distances.sm,
         yoyo: true,
       },
       motionMsToSeconds(motion.stagger.md * 2),

@@ -1013,7 +1013,9 @@ describe('StyleTransferPrompt', () => {
 
     expect(errorMessage).toBeInTheDocument();
     expect(
-      screen.getByText(/that remix didn't quite land\. try a different prompt\./i),
+      screen.getByText(
+        /that remix didn't quite land\. try a different prompt\./i,
+      ),
     ).toBeInTheDocument();
     expect(controllerMocks.setStyleTransferMode).toHaveBeenCalledWith('light');
   });
@@ -1223,7 +1225,7 @@ describe('StyleTransferPrompt', () => {
       prompt: null,
       source: 'default',
     };
-    let generatedThemes: typeof generatedTheme[] = [];
+    let generatedThemes: (typeof generatedTheme)[] = [];
     let activeArtwork: ResolvedStyleTransferArtworkState = {
       artwork: null,
       key: null,
