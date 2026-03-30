@@ -3799,32 +3799,16 @@
 
 @include mixins.respond-down(xxs) {
   @include supports-anchored-highlights {
-    .site-nav {
-      --site-nav-chip-transition: var(--site-nav-chip-transition-enhanced);
-    }
+    @include anchored-highlight-disabled('.site-nav', '.site-nav__active-pill');
 
-    @include anchored-highlight-enabled(
-      '.site-nav',
-      'a:not([aria-current="page"])',
-      --site-nav-hover-target,
-      var(--color-accent-soft),
-      'a[aria-current="page"]',
-      --site-nav-active-target,
-      var(--color-text),
-      '.site-nav__active-pill'
-    );
+    .site-nav {
+      --site-nav-chip-transition: var(--site-nav-chip-transition-fallback);
+    }
 
     .site-nav
       a:not([aria-current='page']):is(:hover, :focus-visible)
       .site-nav__chip {
-      background: transparent;
-    }
-
-    .site-nav::before {
-      transition:
-        opacity var(--site-motion-fast) var(--site-motion-ease-standard),
-        background-color var(--site-motion-fast)
-          var(--site-motion-ease-standard);
+      background: var(--color-accent-soft);
     }
   }
 
