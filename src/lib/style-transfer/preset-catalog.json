@@ -200,7 +200,7 @@
     },
     "fonts": {
       "sans": "humanist",
-      "serif": "editorial"
+      "serif": "oldstyle"
     },
     "density": "balanced",
     "surfaceStyle": "paper",
@@ -305,7 +305,7 @@
     },
     "fonts": {
       "sans": "humanist",
-      "serif": "oldstyle"
+      "serif": "editorial"
     },
     "density": "compact",
     "surfaceStyle": "paper",

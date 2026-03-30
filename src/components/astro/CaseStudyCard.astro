@@ -8,9 +8,10 @@ import { getProjectLinks, getProjectTransitionNames } from '../../lib/projects';
 interface Props {
   project: ProjectEntry;
   hoverMeta?: boolean;
+  priority?: boolean;
 }
 
-const { project, hoverMeta = false } = Astro.props;
+const { project, hoverMeta = false, priority = false } = Astro.props;
 const links = getProjectLinks(project, import.meta.env.BASE_URL);
 const transitionNames = getProjectTransitionNames(project.id);
 type ActionLink = {
@@ -32,6 +33,11 @@ const actionLinks = [
     href: links.repo,
   },
 ].filter((link): link is ActionLink => Boolean(link));
+
+const actionLinkItems = actionLinks.flatMap((link, index) => [
+  ...(index > 0 ? [{ divider: true as const }] : []),
+  { ...link, divider: false as const },
+]);
 ---
 
 <article
@@ -43,6 +49,7 @@ const actionLinks = [
   <ProjectVisual
     project={project}
     hoverMeta={hoverMeta}
+    priority={priority}
     href={links.writeup}
     transitionName={transitionNames.visual}
     title={project.data.title}
@@ -90,17 +97,21 @@ const actionLinks = [
               class="inline-link-list inline-link-list--card"
               aria-label={`${project.data.title} links`}
             >
-              {actionLinks.map((link) => (
-                <li>
-                  {isOutboundHref(link.href) ? (
-                    <a href={link.href} {...getExternalLinkProps(link.href)}>
-                      {link.label}
-                    </a>
-                  ) : (
-                    <InternalLink href={link.href}>{link.label}</InternalLink>
-                  )}
-                </li>
-              ))}
+              {actionLinkItems.map((item) =>
+                item.divider ? (
+                  <li class="divider" aria-hidden="true" />
+                ) : (
+                  <li>
+                    {isOutboundHref(item.href) ? (
+                      <a href={item.href} {...getExternalLinkProps(item.href)}>
+                        {item.label}
+                      </a>
+                    ) : (
+                      <InternalLink href={item.href}>{item.label}</InternalLink>
+                    )}
+                  </li>
+                ),
+              )}
             </ul>
 
             {/* {project.data.note && <p class="card-note">{project.data.note}</p>} */}
@@ -115,6 +126,8 @@ const actionLinks = [
         {project.data.summary}
       </p>
       {
+        /*
+      {
         hoverMeta ? (
           <p class="card-note">{project.data.impact[0]}</p>
         ) : (
@@ -126,6 +139,8 @@ const actionLinks = [
             {project.data.problem}
           </p>
         )
+      }
+      */
       }
     </header>
 

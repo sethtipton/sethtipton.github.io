@@ -37,26 +37,30 @@ const printHref = getResumePrintHref(base);
       <p class="resume-document__location">{resume.data.location}</p>
     </div>
 
-    <ul class="resume-document__contacts" aria-label="Contact information">
-      {
-        resume.data.contacts.map((item) => {
-          const href = getResumeLink(item, base);
+    <address class="resume-document__contact-block">
+      <ul class="resume-document__contacts" aria-label="Contact information">
+        {
+          resume.data.contacts.map((item) => {
+            const href = getResumeLink(item, base);
 
-          return (
-            <li class="resume-document__contact">
-              <span class="resume-document__contact-label">{item.label}:</span>
-              {isOutboundHref(href) ? (
-                <a href={href} {...getExternalLinkProps(href)}>
-                  {item.text}
-                </a>
-              ) : (
-                <InternalLink href={href}>{item.text}</InternalLink>
-              )}
-            </li>
-          );
-        })
-      }
-    </ul>
+            return (
+              <li class="resume-document__contact">
+                <span class="resume-document__contact-label">
+                  {item.label}:
+                </span>
+                {isOutboundHref(href) ? (
+                  <a href={href} {...getExternalLinkProps(href)}>
+                    {item.text}
+                  </a>
+                ) : (
+                  <InternalLink href={href}>{item.text}</InternalLink>
+                )}
+              </li>
+            );
+          })
+        }
+      </ul>
+    </address>
   </header>
 
   {

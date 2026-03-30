@@ -17,6 +17,6 @@
   <rect x="436" y="238" width="304" height="140" rx="22" fill="var(--project-background)" stroke="var(--project-border)"/>
   <rect x="784" y="238" width="304" height="140" rx="22" fill="var(--project-background)" stroke="var(--project-border)"/>
   <rect x="436" y="412" width="652" height="180" rx="24" fill="var(--project-panel)"/>
-  <text x="112" y="542" fill="var(--project-text)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34" font-weight="700">Tree City Rentals</text>
-  <text x="112" y="582" fill="var(--project-muted)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="24">Headless WordPress content feeding a React frontend.</text>
+  <text x="112" y="542" fill="var(--project-text)" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="34" font-weight="700">Tree City Rentals</text>
+  <text x="112" y="582" fill="var(--project-muted)" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="24">Headless WordPress content feeding a React frontend.</text>
 </svg>

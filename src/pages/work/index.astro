@@ -33,10 +33,15 @@ const base = import.meta.env.BASE_URL;
         </div>
       </header>
 
+      <h2 class="sr-only">All case studies</h2>
       <div class="case-study-grid">
         {
-          projects.map((project) => (
-            <CaseStudyCard project={project} hoverMeta={true} />
+          projects.map((project, index) => (
+            <CaseStudyCard
+              project={project}
+              hoverMeta={true}
+              priority={index < 2}
+            />
           ))
         }
       </div>

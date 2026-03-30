@@ -32,42 +32,42 @@ const footerContactLinks = resolvedContactLinks.filter(
       <InternalLink class="site-brand" href={withBase('/', base)}>
         {siteMeta.title}
       </InternalLink>
-      <p class="text-muted">
-        An engineer who takes pride in the craft and stays current with the
-        platform. 15+ years building shared UI systems, accessible product
-        interfaces, and durable front-end architecture.
-      </p>
+      <p class="text-muted">{siteMeta.description}</p>
       <p class="text-muted">{availabilityNote}</p>
     </div>
 
     <div class="site-footer__meta">
-      <ul class="link-list" aria-label="Primary pages">
-        {
-          primaryNav.map((item) => (
-            <li>
-              <InternalLink href={withBase(item.href, base)}>
-                {item.label}
-              </InternalLink>
-            </li>
-          ))
-        }
-      </ul>
-
-      <ul class="link-list" aria-label="External links">
-        {
-          footerContactLinks.map((item) => (
-            <li>
-              {isOutboundHref(item.href) ? (
-                <a href={item.href} {...getExternalLinkProps(item.href)}>
+      <nav aria-label="Footer">
+        <ul class="link-list" aria-label="Primary pages">
+          {
+            primaryNav.map((item) => (
+              <li>
+                <InternalLink href={withBase(item.href, base)}>
                   {item.label}
-                </a>
-              ) : (
-                <InternalLink href={item.href}>{item.label}</InternalLink>
-              )}
-            </li>
-          ))
-        }
-      </ul>
+                </InternalLink>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <address class="site-footer__contact">
+        <ul class="link-list" aria-label="Contact links">
+          {
+            footerContactLinks.map((item) => (
+              <li>
+                {isOutboundHref(item.href) ? (
+                  <a href={item.href} {...getExternalLinkProps(item.href)}>
+                    {item.label}
+                  </a>
+                ) : (
+                  <InternalLink href={item.href}>{item.label}</InternalLink>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </address>
     </div>
   </div>
 </footer>

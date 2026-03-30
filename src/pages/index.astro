@@ -185,32 +185,34 @@ const homeMeta = {
     description="I’m most interested in teams that need architecture judgment, delivery standards, and hands-on implementation in the same role."
   >
     <div class="contact-panel surface-card flow">
-      <ul class="contact-grid" aria-label="Contact links">
-        {
-          resolvedContactLinks.map((item) => (
-            <li>
-              {isOutboundHref(item.href) ? (
-                <a
-                  class="contact-link surface-hover"
-                  href={item.href}
-                  {...getExternalLinkProps(item.href)}
-                >
-                  <span>{item.label}</span>
-                  <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <InternalLink
-                  class="contact-link surface-hover"
-                  href={item.href}
-                >
-                  <span>{item.label}</span>
-                  <span aria-hidden="true">→</span>
-                </InternalLink>
-              )}
-            </li>
-          ))
-        }
-      </ul>
+      <address class="contact-panel__address">
+        <ul class="contact-grid" aria-label="Contact links">
+          {
+            resolvedContactLinks.map((item) => (
+              <li>
+                {isOutboundHref(item.href) ? (
+                  <a
+                    class="contact-link surface-hover"
+                    href={item.href}
+                    {...getExternalLinkProps(item.href)}
+                  >
+                    <span>{item.label}</span>
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  <InternalLink
+                    class="contact-link surface-hover"
+                    href={item.href}
+                  >
+                    <span>{item.label}</span>
+                    <span aria-hidden="true">→</span>
+                  </InternalLink>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </address>
     </div>
   </Section>
 </BaseLayout>

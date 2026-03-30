@@ -54,7 +54,7 @@ describe('style transfer theme contracts', () => {
         focus: { light: '#0ea5e9', dark: '#fde68a' },
       },
       fonts: {
-        sans: 'neo-grotesk',
+        sans: 'default',
         serif: 'editorial',
       },
       density: 'airy',
@@ -93,7 +93,7 @@ describe('style transfer theme contracts', () => {
         focus: { light: '#0ea5e9', dark: '#fde68a' },
       },
       fonts: {
-        sans: 'neo-grotesk',
+        sans: 'default',
         serif: 'editorial',
       },
       density: 'airy',

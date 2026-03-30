@@ -28,7 +28,7 @@ function createTheme(motion: (typeof styleTransferMotionOptions)[number]) {
       focus: { light: '#0ea5e9', dark: '#fde68a' },
     },
     fonts: {
-      sans: 'neo-grotesk',
+      sans: 'default',
       serif: 'editorial',
     },
     density: 'balanced',
@@ -46,8 +46,8 @@ describe('style transfer motion profiles', () => {
     const profile = getStyleTransferMotionProfile('calm');
     const cssVars = createStyleTransferMotionCssVars(profile);
 
-    expect(cssVars['--site-motion-enter']).toBe('220ms');
-    expect(cssVars['--site-motion-item-enter']).toBe('190ms');
+    expect(cssVars['--site-motion-enter']).toBe('250ms');
+    expect(cssVars['--site-motion-item-enter']).toBe('220ms');
     expect(cssVars['--site-motion-ease-emphasized']).toBe(
       'cubic-bezier(0.16, 1, 0.3, 1)',
     );

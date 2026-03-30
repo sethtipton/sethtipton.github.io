@@ -11,6 +11,7 @@ import {
 import type { StyleTransferThemeColorRole } from '../../lib/style-transfer/schema';
 
 type ThemeGlobeProps = ThemeGlobeInput & {
+  activityState?: ThemeGlobeActivityState;
   cameraPositionZ?: number;
   dpr?: number | [number, number];
   fallbackAppearance?: 'dot' | 'empty';
@@ -18,8 +19,15 @@ type ThemeGlobeProps = ThemeGlobeInput & {
   variant?: ThemeGlobeRenderVariant;
 };
 
+export type ThemeGlobeActivityState =
+  | 'idle'
+  | 'generating'
+  | 'success'
+  | 'error';
+
 type ThemeGlobeSceneProps = {
   activeToken: StyleTransferThemeColorRole | null;
+  activityState: ThemeGlobeActivityState;
   effectiveMode: ThemeGlobeInput['effectiveMode'];
   model: ReturnType<typeof createThemeGlobeModel>;
   reducedMotion: boolean;
@@ -30,9 +38,12 @@ type ThemeGlobeSceneProps = {
 
 type ThemeGlobeCellProps = {
   active: boolean;
+  activityState: ThemeGlobeActivityState;
   cell: ThemeGlobeCellModel;
   effectiveMode: ThemeGlobeInput['effectiveMode'];
   onInspect: (token: StyleTransferThemeColorRole | null) => void;
+  sequenceIndex: number;
+  sequenceTotal: number;
   showOutlines: boolean;
   variant: ThemeGlobeRenderVariant;
 };
@@ -93,14 +104,50 @@ function useWebglAvailability() {
   }, []);
 }
 
+function getSequencePulse(
+  elapsedSeconds: number,
+  sequenceIndex: number,
+  sequenceTotal: number,
+) {
+  const normalizedIndex = sequenceIndex / Math.max(sequenceTotal, 1);
+  const phase = (elapsedSeconds * 0.9 - normalizedIndex * 0.82) % 1;
+  const wrappedPhase = phase < 0 ? phase + 1 : phase;
+
+  if (wrappedPhase > 0.5) {
+    return 0;
+  }
+
+  return Math.sin((wrappedPhase / 0.5) * Math.PI);
+}
+
+function getSettlingPulse(elapsedSeconds: number, durationSeconds: number) {
+  if (elapsedSeconds <= 0 || elapsedSeconds >= durationSeconds) {
+    return 0;
+  }
+
+  const progress = elapsedSeconds / durationSeconds;
+  return Math.sin(progress * Math.PI) * (1 - progress * 0.35);
+}
+
+function getTimestampMs() {
+  return typeof performance !== 'undefined' ? performance.now() : 0;
+}
+
 function ThemeGlobeCell({
   active,
+  activityState,
   cell,
   effectiveMode,
   onInspect,
+  sequenceIndex,
+  sequenceTotal,
   showOutlines,
   variant,
 }: ThemeGlobeCellProps) {
+  const groupRef = useRef<THREE.Group | null>(null);
+  const fillMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+  const outlineMaterialRefs = useRef<Array<THREE.LineBasicMaterial | null>>([]);
+  const phaseStartRef = useRef<number | null>(null);
   const strokeLoopScales = variant === 'stroke' ? [1, 1.014, 0.986] : [1];
   const geometry = useMemo(() => {
     const nextGeometry = new THREE.BufferGeometry();
@@ -151,6 +198,22 @@ function ThemeGlobeCell({
     () => new THREE.Color(cell.color).lerp(new THREE.Color('#ffffff'), 0.24),
     [cell.color],
   );
+  const loadingColor = useMemo(
+    () => new THREE.Color(cell.color).lerp(new THREE.Color('#ffffff'), 0.38),
+    [cell.color],
+  );
+  const successColor = useMemo(
+    () => new THREE.Color(cell.color).lerp(new THREE.Color('#ffffff'), 0.28),
+    [cell.color],
+  );
+  const errorColor = useMemo(
+    () =>
+      new THREE.Color(cell.color).lerp(
+        new THREE.Color(effectiveMode === 'dark' ? '#5c6570' : '#8a7d74'),
+        0.62,
+      ),
+    [cell.color, effectiveMode],
+  );
   const filledOutlineColor = useMemo(
     () => new THREE.Color(effectiveMode === 'dark' ? '#f4f8fc' : '#0f1720'),
     [effectiveMode],
@@ -167,8 +230,156 @@ function ThemeGlobeCell({
       : { primary: 0.76, secondary: 0.22 };
   }, [active, effectiveMode]);
 
+  useEffect(() => {
+    phaseStartRef.current = getTimestampMs();
+  }, [activityState]);
+
+  useFrame((_, delta) => {
+    if (!groupRef.current) {
+      return;
+    }
+
+    const now = getTimestampMs();
+    if (phaseStartRef.current === null) {
+      phaseStartRef.current = now;
+    }
+    const phaseElapsedSeconds = (now - phaseStartRef.current) / 1000;
+    const fillMaterial = fillMaterialRef.current;
+    const outlineMaterials = outlineMaterialRefs.current.filter(
+      (material): material is THREE.LineBasicMaterial => material !== null,
+    );
+
+    let pulse = 0;
+    let targetScale = active ? 1.018 : 1;
+    let targetOpacity = active ? 1 : cell.material.opacity;
+    let targetEmissiveIntensity = active
+      ? cell.material.emissiveIntensity
+      : cell.material.emissiveIntensity * 0.45;
+    let targetMetalness = active
+      ? Math.min(cell.material.metalness + 0.08, 0.5)
+      : cell.material.metalness;
+    let targetRoughness = active
+      ? Math.max(cell.material.roughness - 0.08, 0.18)
+      : cell.material.roughness;
+    let targetColor = active ? activeColor : baseColor;
+    let targetOutlineOpacity =
+      variant === 'stroke'
+        ? active
+          ? strokeOpacity.primary
+          : strokeOpacity.secondary
+        : active
+          ? 0.34
+          : 0.2;
+
+    if (activityState === 'generating') {
+      pulse = getSequencePulse(
+        phaseElapsedSeconds,
+        sequenceIndex,
+        sequenceTotal,
+      );
+      targetScale += pulse * 0.055;
+      targetOpacity = Math.min(1, cell.material.opacity + pulse * 0.18);
+      targetEmissiveIntensity =
+        cell.material.emissiveIntensity * (0.7 + pulse * 2.1);
+      targetMetalness = Math.min(cell.material.metalness + pulse * 0.14, 0.56);
+      targetRoughness = Math.max(cell.material.roughness - pulse * 0.16, 0.14);
+      targetColor = pulse > 0.06 ? loadingColor : targetColor;
+      targetOutlineOpacity =
+        variant === 'stroke'
+          ? strokeOpacity.secondary + pulse * 0.6
+          : 0.2 + pulse * 0.42;
+    } else if (activityState === 'success') {
+      pulse = getSettlingPulse(phaseElapsedSeconds, 0.42);
+      targetScale += pulse * 0.08;
+      targetOpacity = Math.min(1, cell.material.opacity + pulse * 0.12);
+      targetEmissiveIntensity =
+        cell.material.emissiveIntensity * (0.75 + pulse * 1.35);
+      targetMetalness = Math.min(cell.material.metalness + pulse * 0.1, 0.54);
+      targetRoughness = Math.max(cell.material.roughness - pulse * 0.08, 0.16);
+      targetColor = pulse > 0.03 ? successColor : targetColor;
+      targetOutlineOpacity =
+        variant === 'stroke'
+          ? strokeOpacity.secondary + pulse * 0.38
+          : 0.2 + pulse * 0.24;
+    } else if (activityState === 'error') {
+      pulse = getSettlingPulse(phaseElapsedSeconds, 0.34);
+      targetScale -= pulse * 0.03;
+      targetOpacity = Math.max(0.74, cell.material.opacity - pulse * 0.08);
+      targetEmissiveIntensity =
+        cell.material.emissiveIntensity * Math.max(0.18, 0.45 - pulse * 0.2);
+      targetMetalness = Math.max(0, cell.material.metalness - pulse * 0.04);
+      targetRoughness = Math.min(1, cell.material.roughness + pulse * 0.12);
+      targetColor = errorColor;
+      targetOutlineOpacity =
+        variant === 'stroke'
+          ? Math.max(0.08, strokeOpacity.secondary - pulse * 0.12)
+          : Math.max(0.08, 0.16 - pulse * 0.08);
+    }
+
+    groupRef.current.scale.x = THREE.MathUtils.damp(
+      groupRef.current.scale.x,
+      targetScale,
+      10,
+      delta,
+    );
+    groupRef.current.scale.y = THREE.MathUtils.damp(
+      groupRef.current.scale.y,
+      targetScale,
+      10,
+      delta,
+    );
+    groupRef.current.scale.z = THREE.MathUtils.damp(
+      groupRef.current.scale.z,
+      targetScale,
+      10,
+      delta,
+    );
+
+    if (fillMaterial) {
+      fillMaterial.color.lerp(targetColor, 1 - Math.exp(-8 * delta));
+      fillMaterial.emissiveIntensity = THREE.MathUtils.damp(
+        fillMaterial.emissiveIntensity,
+        targetEmissiveIntensity,
+        8,
+        delta,
+      );
+      fillMaterial.metalness = THREE.MathUtils.damp(
+        fillMaterial.metalness,
+        targetMetalness,
+        8,
+        delta,
+      );
+      fillMaterial.opacity = THREE.MathUtils.damp(
+        fillMaterial.opacity,
+        targetOpacity,
+        10,
+        delta,
+      );
+      fillMaterial.roughness = THREE.MathUtils.damp(
+        fillMaterial.roughness,
+        targetRoughness,
+        8,
+        delta,
+      );
+    }
+
+    outlineMaterials.forEach((material) => {
+      material.opacity = THREE.MathUtils.damp(
+        material.opacity,
+        targetOutlineOpacity,
+        10,
+        delta,
+      );
+      material.color.lerp(
+        variant === 'filled' ? filledOutlineColor : targetColor,
+        1 - Math.exp(-8 * delta),
+      );
+    });
+  });
+
   return (
     <group
+      ref={groupRef}
       onPointerOut={(event) => {
         event.stopPropagation();
         onInspect(null);
@@ -182,6 +393,7 @@ function ThemeGlobeCell({
         <group>
           <mesh geometry={geometry}>
             <meshStandardMaterial
+              ref={fillMaterialRef}
               color={active ? activeColor : baseColor}
               emissive={emissiveColor}
               emissiveIntensity={
@@ -206,6 +418,9 @@ function ThemeGlobeCell({
           {showOutlines ? (
             <lineLoop geometry={outlineGeometry}>
               <lineBasicMaterial
+                ref={(material) => {
+                  outlineMaterialRefs.current[0] = material;
+                }}
                 color={filledOutlineColor}
                 opacity={active ? 0.34 : 0.2}
                 transparent
@@ -224,6 +439,9 @@ function ThemeGlobeCell({
               scale={[scale, scale, scale]}
             >
               <lineBasicMaterial
+                ref={(material) => {
+                  outlineMaterialRefs.current[index] = material;
+                }}
                 color={active ? activeColor : baseColor}
                 opacity={
                   index === 0 ? strokeOpacity.primary : strokeOpacity.secondary
@@ -240,6 +458,7 @@ function ThemeGlobeCell({
 
 function ThemeGlobeScene({
   activeToken,
+  activityState,
   effectiveMode,
   model,
   reducedMotion,
@@ -250,6 +469,11 @@ function ThemeGlobeScene({
   const groupRef = useRef<THREE.Group | null>(null);
   const currentSpeedRef = useRef(model.rotationSpeed);
   const wobbleTimeRef = useRef(0);
+  const activityPhaseStartRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    activityPhaseStartRef.current = getTimestampMs();
+  }, [activityState]);
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -265,12 +489,34 @@ function ThemeGlobeScene({
       return;
     }
 
-    const rotationSpeed =
+    const now = getTimestampMs();
+    if (activityPhaseStartRef.current === null) {
+      activityPhaseStartRef.current = now;
+    }
+    const phaseElapsedSeconds = (now - activityPhaseStartRef.current) / 1000;
+    const baseRotationSpeed =
       variant === 'stroke' ? model.rotationSpeed * 0.42 : model.rotationSpeed;
+    let targetRotationSpeed = baseRotationSpeed;
+    let extraScale = 0;
+    let targetPositionX = 0;
+    let wobbleAmplitude = variant === 'stroke' ? 0.6 : 1;
+
+    if (activityState === 'generating') {
+      targetRotationSpeed = baseRotationSpeed * 1.75;
+      wobbleAmplitude *= 1.42;
+    } else if (activityState === 'success') {
+      targetRotationSpeed = baseRotationSpeed * 0.45;
+      extraScale = getSettlingPulse(phaseElapsedSeconds, 0.42) * 0.075;
+    } else if (activityState === 'error') {
+      const decay = Math.exp(-phaseElapsedSeconds * 7.5);
+      targetRotationSpeed = baseRotationSpeed * 0.08 * decay;
+      targetPositionX = Math.sin(phaseElapsedSeconds * 44) * 0.04 * decay;
+      wobbleAmplitude *= 0.34;
+    }
 
     currentSpeedRef.current = THREE.MathUtils.damp(
       currentSpeedRef.current,
-      rotationSpeed,
+      targetRotationSpeed,
       4,
       delta,
     );
@@ -278,7 +524,6 @@ function ThemeGlobeScene({
     wobbleTimeRef.current += delta;
     group.rotation.y += currentSpeedRef.current * delta;
 
-    const wobbleAmplitude = variant === 'stroke' ? 0.6 : 1;
     const targetX =
       Math.sin(wobbleTimeRef.current * 0.24) * 0.08 * wobbleAmplitude;
     const targetZ =
@@ -296,6 +541,18 @@ function ThemeGlobeScene({
       6,
       delta,
     );
+
+    const targetScale = 1 + extraScale;
+
+    group.scale.x = THREE.MathUtils.damp(group.scale.x, targetScale, 9, delta);
+    group.scale.y = THREE.MathUtils.damp(group.scale.y, targetScale, 9, delta);
+    group.scale.z = THREE.MathUtils.damp(group.scale.z, targetScale, 9, delta);
+    group.position.x = THREE.MathUtils.damp(
+      group.position.x,
+      targetPositionX,
+      16,
+      delta,
+    );
   });
 
   return (
@@ -304,13 +561,16 @@ function ThemeGlobeScene({
       <directionalLight intensity={1.25} position={[3.2, 2.6, 4.4]} />
       <directionalLight intensity={0.68} position={[-3, -2, 2.4]} />
       <group ref={groupRef}>
-        {model.cells.map((cell) => (
+        {model.cells.map((cell, index) => (
           <ThemeGlobeCell
             active={activeToken === cell.token}
+            activityState={activityState}
             cell={cell}
             effectiveMode={effectiveMode}
             key={cell.token}
             onInspect={onInspect}
+            sequenceIndex={index}
+            sequenceTotal={model.cells.length}
             showOutlines={showOutlines}
             variant={variant}
           />
@@ -323,6 +583,7 @@ function ThemeGlobeScene({
 const MemoizedThemeGlobeScene = memo(ThemeGlobeScene);
 
 export default function ThemeGlobe({
+  activityState = 'idle',
   artworkFamily = null,
   cameraPositionZ = 3.35,
   colors,
@@ -380,6 +641,7 @@ export default function ThemeGlobe({
             >
               <MemoizedThemeGlobeScene
                 activeToken={inspectedToken}
+                activityState={activityState}
                 effectiveMode={effectiveMode}
                 model={globeModel}
                 onInspect={handleInspect}

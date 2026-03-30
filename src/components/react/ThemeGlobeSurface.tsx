@@ -12,6 +12,7 @@ import type {
 } from '../../lib/style-transfer/themeGlobe';
 import { isStyleTransferDebugEnabled } from '../../lib/style-transfer/debug';
 import { recordStyleTransferDiagnostic } from '../../lib/style-transfer/diagnostics';
+import type { ThemeGlobeActivityState } from './ThemeGlobe';
 
 const ThemeGlobe = lazy(() => import('./ThemeGlobe'));
 
@@ -19,6 +20,7 @@ const themeGlobeFallbackMessage =
   'Theme globe unavailable in this dev session. Reload after the dev server finishes re-optimizing dependencies.';
 
 type ThemeGlobeSurfaceProps = ThemeGlobeInput & {
+  activityState?: ThemeGlobeActivityState;
   cameraPositionZ?: number;
   dpr?: number | [number, number];
   fallbackAppearance?: 'dot' | 'empty';

@@ -89,6 +89,9 @@ npm run validate:fast
 # run the full local validation flow
 npm run validate:full
 
+# install the repo-managed git hooks
+npm run hooks:install
+
 # backwards-compatible alias for the full flow
 npm run validate
 ```
@@ -108,6 +111,19 @@ scripts/        Build and validation scripts
 public/         Static assets
 docs/           Architecture and workflow docs
 ```
+
+## Validation Workflow
+
+- `.githooks/pre-push`
+  - Local Git hook that runs `npm run validate:fast` before `git push`
+  - Blocks the push if format check, lint, typecheck, or unit tests fail
+  - Only runs after you install the repo-managed hooks with `npm run hooks:install`
+- `npm run validate:fast`
+  - Fast local safety check for routine pushes and iteration
+- `npm run validate:full`
+  - Manual pre-PR check for the full build path, smoke tests, resume PDF generation, and resume validation
+- `.github/workflows/validate.yml`
+  - GitHub Actions backstop that runs in a clean Linux environment after code is pushed
 
 ## Deployment
 

@@ -12,9 +12,9 @@
   <rect width="1200" height="630" fill="var(--card-background)"/>
   <rect x="72" y="72" width="1056" height="486" rx="32" fill="var(--card-surface)" stroke="var(--card-border)"/>
   <rect x="120" y="132" width="164" height="22" rx="11" fill="var(--card-accent)"/>
-  <text x="120" y="260" fill="var(--card-text)" font-family="Iowan Old Style, Georgia, serif" font-size="78" font-weight="600">Seth Tipton</text>
-  <text x="120" y="330" fill="var(--card-muted)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34">Senior Front-End Engineer</text>
-  <text x="120" y="396" fill="var(--card-muted)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="28">Fast, accessible, scalable interfaces for React, TypeScript, and WordPress/headless CMS.</text>
+  <text x="120" y="260" fill="var(--card-text)" font-family="Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif" font-size="78" font-weight="600">Seth Tipton</text>
+  <text x="120" y="330" fill="var(--card-muted)" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="34">Senior Front-End Engineer</text>
+  <text x="120" y="396" fill="var(--card-muted)" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="28">Fast, accessible, scalable interfaces for React, TypeScript, and WordPress/headless CMS.</text>
   <rect x="120" y="454" width="180" height="54" rx="27" fill="var(--card-accent)"/>
-  <text x="154" y="489" fill="var(--card-surface)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="24" font-weight="700">Portfolio v1</text>
+  <text x="154" y="489" fill="var(--card-surface)" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="700">Portfolio v1</text>
 </svg>

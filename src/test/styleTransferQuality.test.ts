@@ -25,7 +25,7 @@ function createThemeRecord() {
       focus: { light: '#8c4b00', dark: '#ffd089' },
     },
     fonts: {
-      sans: 'neo-grotesk',
+      sans: 'default',
       serif: 'editorial',
     },
     density: 'balanced',

@@ -8,30 +8,10 @@
   @include mixins.section-space;
 }
 
-.section-shell--contrast {
-  border-block: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--color-surface-strong) 95%, transparent),
-      color-mix(in srgb, var(--color-background) 45%, transparent)
-    ),
-    var(--color-surface-strong);
-}
-
 .surface-card {
   @include mixins.card-surface;
   position: relative;
   padding: clamp(var(--space-5), 4vw, var(--space-6));
-  &.case-study-card {
-    padding: 0;
-    .case-study-card__body {
-      padding: clamp(var(--space-5), 4vw, var(--space-6));
-    }
-  }
-  &.style-transfer__panel {
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  }
 }
 
 .heading-scrim {
@@ -114,9 +94,9 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--color-accent-strong);
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--text-label);
+  font-weight: var(--font-weight-strong);
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
 }
 
@@ -125,15 +105,13 @@
 }
 
 .stack-list,
-.link-list,
-.site-nav {
+.link-list {
   margin: 0;
   padding: 0;
 }
 
 .stack-list,
-.link-list,
-.site-nav {
+.link-list {
   list-style: none;
 }
 
@@ -144,16 +122,4 @@
 
 .stack-list {
   margin-top: var(--space-4);
-}
-
-@include mixins.respond-up(md) {
-  .case-study-grid,
-  .experience-grid,
-  .strength-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .principles-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }

@@ -6,6 +6,7 @@ interface Props {
   project: ProjectEntry;
   detail?: boolean;
   hoverMeta?: boolean;
+  priority?: boolean;
   href?: string;
   transitionName?: string;
   title?: string;
@@ -16,6 +17,7 @@ const {
   project,
   detail = false,
   hoverMeta = false,
+  priority = false,
   href,
   transitionName,
   title,
@@ -53,8 +55,9 @@ const visualClass = [
             width={thumbnail.width}
             height={thumbnail.height}
             alt=""
-            loading={detail ? 'eager' : 'lazy'}
+            loading={priority || detail ? 'eager' : 'lazy'}
             decoding="async"
+            fetchpriority={priority ? 'high' : undefined}
             class="project-visual__image"
             data-case-study-hover-image={hoverMeta ? '' : undefined}
           />
@@ -86,13 +89,13 @@ const visualClass = [
                 height="87"
               />
             </svg>
-            <h2
+            <p
               class="case-study-card__title project-visual__title"
               transition:name={titleTransitionName}
               transition:animate={titleTransitionName ? 'initial' : undefined}
             >
               <span class="project-visual__title-text">{title}</span>
-            </h2>
+            </p>
           </div>
         )}
 
@@ -159,9 +162,10 @@ const visualClass = [
             width={thumbnail.width}
             height={thumbnail.height}
             alt=""
-            loading={detail ? 'eager' : 'lazy'}
+            loading={priority || detail ? 'eager' : 'lazy'}
             class="project-visual__image"
             decoding="async"
+            fetchpriority={priority ? 'high' : undefined}
             data-case-study-hover-image={hoverMeta ? '' : undefined}
           />
         ) : (
@@ -192,13 +196,13 @@ const visualClass = [
                 height="87"
               />
             </svg>
-            <h2
+            <p
               class="case-study-card__title project-visual__title"
               transition:name={titleTransitionName}
               transition:animate={titleTransitionName ? 'initial' : undefined}
             >
               <span class="project-visual__title-text">{title}</span>
-            </h2>
+            </p>
           </div>
         )}
       </>

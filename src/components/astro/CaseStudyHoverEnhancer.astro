@@ -85,6 +85,7 @@
         );
         active = false;
         card.classList.remove('project-visual--hover-active');
+        card.classList.remove('project-visual--focus-static');
 
         gsap.killTweensOf([scrim, panel, image, ...paths]);
         gsap.set(image, { scale: 1 });
@@ -114,6 +115,7 @@
         }
 
         active = true;
+        card.classList.remove('project-visual--focus-static');
         card.classList.add('project-visual--hover-active');
 
         gsap.killTweensOf([scrim, panel, image, ...paths]);
@@ -145,12 +147,36 @@
         });
       };
 
+      const revealForFocus = () => {
+        active = true;
+        card.classList.add('project-visual--hover-active');
+        card.classList.add('project-visual--focus-static');
+
+        gsap.killTweensOf([scrim, panel, image, ...paths]);
+        gsap.set(image, {
+          scale: 1,
+        });
+        gsap.set(scrim, {
+          opacity: 1,
+        });
+        gsap.set(paths, {
+          opacity: 0,
+          strokeDashoffset: (index: number) => lengths[index] ?? 0,
+          strokeWidth: 100,
+        });
+        gsap.set(panel, {
+          autoAlpha: 1,
+          y: 0,
+        });
+      };
+
       const leave = () => {
         const motion = getRuntimeStyleTransferMotionProfile(
           document.documentElement,
         );
         active = false;
         card.classList.remove('project-visual--hover-active');
+        card.classList.remove('project-visual--focus-static');
         gsap.killTweensOf([scrim, panel, image, ...paths]);
         gsap.to(image, {
           scale: 1,
@@ -163,6 +189,7 @@
           ease: motion.easings.exit.gsap,
         });
         gsap.to(paths, {
+          opacity: 1,
           strokeDashoffset: (_, target) => {
             const index = paths.indexOf(target as SVGPathElement);
             return lengths[index] ?? 0;
@@ -182,7 +209,7 @@
 
       card.addEventListener('mouseenter', enter);
       card.addEventListener('mouseleave', leave);
-      card.addEventListener('focusin', enter);
+      card.addEventListener('focusin', revealForFocus);
       card.addEventListener('focusout', (event) => {
         const next = event.relatedTarget;
 
@@ -190,7 +217,7 @@
           return;
         }
 
-        leave();
+        collapseImmediately();
       });
 
       if (visualLink) {

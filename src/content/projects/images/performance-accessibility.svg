@@ -24,6 +24,6 @@
   <rect x="906" y="170" width="160" height="20" rx="10" fill="var(--project-border)"/>
   <rect x="520" y="286" width="292" height="346" rx="28" fill="var(--project-surface)" stroke="var(--project-border)"/>
   <rect x="840" y="286" width="292" height="346" rx="28" fill="var(--project-surface)" stroke="var(--project-border)"/>
-  <text x="560" y="574" fill="var(--project-text)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34" font-weight="700">Performance + accessibility</text>
-  <text x="560" y="614" fill="var(--project-muted)" font-family="Avenir Next, Segoe UI, sans-serif" font-size="24">Cleaner interaction, smaller front-end cost, better defaults.</text>
+  <text x="560" y="574" fill="var(--project-text)" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="34" font-weight="700">Performance + accessibility</text>
+  <text x="560" y="614" fill="var(--project-muted)" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="24">Cleaner interaction, smaller front-end cost, better defaults.</text>
 </svg>

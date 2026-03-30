@@ -9,6 +9,7 @@
     "build": "npm run build:site && npm run build:resume-pdf",
     "build:site": "astro build",
     "build:resume-pdf": "node ./scripts/generate-resume-pdf.mjs",
+    "hooks:install": "git config core.hooksPath .githooks",
     "preview": "astro preview",
     "presets:summary": "tsx ./scripts/style-transfer-presets.mjs summary",
     "presets:validate": "tsx ./scripts/style-transfer-presets.mjs validate",

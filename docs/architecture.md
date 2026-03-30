@@ -116,6 +116,10 @@ This document is the repo-wide map for humans and AI agents working in this site
   - Format check, lint, typecheck, and unit tests
 - `npm run validate:full`
   - Fast validation, production build, smoke tests against the built `dist/`, and resume validation
+- `.githooks/pre-push`
+  - Local git hook that runs `npm run validate:fast` before each push once `npm run hooks:install` has configured `core.hooksPath`
+- `.github/workflows/validate.yml`
+  - CI backstop that runs the full validation path in GitHub Actions
 - `npm run presets:validate`
   - Style-transfer preset catalog validation
 - `npm run validate:resume`

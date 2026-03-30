@@ -7,7 +7,7 @@ export type LinkItem = {
 export const siteMeta = {
   title: 'Seth Tipton',
   description:
-    'Senior Front-End Engineer building design systems, front-end platforms, and accessible product UI.',
+    'Senior Front-End Engineer with 15+ years building design systems, scalable front-end architecture, accessible interfaces, and high-performance web experiences.',
   themeColor: {
     light: '#f3efe7',
     dark: '#0e1419',

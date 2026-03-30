@@ -34,7 +34,7 @@ function createThemeRecord(
       ...overrides,
     },
     fonts: {
-      sans: 'neo-grotesk',
+      sans: 'default',
       serif: 'editorial',
     },
     density: 'balanced',
@@ -112,7 +112,7 @@ describe('style transfer compliance', () => {
         focus: { light: '#0f766e', dark: '#999999' },
       },
       fonts: {
-        sans: 'neo-grotesk' as const,
+        sans: 'default' as const,
         serif: 'editorial' as const,
       },
       density: 'balanced' as const,

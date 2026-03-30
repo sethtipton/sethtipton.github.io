@@ -72,23 +72,25 @@ const headerLinks = socialLinks.slice(0, 3).map((item) => ({
       </ul>
     </nav>
 
-    <ul class="site-header__links" aria-label="External links">
-      {
-        headerLinks.map((item) => (
-          <li>
-            <a
-              class="social-link social-link--header"
-              href={item.href}
-              aria-label={item.label}
-              title={item.label}
-              {...getExternalLinkProps(item.href)}
-            >
-              <SocialIcon name={item.icon} />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    <address class="site-header__contact">
+      <ul class="site-header__links" aria-label="External links">
+        {
+          headerLinks.map((item) => (
+            <li>
+              <a
+                class="social-link social-link--header"
+                href={item.href}
+                aria-label={item.label}
+                title={item.label}
+                {...getExternalLinkProps(item.href)}
+              >
+                <SocialIcon name={item.icon} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </address>
 
     <div class="site-header__style-transfer">
       <StyleTransferMount />

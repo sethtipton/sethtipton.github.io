@@ -95,7 +95,7 @@ Each preset object must match this structure:
     "focus": { "light": "#0f766e", "dark": "#fde68a" }
   },
   "fonts": {
-    "sans": "neo-grotesk",
+    "sans": "default",
     "serif": "default"
   },
   "density": "balanced",

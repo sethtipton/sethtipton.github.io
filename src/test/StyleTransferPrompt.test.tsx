@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import StyleTransferPrompt from '../components/react/StyleTransferPrompt';
@@ -33,7 +39,7 @@ function createPassingPromptThemePayload() {
       focus: { light: '#2563eb', dark: '#fde68a' },
     },
     fonts: {
-      sans: 'neo-grotesk',
+      sans: 'default',
       serif: 'editorial',
     },
     density: 'balanced',
@@ -126,7 +132,7 @@ describe('StyleTransferPrompt', () => {
     vi.unstubAllGlobals();
   });
 
-  it('opens as an inline disclosure', async () => {
+  it('opens as a controlled theme explorer region', async () => {
     render(<StyleTransferPrompt />);
 
     await openPromptPanel();
@@ -140,7 +146,7 @@ describe('StyleTransferPrompt', () => {
       screen.getByRole('region', { name: /theme explorer/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/pick a theme, or type a vibe and see where it goes/i),
+      screen.getByText(/choose a theme or enter a vibe/i),
     ).toBeInTheDocument();
     expect(screen.queryByText(/enter a prompt to create a custom theme/i)).toBe(
       null,
@@ -153,11 +159,30 @@ describe('StyleTransferPrompt', () => {
     });
 
     expect(
-      screen.getByText(/pick a theme, or type a vibe and see where it goes/i),
+      screen.getByText(/choose a theme or enter a vibe/i),
     ).toBeInTheDocument();
     expect(
       screen.queryByText(/enter a prompt to create a custom theme/i),
     ).not.toBeInTheDocument();
+  });
+
+  it('exposes the mode chips as native radio inputs with single-selection semantics', async () => {
+    render(<StyleTransferPrompt />);
+
+    await openPromptPanel();
+
+    expect(
+      screen.getByText(/theme mode/i, { selector: 'legend' }),
+    ).toBeInTheDocument();
+    const autoMode = screen.getByRole('radio', { name: 'Auto' });
+    const lightMode = screen.getByRole('radio', { name: 'Light' });
+
+    expect(autoMode).toBeChecked();
+    expect(lightMode).not.toBeChecked();
+
+    fireEvent.click(lightMode);
+
+    expect(controllerMocks.setStyleTransferMode).toHaveBeenCalledWith('light');
   });
 
   it('hides the intro copy after remix interaction, even after returning to default', async () => {
@@ -171,7 +196,7 @@ describe('StyleTransferPrompt', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/pick a theme, or type a vibe and see where it goes/i),
+        screen.getByText(/choose a theme or enter a vibe/i),
       ).toBeInTheDocument();
     });
 
@@ -186,9 +211,7 @@ describe('StyleTransferPrompt', () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByText(
-          /pick a theme, or type a vibe and see where it goes/i,
-        ),
+        screen.queryByText(/choose a theme or enter a vibe/i),
       ).not.toBeInTheDocument();
     });
 
@@ -199,7 +222,7 @@ describe('StyleTransferPrompt', () => {
     );
 
     expect(
-      screen.queryByText(/pick a theme, or type a vibe and see where it goes/i),
+      screen.queryByText(/choose a theme or enter a vibe/i),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByText(/enter a prompt to create a custom theme/i),
@@ -263,6 +286,67 @@ describe('StyleTransferPrompt', () => {
 
     await waitFor(() => {
       expect(launcher).toHaveFocus();
+    });
+  });
+
+  it('closes on outside click without forcing focus back to the launcher', async () => {
+    render(
+      <>
+        <StyleTransferPrompt />
+        <button type="button">Outside action</button>
+      </>,
+    );
+
+    const launcher = screen.getByRole('button', {
+      name: /default theme/i,
+    });
+    const outsideButton = screen.getByRole('button', {
+      name: /outside action/i,
+    });
+
+    await openPromptPanel(launcher);
+
+    await act(async () => {
+      fireEvent.pointerDown(outsideButton);
+      outsideButton.focus();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('region', { name: /theme explorer/i }),
+      ).not.toBeInTheDocument();
+      expect(outsideButton).toHaveFocus();
+      expect(launcher).not.toHaveFocus();
+    });
+  });
+
+  it('closes when focus moves outside the launcher and panel cluster', async () => {
+    render(
+      <>
+        <StyleTransferPrompt />
+        <button type="button">After explorer</button>
+      </>,
+    );
+
+    const launcher = screen.getByRole('button', {
+      name: /default theme/i,
+    });
+    const outsideButton = screen.getByRole('button', {
+      name: /after explorer/i,
+    });
+
+    await openPromptPanel(launcher);
+
+    await act(async () => {
+      outsideButton.focus();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('region', { name: /theme explorer/i }),
+      ).not.toBeInTheDocument();
+      expect(outsideButton).toHaveFocus();
+      expect(launcher).not.toHaveFocus();
     });
   });
 
@@ -780,7 +864,7 @@ describe('StyleTransferPrompt', () => {
         focus: { light: '#0f766e', dark: '#999999' },
       },
       fonts: {
-        sans: 'neo-grotesk',
+        sans: 'default',
         serif: 'editorial',
       },
       density: 'balanced',
@@ -847,7 +931,7 @@ describe('StyleTransferPrompt', () => {
         focus: { light: '#0f766e', dark: '#999999' },
       },
       fonts: {
-        sans: 'neo-grotesk',
+        sans: 'default',
         serif: 'editorial',
       },
       density: 'balanced',
@@ -905,7 +989,7 @@ describe('StyleTransferPrompt', () => {
         focus: { light: '#0f766e', dark: '#999999' },
       },
       fonts: {
-        sans: 'neo-grotesk',
+        sans: 'default',
         serif: 'editorial',
       },
       density: 'balanced',
@@ -939,7 +1023,7 @@ describe('StyleTransferPrompt', () => {
       /after some local tuning\. it passes, though the palette still leans soft\./i,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /^dark$/i }));
+    fireEvent.click(screen.getByRole('radio', { name: /^dark$/i }));
 
     expect(notice).toBeInTheDocument();
     expect(
@@ -1009,7 +1093,7 @@ describe('StyleTransferPrompt', () => {
       /that remix didn't quite land\. try a different prompt\./i,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /^light$/i }));
+    fireEvent.click(screen.getByRole('radio', { name: /^light$/i }));
 
     expect(errorMessage).toBeInTheDocument();
     expect(

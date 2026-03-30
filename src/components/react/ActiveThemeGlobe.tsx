@@ -11,9 +11,16 @@ import {
 } from '../../lib/style-transfer/controller';
 import type { StyleTransferArtworkPreview } from '../../lib/style-transfer/artwork';
 import { resolveThemeGlobeInput } from '../../lib/style-transfer/themeGlobeRuntime';
+import type { ThemeGlobeActivityState } from './ThemeGlobe';
 import ThemeGlobeSurface from './ThemeGlobeSurface';
 
-export default function ActiveThemeGlobe() {
+type ActiveThemeGlobeProps = {
+  activityState?: ThemeGlobeActivityState;
+};
+
+export default function ActiveThemeGlobe({
+  activityState = 'idle',
+}: ActiveThemeGlobeProps) {
   const [controllerState, setControllerState] =
     useState<StyleTransferControllerState>(
       DEFAULT_STYLE_TRANSFER_CONTROLLER_STATE,
@@ -77,6 +84,7 @@ export default function ActiveThemeGlobe() {
   return (
     <ThemeGlobeSurface
       {...globeProps}
+      activityState={activityState}
       cameraPositionZ={4.1}
       dpr={[2, 3]}
       fallbackAppearance="empty"

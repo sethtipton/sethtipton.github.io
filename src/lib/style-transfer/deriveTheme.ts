@@ -45,7 +45,7 @@ const sansStacks = {
 
 const serifStacks = {
   default:
-    "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif",
   editorial:
     "'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', 'Cormorant Garamond', Georgia, serif",
   oldstyle:

@@ -118,7 +118,7 @@ describe('resolveActiveStyleTransferArtwork', () => {
           focus: { light: '#0ea5e9', dark: '#fde68a' },
         },
         fonts: {
-          sans: 'neo-grotesk',
+          sans: 'default',
           serif: 'editorial',
         },
         density: 'airy',

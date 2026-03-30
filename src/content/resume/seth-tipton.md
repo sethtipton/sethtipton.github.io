@@ -3,7 +3,7 @@ name: Seth Tipton
 role: Senior Front-End Engineer
 location: Kent, OH
 description: Resume for Seth Tipton, a Senior Front-End Engineer focused on design systems, accessibility, performance, and scalable UI architecture.
-profile: Senior Front-End Engineer with 15+ years of experience building design systems, accessible interfaces, and performant front ends. I create scalable UI architecture and front-end standards that improve consistency, maintainability, and delivery speed.
+profile: Senior Front-End Engineer with 15+ years of experience building design systems, scalable front-end architecture, accessible interfaces, and high-performance web experiences. Passionate about turning complex product and content needs into reusable UI foundations that improve consistency, strengthen engineering quality, and help teams ship with confidence.
 contacts:
   - label: Email
     href: mailto:sethtipton@gmail.com

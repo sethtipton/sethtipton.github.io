@@ -248,18 +248,18 @@
   --control-background-hover: var(--button-secondary-background-hover);
   --control-border-color: var(--button-secondary-border-color);
   --control-border-color-hover: var(--color-text);
-  --site-motion-fast: 160ms;
-  --site-motion-medium: 220ms;
-  --site-motion-slow: 320ms;
-  --site-motion-enter: 220ms;
-  --site-motion-item-enter: 190ms;
-  --site-motion-exit: 170ms;
-  --site-motion-view-fast: 360ms;
-  --site-motion-view-medium: 420ms;
-  --site-motion-view-slow: 520ms;
-  --site-motion-loop-feedback: 1350ms;
-  --site-motion-loop-decorative-fast: 1700ms;
-  --site-motion-loop-decorative-slow: 3200ms;
+  --site-motion-fast: 200ms;
+  --site-motion-medium: 300ms;
+  --site-motion-slow: 420ms;
+  --site-motion-enter: 250ms;
+  --site-motion-item-enter: 220ms;
+  --site-motion-exit: 190ms;
+  --site-motion-view-fast: 400ms;
+  --site-motion-view-medium: 480ms;
+  --site-motion-view-slow: 600ms;
+  --site-motion-loop-feedback: 1500ms;
+  --site-motion-loop-decorative-fast: 1900ms;
+  --site-motion-loop-decorative-slow: 3600ms;
   --site-motion-stagger-sm: 32ms;
   --site-motion-stagger-md: 40ms;
   --site-motion-distance-sm: 8px;
@@ -296,8 +296,36 @@
     Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, sans-serif;
   --font-serif:
-    Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, sans-serif;
+    'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-mono:
+    ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+  --font-weight-body: 300;
+  --font-weight-display: 300;
+  --font-weight-strong: 700;
+  --text-h1: clamp(1.95rem, 5.2vw, 3rem);
+  --text-h2: clamp(1.6rem, 3.5vw, 2.35rem);
+  --text-h3: clamp(1.25rem, 2.5vw, 1.65rem);
+  --text-h4: 1.05rem;
+  --text-ui-title: clamp(1.1rem, 2vw, 1.35rem);
+  --text-card-title: clamp(1.45rem, 2.6vw, 1.85rem);
+  --text-lead: clamp(1.1rem, 2vw, 1.3rem);
+  --text-lead-section: clamp(1rem, 1.6vw, 1.15rem);
+  --text-body: 1rem;
+  --text-body-lg: 1.2rem;
+  --text-meta: 0.95rem;
+  --text-label: 0.78rem;
+  --text-caption: 0.72rem;
+  --text-button: 1rem;
+  --leading-body: 1.6;
+  --leading-body-relaxed: 1.65;
+  --leading-body-compact: 1.5;
+  --leading-heading-tight: 1.05;
+  --leading-heading: 1.2;
+  --leading-ui: 1.45;
+  --tracking-heading: -0.02em;
+  --tracking-label: 0.08em;
+  --tracking-label-tight: 0.06em;
 }
 
 :root[data-theme='light'] {

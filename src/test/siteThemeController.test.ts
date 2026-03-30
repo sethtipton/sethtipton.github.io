@@ -108,7 +108,7 @@ function createGeneratedApplication(
       focus: { light: '#2563eb', dark: '#fde68a' },
     },
     fonts: {
-      sans: 'neo-grotesk',
+      sans: 'default',
       serif: 'editorial',
     },
     density: 'airy',

@@ -117,6 +117,13 @@ function normalizePromptForApi(prompt: string) {
   return `${trimmedPrompt} theme`;
 }
 
+function isEventTargetWithinNode(
+  target: EventTarget | null,
+  node: Node | null | undefined,
+) {
+  return target instanceof Node && !!node && node.contains(target);
+}
+
 function countActionableComplianceAdjustments(
   adjustments: Array<{ kind: string }>,
 ) {
@@ -254,6 +261,7 @@ const remixRejectedMessage =
   'That remix could not be created. Try a different prompt.';
 const remixApplyFailureMessage =
   'That remix could not be applied cleanly. Please try again.';
+const styleTransferModeOptions = ['auto', 'light', 'dark'] as const;
 
 type StyleTransferPromptProps = {
   autoOpenOnMount?: boolean;
@@ -285,6 +293,7 @@ function getLauncherThemeLabel(source: StyleTransferControllerState['source']) {
 }
 
 type TraceVisibilityState = 'hidden' | 'entering' | 'visible' | 'exiting';
+type LauncherGlobeActivityState = 'idle' | 'generating' | 'success' | 'error';
 
 function getTraceEnterDurationMs(trace: StyleTransferTrace | null) {
   if (!trace || typeof document === 'undefined') {
@@ -319,13 +328,19 @@ export default function StyleTransferPrompt({
   const shellRef = useRef<HTMLDivElement | null>(null);
   const launcherRef = useRef<HTMLButtonElement | null>(null);
   const launcherMeasureRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
+  const promptRef = useRef<HTMLTextAreaElement | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+  const themeTickRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const traceCacheRef = useRef<Map<string, StyleTransferTrace>>(new Map());
   const isThemeSliderDraggingRef = useRef(false);
   const introDismissTimeoutRef = useRef<number | null>(null);
   const traceVisibilityTimeoutRef = useRef<number | null>(null);
+  const focusThemeTickTimeoutRef = useRef<number | null>(null);
+  const launcherGlobeActivityTimeoutRef = useRef<number | null>(null);
   const renderedTraceRef = useRef<StyleTransferTrace | null>(null);
   const traceVisibilityStateRef = useRef<TraceVisibilityState>('hidden');
+  const wasOpenRef = useRef(initialOpen);
   const panelId = useId();
   const panelHeadingId = useId();
   const promptCharacterCountId = useId();
@@ -358,6 +373,8 @@ export default function StyleTransferPrompt({
     useState<TraceVisibilityState>('hidden');
   const [themeSliderIndex, setThemeSliderIndex] = useState(0);
   const [hasStartedRemixing, setHasStartedRemixing] = useState(false);
+  const [launcherGlobeActivityState, setLauncherGlobeActivityState] =
+    useState<LauncherGlobeActivityState>('idle');
   const [introState, setIntroState] = useState<'hidden' | 'visible' | 'hiding'>(
     'hidden',
   );
@@ -487,6 +504,11 @@ export default function StyleTransferPrompt({
 
   const closePanel = useCallback(
     ({ returnFocus = false }: { returnFocus?: boolean } = {}) => {
+      if (focusThemeTickTimeoutRef.current !== null) {
+        window.clearTimeout(focusThemeTickTimeoutRef.current);
+        focusThemeTickTimeoutRef.current = null;
+      }
+
       setIsOpen(false);
       setIsShellExpanded(false);
       // Let the collapsed launcher size itself naturally after close instead of
@@ -501,6 +523,35 @@ export default function StyleTransferPrompt({
     },
     [],
   );
+
+  const setLauncherGlobeActivity = useCallback(
+    (
+      nextState: LauncherGlobeActivityState,
+      resetAfterMs: number | null = null,
+    ) => {
+      if (launcherGlobeActivityTimeoutRef.current !== null) {
+        window.clearTimeout(launcherGlobeActivityTimeoutRef.current);
+        launcherGlobeActivityTimeoutRef.current = null;
+      }
+
+      setLauncherGlobeActivityState(nextState);
+
+      if (resetAfterMs !== null) {
+        launcherGlobeActivityTimeoutRef.current = window.setTimeout(() => {
+          setLauncherGlobeActivityState('idle');
+          launcherGlobeActivityTimeoutRef.current = null;
+        }, resetAfterMs);
+      }
+    },
+    [],
+  );
+
+  const isTargetWithinExplorer = useCallback((target: EventTarget | null) => {
+    return (
+      isEventTargetWithinNode(target, launcherRef.current) ||
+      isEventTargetWithinNode(target, panelRef.current)
+    );
+  }, []);
   useEffect(() => {
     const supportStatus = getStyleTransferSupportStatus();
 
@@ -516,6 +567,14 @@ export default function StyleTransferPrompt({
       syncControllerState as EventListener,
     );
   }, [syncControllerState]);
+
+  useEffect(() => {
+    return () => {
+      if (launcherGlobeActivityTimeoutRef.current !== null) {
+        window.clearTimeout(launcherGlobeActivityTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const openPanel = useCallback(() => {
     const collapsedWidth = getCollapsedLauncherWidth();
@@ -583,6 +642,36 @@ export default function StyleTransferPrompt({
       return;
     }
 
+    const handlePointerDown = (event: PointerEvent) => {
+      if (isTargetWithinExplorer(event.target)) {
+        return;
+      }
+
+      closePanel();
+    };
+
+    const handleFocusIn = (event: FocusEvent) => {
+      if (isTargetWithinExplorer(event.target)) {
+        return;
+      }
+
+      closePanel();
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('focusin', handleFocusIn);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('focusin', handleFocusIn);
+    };
+  }, [closePanel, isOpen, isTargetWithinExplorer]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     const syncExpandedShellWidth = () => {
       const expandedWidth = getExpandedShellWidth();
 
@@ -632,6 +721,15 @@ export default function StyleTransferPrompt({
       delete root.dataset[STYLE_TRANSFER_PANEL_OPEN_DATASET_KEY];
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (focusThemeTickTimeoutRef.current !== null) {
+        window.clearTimeout(focusThemeTickTimeoutRef.current);
+        focusThemeTickTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -722,6 +820,10 @@ export default function StyleTransferPrompt({
     if (controllerState.mode !== mode) {
       setHasStartedRemixing(true);
     }
+    setControllerState((previousState) => ({
+      ...previousState,
+      mode,
+    }));
     setStyleTransferMode(mode);
     syncControllerState();
   };
@@ -899,6 +1001,29 @@ export default function StyleTransferPrompt({
     handleGeneratedTheme(selectedTheme.id);
   };
 
+  const focusThemeTick = useCallback((nextIndex: number) => {
+    if (focusThemeTickTimeoutRef.current !== null) {
+      window.clearTimeout(focusThemeTickTimeoutRef.current);
+    }
+
+    focusThemeTickTimeoutRef.current = window.setTimeout(() => {
+      focusThemeTickTimeoutRef.current = null;
+
+      const nextTick =
+        themeTickRefs.current[nextIndex] ??
+        document.querySelectorAll<HTMLButtonElement>(
+          '.style-transfer__theme-tick',
+        )[nextIndex];
+
+      if (nextTick) {
+        nextTick.focus();
+        return;
+      }
+
+      promptRef.current?.focus();
+    }, 0);
+  }, []);
+
   const commitThemeSliderSelection = (nextIndex: number) => {
     isThemeSliderDraggingRef.current = false;
     setThemeSliderIndex(nextIndex);
@@ -955,6 +1080,24 @@ export default function StyleTransferPrompt({
   } as CSSProperties;
   const launcherThemeLabel = getLauncherThemeLabel(controllerState.source);
 
+  useEffect(() => {
+    if (!isOpen || wasOpenRef.current) {
+      wasOpenRef.current = isOpen;
+      return;
+    }
+
+    wasOpenRef.current = true;
+    focusThemeTick(themeSliderIndex);
+  }, [focusThemeTick, isOpen, themeSliderIndex]);
+
+  useEffect(() => {
+    if (isOpen) {
+      return;
+    }
+
+    wasOpenRef.current = false;
+  }, [isOpen]);
+
   const handlePromptKeyDown: NonNullable<
     ComponentProps<'textarea'>['onKeyDown']
   > = (event) => {
@@ -993,6 +1136,44 @@ export default function StyleTransferPrompt({
     form.dispatchEvent(
       new Event('submit', { bubbles: true, cancelable: true }),
     );
+  };
+
+  const handleThemeTickKeyDown = (
+    event: Parameters<NonNullable<ComponentProps<'button'>['onKeyDown']>>[0],
+    index: number,
+  ) => {
+    const lastIndex = allThemes.length - 1;
+
+    if (lastIndex < 0) {
+      return;
+    }
+
+    let nextIndex: number | null = null;
+
+    switch (event.key) {
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIndex = index > 0 ? index - 1 : lastIndex;
+        break;
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIndex = index < lastIndex ? index + 1 : 0;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = lastIndex;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+
+    setThemeSliderIndex(nextIndex);
+    handleThemeSelect(nextIndex);
+    focusThemeTick(nextIndex);
   };
 
   const handleSubmit: FormSubmitHandler = async (event) => {
@@ -1037,6 +1218,7 @@ export default function StyleTransferPrompt({
     }
 
     setIsGenerating(true);
+    setLauncherGlobeActivity('generating');
     setError(null);
     setNotice(`${loadingNoticeCopy}…`);
     const apiPrompt = normalizePromptForApi(trimmedPrompt);
@@ -1423,6 +1605,7 @@ export default function StyleTransferPrompt({
                 ? `Applied "${bestAttempt.themeRecord.name}" after another pass for readability.`
                 : `Applied "${bestAttempt.themeRecord.name}".`,
       );
+      setLauncherGlobeActivity('success', 560);
     } catch (caughtError) {
       logDebugError('submit failed', caughtError);
       recordStyleTransferDiagnostic({
@@ -1437,6 +1620,7 @@ export default function StyleTransferPrompt({
           : 'Style remix failed.',
       );
       setNotice(null);
+      setLauncherGlobeActivity('error', 520);
     } finally {
       setHasStartedRemixing(true);
       setIsGenerating(false);
@@ -1445,28 +1629,42 @@ export default function StyleTransferPrompt({
   };
 
   const modeChips = (
-    <div
-      className="style-transfer__preset-grid style-transfer__preset-grid--mode"
-      role="list"
-      aria-label="Theme mode"
-    >
-      {(['auto', 'light', 'dark'] as const).map((mode) => (
-        <button
-          key={mode}
-          className="style-transfer__chip"
-          type="button"
-          aria-pressed={controllerState.mode === mode}
-          disabled={!isStyleTransferSupported}
-          onClick={() => {
-            handleMode(mode);
-          }}
-        >
-          {mode === 'auto'
-            ? 'Auto'
-            : mode.charAt(0).toUpperCase() + mode.slice(1)}
-        </button>
-      ))}
-    </div>
+    <fieldset className="style-transfer__mode-fieldset">
+      <legend className="sr-only">Theme mode</legend>
+      <div className="style-transfer__preset-grid style-transfer__preset-grid--mode">
+        {styleTransferModeOptions.map((mode) => {
+          const inputId = `${panelId}-${mode}-mode`;
+          const isSelected = controllerState.mode === mode;
+
+          return (
+            <label
+              key={mode}
+              className="style-transfer__chip-option"
+              data-selected={isSelected ? 'true' : 'false'}
+              htmlFor={inputId}
+            >
+              <input
+                id={inputId}
+                className="style-transfer__chip-input"
+                type="radio"
+                name={`${panelId}-theme-mode`}
+                value={mode}
+                checked={isSelected}
+                disabled={!isStyleTransferSupported}
+                onChange={() => {
+                  handleMode(mode);
+                }}
+              />
+              <span className="style-transfer__chip">
+                {mode === 'auto'
+                  ? 'Auto'
+                  : mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 
   return (
@@ -1525,7 +1723,7 @@ export default function StyleTransferPrompt({
         }}
       >
         <span className="style-transfer__launcher-globe" aria-hidden="true">
-          <ActiveThemeGlobe />
+          <ActiveThemeGlobe activityState={launcherGlobeActivityState} />
         </span>
         <span className="style-transfer__launcher-label">
           {launcherThemeLabel}
@@ -1544,6 +1742,7 @@ export default function StyleTransferPrompt({
       </button>
 
       <section
+        ref={panelRef}
         id={panelId}
         className={`style-transfer__panel surface-card${
           activeTrace ? ' style-transfer__panel--split' : ''
@@ -1574,7 +1773,7 @@ export default function StyleTransferPrompt({
                         : ''
                     }`}
                   >
-                    Pick a theme, or type a vibe and see where it goes.
+                    Choose a theme or enter a vibe
                   </p>
                 ) : null}
                 {/* {activeThemeExplorerItem ? (
@@ -1622,6 +1821,7 @@ export default function StyleTransferPrompt({
                         aria-label="Explore and switch themes"
                         aria-valuetext={themeSliderValueText}
                         disabled={!isStyleTransferSupported}
+                        tabIndex={-1}
                         onBlur={(event) => {
                           if (!isThemeSliderDraggingRef.current) {
                             return;
@@ -1678,6 +1878,8 @@ export default function StyleTransferPrompt({
 
                     <div
                       className="style-transfer__theme-explorer-ticks"
+                      role="toolbar"
+                      aria-label="Available themes"
                       style={{
                         gridTemplateColumns: `repeat(${renderedThemeTickCount}, minmax(0, 1fr))`,
                       }}
@@ -1716,10 +1918,19 @@ export default function StyleTransferPrompt({
                             aria-pressed={isApplied}
                             disabled={!isStyleTransferSupported}
                             style={tickStyle}
-                            title={theme.prompt ?? theme.name}
+                            tabIndex={isActive ? 0 : -1}
+                            ref={(element) => {
+                              themeTickRefs.current[index] = element;
+                            }}
                             onClick={() => {
                               setThemeSliderIndex(index);
                               handleThemeSelect(index);
+                            }}
+                            onFocus={() => {
+                              setThemeSliderIndex(index);
+                            }}
+                            onKeyDown={(event) => {
+                              handleThemeTickKeyDown(event, index);
                             }}
                           >
                             <span
@@ -1782,6 +1993,7 @@ export default function StyleTransferPrompt({
 
                     <div className="style-transfer-prompt-wrapper">
                       <textarea
+                        ref={promptRef}
                         id="style-transfer-prompt"
                         className="style-transfer__input"
                         rows={2}
