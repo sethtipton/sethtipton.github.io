@@ -3590,6 +3590,13 @@
       .site-nav__chip {
       background: transparent;
     }
+
+    .site-nav::before {
+      transition:
+        opacity var(--site-motion-fast) var(--site-motion-ease-standard),
+        background-color var(--site-motion-fast)
+          var(--site-motion-ease-standard);
+    }
   }
 
   .site-nav {

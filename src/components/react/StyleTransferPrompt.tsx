@@ -324,6 +324,8 @@ export default function StyleTransferPrompt({
   const isThemeSliderDraggingRef = useRef(false);
   const introDismissTimeoutRef = useRef<number | null>(null);
   const traceVisibilityTimeoutRef = useRef<number | null>(null);
+  const renderedTraceRef = useRef<StyleTransferTrace | null>(null);
+  const traceVisibilityStateRef = useRef<TraceVisibilityState>('hidden');
   const panelId = useId();
   const panelHeadingId = useId();
   const promptCharacterCountId = useId();
@@ -646,40 +648,51 @@ export default function StyleTransferPrompt({
       traceVisibilityTimeoutRef.current = null;
     }
 
+    const previousRenderedTrace = renderedTraceRef.current;
+    const previousTraceVisibilityState = traceVisibilityStateRef.current;
+
     if (activeTrace) {
       const shouldAnimateIn =
-        traceVisibilityState === 'hidden' ||
-        traceVisibilityState === 'exiting' ||
-        !renderedTrace;
+        previousTraceVisibilityState === 'hidden' ||
+        previousTraceVisibilityState === 'exiting' ||
+        !previousRenderedTrace;
 
       setRenderedTrace(activeTrace);
+      renderedTraceRef.current = activeTrace;
 
       if (!shouldAnimateIn) {
         setTraceVisibilityState('visible');
+        traceVisibilityStateRef.current = 'visible';
         return;
       }
 
       setTraceVisibilityState('entering');
+      traceVisibilityStateRef.current = 'entering';
 
       traceVisibilityTimeoutRef.current = window.setTimeout(() => {
         setTraceVisibilityState('visible');
+        traceVisibilityStateRef.current = 'visible';
         traceVisibilityTimeoutRef.current = null;
       }, getTraceEnterDurationMs(activeTrace));
 
       return;
     }
 
-    if (!renderedTrace || traceVisibilityState === 'hidden') {
+    if (!previousRenderedTrace || previousTraceVisibilityState === 'hidden') {
       setTraceVisibilityState('hidden');
+      traceVisibilityStateRef.current = 'hidden';
       return;
     }
 
     setTraceVisibilityState('exiting');
+    traceVisibilityStateRef.current = 'exiting';
     traceVisibilityTimeoutRef.current = window.setTimeout(() => {
       setRenderedTrace(null);
+      renderedTraceRef.current = null;
       setTraceVisibilityState('hidden');
+      traceVisibilityStateRef.current = 'hidden';
       traceVisibilityTimeoutRef.current = null;
-    }, getTraceExitDurationMs(renderedTrace));
+    }, getTraceExitDurationMs(previousRenderedTrace));
   }, [activeTrace]);
 
   const handlePreset = (presetId: string) => {
