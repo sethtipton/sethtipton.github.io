@@ -5,11 +5,9 @@ problem: Oracle needed more than a single navigation component. It needed a dura
 role: Senior Front-End Engineer
 impact:
   - Sole front-end engineer responsible for six generations of Oracle’s shared navigation system.
-  - Built dozens of navigation implementations during my time at Oracle, all designed to adapt to different content structures, logos, icons, themes, and site-level needs without rewriting the core system.
-  - Created the navigation as a reusable library component with configurable structure, branding, and behavior so teams could meet local requirements while staying aligned to a shared platform.
-  - Partnered closely with other teams to turn the evolving brand, UX, and business requirements into durable component patterns instead of one-off custom solutions.
-  - Owned the interaction model end to end, including accessibility, responsive behavior, keyboard and focus management, testing, rollout strategy, and long-term maintainability.
-  - Reduced initial render cost by loading the large navigation DOM only when needed, improving Core Web Vitals without reducing capability.
+  - Built dozens of navigation implementations that adapted to different content structures, logos, icons, themes, and site-level needs without rewriting the core system.
+  - Created the navigation as a reusable library component with configurable structure, branding, and behavior, and turned evolving brand and UX requirements into durable shared patterns instead of one-off solutions.
+  - Owned the interaction model end to end, including accessibility, responsive behavior, keyboard and focus management, testing, rollout strategy, long-term maintainability, and reducing initial render cost by loading the large navigation DOM only when needed.
 stack:
   - React
   - TypeScript
