@@ -50,13 +50,16 @@ function resolveAnimationProfile(
     case 'modular-tiles':
     case 'inset-frames':
     case 'paper-cut':
+    case 'offset-paper-windows':
     case 'angled-panel':
+    case 'holo-shards':
       return 'panel-stagger';
     case 'offset-rings':
     case 'radial-burst':
     case 'constellation':
       return 'orbital-pulse';
     case 'scanline-band':
+    case 'venetian-shadow-bands':
     case 'folded-ribbon':
       return 'band-sweep';
     case 'soft-blob':

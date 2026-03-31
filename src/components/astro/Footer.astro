@@ -1,6 +1,7 @@
 ---
 import HeroPattern from './HeroPattern.astro';
 import InternalLink from './InternalLink.astro';
+import SocialIcon from './SocialIcon.astro';
 import {
   availabilityNote,
   contactLinks,
@@ -14,14 +15,26 @@ import {
 } from '../../lib/links';
 import { withBase } from '../../lib/paths';
 
+type SocialIconName = 'GitHub' | 'LinkedIn' | 'Email';
+
 const base = import.meta.env.BASE_URL;
+const normalizePath = (path: string) =>
+  path.endsWith('/') ? path : `${path}/`;
+const currentPath = normalizePath(Astro.url.pathname);
 const resolvedContactLinks = contactLinks.map((item) => ({
   ...item,
   href: resolveHref(item, base),
 }));
-const footerContactLinks = resolvedContactLinks.filter(
-  (item) => item.href !== withBase('/resume/', base),
-);
+const footerNavLinks = primaryNav.map((item) => ({
+  ...item,
+  href: withBase(item.href, base),
+}));
+const footerContactLinks = resolvedContactLinks
+  .filter((item) => item.href !== withBase('/resume/', base))
+  .map((item) => ({
+    ...item,
+    icon: item.label as SocialIconName,
+  }));
 ---
 
 <footer class="site-footer">
@@ -40,13 +53,24 @@ const footerContactLinks = resolvedContactLinks.filter(
       <nav aria-label="Footer">
         <ul class="link-list" aria-label="Primary pages">
           {
-            primaryNav.map((item) => (
-              <li>
-                <InternalLink href={withBase(item.href, base)}>
-                  {item.label}
-                </InternalLink>
-              </li>
-            ))
+            footerNavLinks.map((item) => {
+              const href = normalizePath(item.href);
+              const active =
+                href === withBase('/', base)
+                  ? currentPath === href
+                  : currentPath.startsWith(href);
+
+              return (
+                <li>
+                  <InternalLink
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </InternalLink>
+                </li>
+              );
+            })
           }
         </ul>
       </nav>
@@ -58,10 +82,14 @@ const footerContactLinks = resolvedContactLinks.filter(
               <li>
                 {isOutboundHref(item.href) ? (
                   <a href={item.href} {...getExternalLinkProps(item.href)}>
+                    <SocialIcon name={item.icon} />
                     {item.label}
                   </a>
                 ) : (
-                  <InternalLink href={item.href}>{item.label}</InternalLink>
+                  <InternalLink href={item.href}>
+                    <SocialIcon name={item.icon} />
+                    {item.label}
+                  </InternalLink>
                 )}
               </li>
             ))

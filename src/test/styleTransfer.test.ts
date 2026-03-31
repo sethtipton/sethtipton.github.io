@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { deriveStyleTransferArtworkRenderConfig } from '../lib/style-transfer/artwork';
+import {
+  deriveStyleTransferArtworkRenderConfig,
+  getStyleTransferArtworkBackgroundOpacity,
+} from '../lib/style-transfer/artwork';
 import { deriveStyleTransferApplication } from '../lib/style-transfer/deriveTheme';
 import {
   styleTransferPresetThemes,
@@ -174,6 +177,110 @@ describe('style transfer theme contracts', () => {
 
     rotatedRects.forEach((shape) => {
       expect(shape.width).toBeGreaterThan(shape.height * 2);
+    });
+  });
+
+  it('renders Y2K Futurism artwork as oversized holographic shards', () => {
+    const y2kPreset = styleTransferPresetSummaries.find(
+      (preset) => preset.id === 'y2k-futurism',
+    );
+
+    expect(y2kPreset).toBeTruthy();
+    expect(y2kPreset!.artwork.spec.family).toBe('holo-shards');
+
+    const config = deriveStyleTransferArtworkRenderConfig(
+      y2kPreset!.artwork.spec,
+    );
+    const largeEllipses = config.shapes.filter(
+      (
+        shape,
+      ): shape is Extract<
+        (typeof config.shapes)[number],
+        { type: 'ellipse' }
+      > => shape.type === 'ellipse' && shape.rx > config.viewBox.width * 0.2,
+    );
+    const shardPanels = config.shapes.filter(
+      (
+        shape,
+      ): shape is Extract<
+        (typeof config.shapes)[number],
+        { type: 'polygon' }
+      > => shape.type === 'polygon',
+    );
+
+    expect(largeEllipses.length).toBeGreaterThanOrEqual(1);
+    expect(shardPanels.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('renders Toasted Marshmallow artwork as offset paper windows', () => {
+    const toastedPreset = styleTransferPresetSummaries.find(
+      (preset) => preset.id === 'toasted-marshmallow',
+    );
+
+    expect(toastedPreset).toBeTruthy();
+    expect(toastedPreset!.artwork.spec.family).toBe('offset-paper-windows');
+
+    const config = deriveStyleTransferArtworkRenderConfig(
+      toastedPreset!.artwork.spec,
+    );
+    const backgroundPanels = config.shapes.filter(
+      (
+        shape,
+      ): shape is Extract<(typeof config.shapes)[number], { type: 'rect' }> =>
+        shape.type === 'rect' &&
+        shape.fill === 'var(--color-surface-paper)' &&
+        (shape.fillOpacity ?? 0) >= 0.9,
+    );
+
+    expect(config.bindings.primary.role).toBe('surfaceStrong');
+    expect(backgroundPanels.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('renders Noir Interface artwork as venetian shadow bands', () => {
+    const noirPreset = styleTransferPresetSummaries.find(
+      (preset) => preset.id === 'noir-interface',
+    );
+
+    expect(noirPreset).toBeTruthy();
+    expect(noirPreset!.artwork.spec.family).toBe('venetian-shadow-bands');
+
+    const config = deriveStyleTransferArtworkRenderConfig(
+      noirPreset!.artwork.spec,
+    );
+    const wideBands = config.shapes.filter(
+      (
+        shape,
+      ): shape is Extract<(typeof config.shapes)[number], { type: 'rect' }> =>
+        shape.type === 'rect' && shape.width > shape.height * 4,
+    );
+    const guideLines = config.shapes.filter(
+      (
+        shape,
+      ): shape is Extract<(typeof config.shapes)[number], { type: 'line' }> =>
+        shape.type === 'line',
+    );
+
+    expect(wideBands.length).toBeGreaterThanOrEqual(4);
+    expect(guideLines.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('renders all preset artwork with visible accent strokes', () => {
+    styleTransferPresetSummaries.forEach((preset) => {
+      const config = deriveStyleTransferArtworkRenderConfig(
+        preset.artwork.spec,
+      );
+
+      expect(config.bindings.stroke?.role).toBe('accent');
+      expect(config.fillOpacity).toBeGreaterThanOrEqual(0.18);
+      expect(
+        getStyleTransferArtworkBackgroundOpacity(preset.artwork.spec),
+      ).toBeGreaterThanOrEqual(0.22);
+
+      config.shapes.forEach((shape) => {
+        expect(shape.stroke).toBe('var(--color-accent)');
+        expect(shape.strokeWidth ?? 0).toBeGreaterThan(0);
+        expect(shape.strokeOpacity ?? 0).toBeGreaterThanOrEqual(0.32);
+      });
     });
   });
 });

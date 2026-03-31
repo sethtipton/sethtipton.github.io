@@ -35,10 +35,13 @@ export const styleTransferArtworkFamilyOptions = [
   'grid-mesh',
   'scanline-band',
   'paper-cut',
+  'offset-paper-windows',
   'radial-burst',
+  'holo-shards',
   'folded-ribbon',
   'modular-tiles',
   'constellation',
+  'venetian-shadow-bands',
   'inset-frames',
 ] as const;
 
@@ -548,6 +551,70 @@ function resolveStrokeWidth(
     default:
       return 0;
   }
+}
+
+function getDefaultArtworkStrokeStyle(
+  family: StyleTransferArtworkFamily,
+): StyleTransferArtworkSpec['strokeStyle'] {
+  switch (family) {
+    case 'contour-lines':
+    case 'grid-mesh':
+    case 'scanline-band':
+    case 'constellation':
+      return 'hairline';
+    default:
+      return 'soft';
+  }
+}
+
+function normalizeArtworkSpecForRender(
+  spec: StyleTransferArtworkSpec,
+): StyleTransferArtworkSpec {
+  const strokeStyle =
+    spec.strokeStyle === 'none'
+      ? getDefaultArtworkStrokeStyle(spec.family)
+      : spec.strokeStyle;
+  const minimumStrokeWidth = resolveStrokeWidth(strokeStyle);
+  const requestedStrokeWidth = spec.controls?.strokeWidth;
+
+  return {
+    ...spec,
+    strokeStyle,
+    colorBinding: {
+      ...spec.colorBinding,
+      stroke: 'accent',
+    },
+    controls: {
+      ...spec.controls,
+      strokeWidth:
+        typeof requestedStrokeWidth === 'number'
+          ? Math.max(requestedStrokeWidth, minimumStrokeWidth)
+          : minimumStrokeWidth,
+    },
+  };
+}
+
+function applyVisibleAccentStroke(
+  shapes: StyleTransferArtworkShape[],
+  config: Pick<
+    StyleTransferArtworkRenderConfig,
+    'bindings' | 'spec' | 'strokeWidth'
+  >,
+) {
+  const stroke = config.bindings.stroke?.cssValue ?? 'var(--color-accent)';
+  const strokeWidth = Math.max(
+    config.strokeWidth,
+    config.spec.usage === 'section-background' ? 1.35 : 1,
+  );
+  const strokeOpacityFloor =
+    config.spec.usage === 'section-background' ? 0.32 : 0.22;
+
+  return shapes.map((shape) => ({
+    ...shape,
+    stroke,
+    strokeOpacity: Math.max(shape.strokeOpacity ?? 0, strokeOpacityFloor),
+    strokeWidth: Math.max(shape.strokeWidth ?? 0, strokeWidth),
+  }));
 }
 
 function getDefaultViewBox(spec: StyleTransferArtworkSpec) {
@@ -1159,7 +1226,7 @@ function buildPaperCutShapes(
           ? config.bindings.primary.cssValue
           : (config.bindings.secondary?.cssValue ??
             config.bindings.primary.cssValue),
-      fillOpacity: clamp(config.fillOpacity - index * 0.05, 0.1, 0.42),
+      fillOpacity: clamp(config.fillOpacity - index * 0.04, 0.14, 0.48),
       stroke:
         spec.strokeStyle === 'none'
           ? undefined
@@ -1170,6 +1237,116 @@ function buildPaperCutShapes(
       blendMode: spec.blendStyle,
     } satisfies StyleTransferArtworkShape;
   });
+}
+
+function buildOffsetPaperWindowShapes(
+  spec: StyleTransferArtworkSpec,
+  config: Pick<
+    StyleTransferArtworkRenderConfig,
+    'bindings' | 'fillOpacity' | 'strokeWidth' | 'viewBox'
+  >,
+) {
+  const { height, width } = config.viewBox;
+  const seed = getArtworkSpecSeed(spec);
+  const panelCount = Math.max(spec.layerCount + 1, 4);
+  const cornerRadius =
+    spec.cornerStyle === 'sharp'
+      ? 12
+      : spec.cornerStyle === 'rounded'
+        ? 34
+        : 44;
+  const backgroundFill =
+    config.bindings.background?.cssValue ?? 'var(--color-surface-paper)';
+  const stroke =
+    config.bindings.stroke?.cssValue ?? config.bindings.primary.cssValue;
+
+  return Array.from({ length: panelCount }, (_, index) => {
+    const panelWidth = width * seededBetween(seed, 20 + index, 0.56, 0.8);
+    const panelHeight = height * seededBetween(seed, 40 + index, 0.28, 0.42);
+    const x = clamp(
+      width * seededBetween(seed, 60 + index, 0.06, 0.26) +
+        index * width * 0.06,
+      -width * 0.06,
+      width - panelWidth + width * 0.04,
+    );
+    const y = clamp(
+      height * seededBetween(seed, 80 + index, 0.08, 0.44) +
+        index * height * 0.05,
+      height * 0.03,
+      height - panelHeight - height * 0.04,
+    );
+    const rotation = seededBetween(seed, 100 + index, -7, 7);
+    const centerX = x + panelWidth / 2;
+    const centerY = y + panelHeight / 2;
+    const transform = `rotate(${rotation.toFixed(2)} ${centerX.toFixed(2)} ${centerY.toFixed(2)})`;
+    const outerFill =
+      index % 2 === 0
+        ? config.bindings.primary.cssValue
+        : (config.bindings.secondary?.cssValue ??
+          config.bindings.primary.cssValue);
+    const outerOpacity = clamp(config.fillOpacity - index * 0.035, 0.2, 0.42);
+    const frameInsetX =
+      panelWidth * seededBetween(seed, 120 + index, 0.08, 0.15);
+    const frameInsetY =
+      panelHeight * seededBetween(seed, 140 + index, 0.11, 0.2);
+    const seamHeight =
+      panelHeight * seededBetween(seed, 160 + index, 0.08, 0.14);
+
+    return [
+      {
+        type: 'rect',
+        x,
+        y,
+        width: panelWidth,
+        height: panelHeight,
+        rx: cornerRadius,
+        ry: cornerRadius,
+        fill: outerFill,
+        fillOpacity: outerOpacity,
+        stroke,
+        strokeOpacity: 0.24,
+        strokeWidth:
+          config.strokeWidth || seededBetween(seed, 180 + index, 1.5, 2.4),
+        transform,
+        blendMode: spec.blendStyle,
+      } satisfies StyleTransferArtworkShape,
+      {
+        type: 'rect',
+        x: x + frameInsetX,
+        y: y + frameInsetY,
+        width: panelWidth - frameInsetX * 2,
+        height: panelHeight - frameInsetY * 2,
+        rx: cornerRadius * 0.72,
+        ry: cornerRadius * 0.72,
+        fill: backgroundFill,
+        fillOpacity: 0.92,
+        stroke,
+        strokeOpacity: 0.16,
+        strokeWidth:
+          (config.strokeWidth || seededBetween(seed, 200 + index, 1.4, 2.1)) *
+          0.8,
+        transform,
+        blendMode: spec.blendStyle,
+      } satisfies StyleTransferArtworkShape,
+      {
+        type: 'rect',
+        x: x + frameInsetX * 1.2,
+        y: y + frameInsetY * 0.82,
+        width: panelWidth - frameInsetX * 2.4,
+        height: seamHeight,
+        rx: cornerRadius * 0.4,
+        ry: cornerRadius * 0.4,
+        fill:
+          index % 2 === 0
+            ? (config.bindings.secondary?.cssValue ??
+              config.bindings.primary.cssValue)
+            : config.bindings.primary.cssValue,
+        fillOpacity: clamp(outerOpacity * 0.44, 0.1, 0.18),
+        transform,
+        blendMode: spec.blendStyle,
+      } satisfies StyleTransferArtworkShape,
+    ];
+  }).flat();
 }
 
 function buildRadialBurstShapes(
@@ -1234,6 +1411,140 @@ function buildRadialBurstShapes(
   })) satisfies StyleTransferArtworkShape[];
 
   return [...rays, ...cores];
+}
+
+function buildHoloShardShapes(
+  spec: StyleTransferArtworkSpec,
+  config: Pick<
+    StyleTransferArtworkRenderConfig,
+    'bindings' | 'fillOpacity' | 'strokeWidth' | 'viewBox'
+  >,
+) {
+  const { height, width } = config.viewBox;
+  const seed = getArtworkSpecSeed(spec);
+  const centerX = width * seededBetween(seed, 1, 0.52, 0.62);
+  const centerY = height * seededBetween(seed, 2, 0.34, 0.46);
+  const scale = (spec.controls?.scale ?? 1) * 1.14;
+  const stroke =
+    config.bindings.stroke?.cssValue ?? config.bindings.primary.cssValue;
+  const haloRotation = seededBetween(seed, 4, -18, 18);
+  const haloShapes = [
+    {
+      type: 'ellipse',
+      cx: centerX,
+      cy: centerY,
+      rx: width * 0.3 * scale,
+      ry: height * 0.2 * scale,
+      fill:
+        config.bindings.secondary?.cssValue ?? config.bindings.primary.cssValue,
+      fillOpacity: clamp(config.fillOpacity * 0.42, 0.14, 0.3),
+      stroke,
+      strokeOpacity: 0.28,
+      strokeWidth: config.strokeWidth || 2,
+      transform: `rotate(${haloRotation.toFixed(2)} ${centerX.toFixed(2)} ${centerY.toFixed(2)})`,
+      blendMode: spec.blendStyle,
+    },
+    {
+      type: 'ellipse',
+      cx: centerX + width * seededBetween(seed, 6, -0.03, 0.05),
+      cy: centerY + height * seededBetween(seed, 8, -0.05, 0.04),
+      rx: width * 0.19 * scale,
+      ry: height * 0.12 * scale,
+      fill: config.bindings.primary.cssValue,
+      fillOpacity: clamp(config.fillOpacity * 0.28, 0.1, 0.2),
+      stroke,
+      strokeOpacity: 0.24,
+      strokeWidth: config.strokeWidth || 2,
+      transform: `rotate(${(haloRotation * -0.55).toFixed(2)} ${centerX.toFixed(2)} ${centerY.toFixed(2)})`,
+      blendMode: spec.blendStyle,
+    },
+  ] satisfies StyleTransferArtworkShape[];
+  const shardCount = Math.max(spec.layerCount + 1, 4);
+  const shardShapes = Array.from({ length: shardCount }, (_, index) => {
+    const shardWidth =
+      width *
+      seededBetween(seed, 20 + index, 0.26, 0.46) *
+      scale *
+      (1 - index * 0.06);
+    const shardHeight =
+      height *
+      seededBetween(seed, 40 + index, 0.1, 0.18) *
+      scale *
+      (1 - index * 0.04);
+    const offsetX =
+      width * seededBetween(seed, 60 + index, -0.16, 0.14) -
+      index * width * 0.014;
+    const offsetY =
+      height * seededBetween(seed, 80 + index, -0.16, 0.16) +
+      index * height * 0.018;
+    const x = centerX - shardWidth / 2 + offsetX;
+    const y = centerY - shardHeight / 2 + offsetY;
+    const bevel = shardWidth * seededBetween(seed, 100 + index, 0.16, 0.26);
+    const angle =
+      seededBetween(seed, 120 + index, -18, 18) + (index % 2 === 0 ? -6 : 6);
+    const points = [
+      `${(x + bevel).toFixed(2)},${y.toFixed(2)}`,
+      `${(x + shardWidth).toFixed(2)},${(y + shardHeight * 0.08).toFixed(2)}`,
+      `${(x + shardWidth - bevel * 0.3).toFixed(2)},${(y + shardHeight).toFixed(2)}`,
+      `${x.toFixed(2)},${(y + shardHeight * 0.9).toFixed(2)}`,
+    ].join(' ');
+
+    return {
+      type: 'polygon',
+      points,
+      fill:
+        index % 2 === 0
+          ? config.bindings.primary.cssValue
+          : (config.bindings.secondary?.cssValue ??
+            config.bindings.primary.cssValue),
+      fillOpacity: clamp(config.fillOpacity - index * 0.04, 0.16, 0.46),
+      stroke,
+      strokeOpacity: clamp(0.24 + index * 0.03, 0.24, 0.4),
+      strokeWidth:
+        config.strokeWidth || seededBetween(seed, 140 + index, 1.6, 3),
+      transform: `rotate(${angle.toFixed(2)} ${(x + shardWidth / 2).toFixed(2)} ${(y + shardHeight / 2).toFixed(2)})`,
+      blendMode: spec.blendStyle,
+    } satisfies StyleTransferArtworkShape;
+  });
+  const beamShapes = Array.from({ length: 3 }, (_, index) => {
+    const direction = index - 1;
+    const startX =
+      centerX -
+      width * seededBetween(seed, 180 + index, 0.3, 0.42) +
+      direction * 14;
+    const startY =
+      centerY -
+      height * seededBetween(seed, 200 + index, 0.18, 0.24) +
+      direction * height * 0.05;
+    const endX =
+      centerX +
+      width * seededBetween(seed, 220 + index, 0.18, 0.28) -
+      direction * 10;
+    const endY =
+      centerY +
+      height * seededBetween(seed, 240 + index, 0.1, 0.2) +
+      direction * height * 0.04;
+
+    return {
+      type: 'line',
+      x1: startX,
+      y1: startY,
+      x2: endX,
+      y2: endY,
+      stroke,
+      strokeOpacity: clamp(0.18 + index * 0.04, 0.18, 0.3),
+      strokeWidth: config.strokeWidth || 1.8,
+      strokeDasharray:
+        spec.motionStyle === 'still'
+          ? undefined
+          : `${Math.round(seededBetween(seed, 260 + index, 4, 7))} ${Math.round(
+              seededBetween(seed, 280 + index, 10, 18),
+            )}`,
+      blendMode: spec.blendStyle,
+    } satisfies StyleTransferArtworkShape;
+  });
+
+  return [...haloShapes, ...shardShapes, ...beamShapes];
 }
 
 function buildFoldedRibbonShapes(
@@ -1395,6 +1706,76 @@ function buildConstellationShapes(
   return [...lines, ...nodeShapes];
 }
 
+function buildVenetianShadowBandShapes(
+  spec: StyleTransferArtworkSpec,
+  config: Pick<
+    StyleTransferArtworkRenderConfig,
+    'bindings' | 'fillOpacity' | 'strokeWidth' | 'viewBox'
+  >,
+) {
+  const { height, width } = config.viewBox;
+  const seed = getArtworkSpecSeed(spec);
+  const bandCount = Math.max(spec.layerCount + 2, 5);
+  const stroke =
+    config.bindings.stroke?.cssValue ?? config.bindings.primary.cssValue;
+  const bands = Array.from({ length: bandCount }, (_, index) => {
+    const bandHeight = height * seededBetween(seed, 20 + index, 0.08, 0.17);
+    const x = width * seededBetween(seed, 40 + index, -0.08, 0.14);
+    const y = clamp(
+      height * seededBetween(seed, 60 + index, 0.08, 0.72) +
+        index * height * 0.04,
+      0,
+      height - bandHeight,
+    );
+    const bandWidth = width * seededBetween(seed, 80 + index, 0.64, 1.08);
+    const fill =
+      index % 3 === 0
+        ? (config.bindings.secondary?.cssValue ??
+          config.bindings.primary.cssValue)
+        : config.bindings.primary.cssValue;
+
+    return {
+      type: 'rect',
+      x,
+      y,
+      width: bandWidth,
+      height: bandHeight,
+      rx: spec.cornerStyle === 'sharp' ? 0 : 8,
+      ry: spec.cornerStyle === 'sharp' ? 0 : 8,
+      fill,
+      fillOpacity: clamp(config.fillOpacity - index * 0.04, 0.16, 0.4),
+      stroke,
+      strokeOpacity: clamp(0.18 + index * 0.02, 0.18, 0.28),
+      strokeWidth:
+        config.strokeWidth || seededBetween(seed, 100 + index, 1.2, 2),
+      blendMode: spec.blendStyle,
+    } satisfies StyleTransferArtworkShape;
+  });
+  const guideLines = Array.from({ length: 3 }, (_, index) => {
+    const y = height * seededBetween(seed, 140 + index, 0.16, 0.84);
+
+    return {
+      type: 'line',
+      x1: width * seededBetween(seed, 160 + index, 0, 0.12),
+      y1: y,
+      x2: width * seededBetween(seed, 180 + index, 0.72, 1),
+      y2: y + seededBetween(seed, 200 + index, -height * 0.01, height * 0.01),
+      stroke,
+      strokeOpacity: clamp(0.16 + index * 0.03, 0.16, 0.24),
+      strokeWidth: (config.strokeWidth || 1.4) * 0.82,
+      strokeDasharray:
+        spec.motionStyle === 'still'
+          ? undefined
+          : `${Math.round(seededBetween(seed, 220 + index, 4, 6))} ${Math.round(
+              seededBetween(seed, 240 + index, 10, 16),
+            )}`,
+      blendMode: spec.blendStyle,
+    } satisfies StyleTransferArtworkShape;
+  });
+
+  return [...bands, ...guideLines];
+}
+
 function buildInsetFrameShapes(
   spec: StyleTransferArtworkSpec,
   config: Pick<
@@ -1522,14 +1903,20 @@ function buildArtworkShapes(
       return buildScanlineBandShapes(spec, config);
     case 'paper-cut':
       return buildPaperCutShapes(spec, config);
+    case 'offset-paper-windows':
+      return buildOffsetPaperWindowShapes(spec, config);
     case 'radial-burst':
       return buildRadialBurstShapes(spec, config);
+    case 'holo-shards':
+      return buildHoloShardShapes(spec, config);
     case 'folded-ribbon':
       return buildFoldedRibbonShapes(spec, config);
     case 'modular-tiles':
       return buildModularTileShapes(spec, config);
     case 'constellation':
       return buildConstellationShapes(spec, config);
+    case 'venetian-shadow-bands':
+      return buildVenetianShadowBandShapes(spec, config);
     case 'inset-frames':
       return buildInsetFrameShapes(spec, config);
   }
@@ -1538,27 +1925,37 @@ function buildArtworkShapes(
 export function deriveStyleTransferArtworkRenderConfig(
   spec: StyleTransferArtworkSpec,
 ): StyleTransferArtworkRenderConfig {
-  const bindings = resolveStyleTransferArtworkBindings(spec);
-  const viewBox = getDefaultViewBox(spec);
-  const layerCount = clamp(spec.layerCount, 1, 6);
+  const normalizedSpec = normalizeArtworkSpecForRender(spec);
+  const bindings = resolveStyleTransferArtworkBindings(normalizedSpec);
+  const viewBox = getDefaultViewBox(normalizedSpec);
+  const layerCount = clamp(normalizedSpec.layerCount, 1, 6);
+  const baseFillOpacity =
+    (normalizedSpec.controls?.opacity ??
+      opacityModeMap[normalizedSpec.opacityMode]) *
+    densityFactorMap[normalizedSpec.density];
+  const usageFillMultiplier =
+    normalizedSpec.usage === 'section-background'
+      ? 1.34
+      : normalizedSpec.usage === 'surface-overlay'
+        ? 1.1
+        : 1;
   const fillOpacity = clamp(
-    (spec.controls?.opacity ?? opacityModeMap[spec.opacityMode]) *
-      densityFactorMap[spec.density],
-    0.08,
-    0.72,
+    baseFillOpacity * usageFillMultiplier,
+    normalizedSpec.usage === 'section-background' ? 0.18 : 0.08,
+    0.78,
   );
   const strokeWidth = resolveStrokeWidth(
-    spec.strokeStyle,
-    spec.controls?.strokeWidth,
+    normalizedSpec.strokeStyle,
+    normalizedSpec.controls?.strokeWidth,
   );
 
   const config = {
     bindings,
     fillOpacity,
     layerCount,
-    maskBehavior: spec.maskBehavior,
+    maskBehavior: normalizedSpec.maskBehavior,
     spec: {
-      ...spec,
+      ...normalizedSpec,
       layerCount,
     },
     strokeWidth,
@@ -1567,8 +1964,21 @@ export function deriveStyleTransferArtworkRenderConfig(
 
   return {
     ...config,
-    shapes: buildArtworkShapes(config.spec, config),
+    shapes: applyVisibleAccentStroke(
+      buildArtworkShapes(config.spec, config),
+      config,
+    ),
   };
+}
+
+export function getStyleTransferArtworkBackgroundOpacity(
+  spec: StyleTransferArtworkSpec,
+) {
+  if (spec.usage === 'scrim') {
+    return 0.38;
+  }
+
+  return spec.fillStyle === 'transparent' ? 0.24 : 0.22;
 }
 
 export function getStyleTransferArtworkShapeCounts(
@@ -1609,56 +2019,52 @@ export function createStyleTransferArtworkSvgMarkup(
   const maskMarkup = serializeStyleTransferArtworkMask(maskId, config);
   const shapeMarkup = config.shapes
     .map((shape) => {
+      const resolveFill = (fill?: string) =>
+        fill === config.bindings.primary.cssValue
+          ? colorValues.primary
+          : fill === config.bindings.secondary?.cssValue
+            ? colorValues.secondary
+            : fill === config.bindings.background?.cssValue
+              ? colorValues.background
+              : fill;
+      const resolveStroke = (stroke?: string) =>
+        stroke === config.bindings.stroke?.cssValue
+          ? colorValues.stroke
+          : stroke === config.bindings.primary.cssValue
+            ? colorValues.primary
+            : stroke === config.bindings.secondary?.cssValue
+              ? colorValues.secondary
+              : stroke === config.bindings.background?.cssValue
+                ? colorValues.background
+                : stroke;
       const normalizedShape: StyleTransferArtworkShape =
         shape.type === 'ellipse'
           ? {
               ...shape,
-              fill:
-                shape.fill === config.bindings.primary.cssValue
-                  ? colorValues.primary
-                  : shape.fill === config.bindings.secondary?.cssValue
-                    ? colorValues.secondary
-                    : shape.fill,
-              stroke:
-                shape.stroke === config.bindings.stroke?.cssValue
-                  ? colorValues.stroke
-                  : shape.stroke === config.bindings.primary.cssValue
-                    ? colorValues.primary
-                    : shape.stroke,
+              fill: resolveFill(shape.fill),
+              stroke: resolveStroke(shape.stroke),
             }
           : shape.type === 'path' ||
               shape.type === 'polygon' ||
               shape.type === 'rect'
             ? {
                 ...shape,
-                fill:
-                  shape.fill === config.bindings.primary.cssValue
-                    ? colorValues.primary
-                    : shape.fill === config.bindings.secondary?.cssValue
-                      ? colorValues.secondary
-                      : shape.fill,
-                stroke:
-                  shape.stroke === config.bindings.stroke?.cssValue
-                    ? colorValues.stroke
-                    : shape.stroke === config.bindings.primary.cssValue
-                      ? colorValues.primary
-                      : shape.stroke,
+                fill: resolveFill(shape.fill),
+                stroke: resolveStroke(shape.stroke),
               }
             : {
                 ...shape,
                 stroke:
-                  shape.stroke === config.bindings.stroke?.cssValue
-                    ? (colorValues.stroke ?? colorValues.primary)
-                    : shape.stroke === config.bindings.primary.cssValue
-                      ? colorValues.primary
-                      : shape.stroke,
+                  resolveStroke(shape.stroke) ??
+                  colorValues.stroke ??
+                  colorValues.primary,
               };
 
       return serializeStyleTransferArtworkShape(normalizedShape);
     })
     .join('');
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${config.viewBox.width} ${config.viewBox.height}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${maskMarkup}</defs><rect x="0" y="0" width="${config.viewBox.width}" height="${config.viewBox.height}" fill="${escapeSvgAttribute(backgroundFill)}" fill-opacity="${spec.usage === 'scrim' ? 0.38 : 0.12}" />${config.maskBehavior === 'none' ? `<g>${shapeMarkup}</g>` : `<g mask="url(#${maskId})">${shapeMarkup}</g>`}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${config.viewBox.width} ${config.viewBox.height}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${maskMarkup}</defs><rect x="0" y="0" width="${config.viewBox.width}" height="${config.viewBox.height}" fill="${escapeSvgAttribute(backgroundFill)}" fill-opacity="${getStyleTransferArtworkBackgroundOpacity(spec)}" />${config.maskBehavior === 'none' ? `<g>${shapeMarkup}</g>` : `<g mask="url(#${maskId})">${shapeMarkup}</g>`}</svg>`;
 }
 
 export function createStyleTransferArtworkDataUrl(
@@ -1704,12 +2110,19 @@ function getPreferredFamilies(prompt: string) {
     return ['radial-burst', 'offset-rings'] as StyleTransferArtworkFamily[];
   }
 
+  if (includesAny(normalized, ['y2k', 'chrome', 'synthetic', 'holographic'])) {
+    return ['holo-shards', 'radial-burst'] as StyleTransferArtworkFamily[];
+  }
+
   if (includesAny(normalized, ['ribbon', 'fold', 'sleek'])) {
     return ['folded-ribbon', 'angled-panel'] as StyleTransferArtworkFamily[];
   }
 
   if (includesAny(normalized, ['constellation', 'star', 'cinematic'])) {
-    return ['constellation', 'offset-rings'] as StyleTransferArtworkFamily[];
+    return [
+      'venetian-shadow-bands',
+      'constellation',
+    ] as StyleTransferArtworkFamily[];
   }
 
   if (includesAny(normalized, ['tile', 'modular', 'block'])) {
@@ -1729,7 +2142,11 @@ function getPreferredFamilies(prompt: string) {
   if (
     includesAny(normalized, ['scrim', 'soft', 'paper', 'editorial', 'warm'])
   ) {
-    return ['soft-blob', 'paper-cut'] as StyleTransferArtworkFamily[];
+    return [
+      'offset-paper-windows',
+      'soft-blob',
+      'paper-cut',
+    ] as StyleTransferArtworkFamily[];
   }
 
   if (includesAny(normalized, ['wave', 'motif', 'section background'])) {
@@ -1759,7 +2176,7 @@ function getThemeDrivenFamilies(theme: StyleTransferThemeRecord) {
   }
 
   if (theme.surfaceStyle === 'glow') {
-    families.push('offset-rings', 'radial-burst');
+    families.push('offset-rings', 'radial-burst', 'holo-shards');
   }
 
   if (theme.surfaceStyle === 'glass') {
@@ -1767,7 +2184,7 @@ function getThemeDrivenFamilies(theme: StyleTransferThemeRecord) {
   }
 
   if (theme.surfaceStyle === 'paper') {
-    families.push('paper-cut', 'inset-frames');
+    families.push('offset-paper-windows', 'paper-cut', 'inset-frames');
   }
 
   if (theme.buttonStyle === 'hard-edge') {
@@ -1783,7 +2200,12 @@ function getThemeDrivenFamilies(theme: StyleTransferThemeRecord) {
   }
 
   if (theme.density === 'airy') {
-    families.push('layered-wave', 'paper-cut', 'folded-ribbon');
+    families.push(
+      'layered-wave',
+      'offset-paper-windows',
+      'paper-cut',
+      'folded-ribbon',
+    );
   }
 
   if (theme.motion === 'off') {
@@ -1848,12 +2270,29 @@ function pickArtworkFamily(
     candidates.unshift('angled-panel', 'radial-burst', 'offset-rings');
   }
 
+  if (includesAny(normalized, ['y2k', 'chrome', 'synthetic'])) {
+    candidates.unshift('holo-shards', 'radial-burst', 'offset-rings');
+  }
+
   if (includesAny(normalized, ['scrim', 'editorial', 'paper'])) {
-    candidates.unshift('soft-blob', 'paper-cut', 'inset-frames');
+    candidates.unshift(
+      'offset-paper-windows',
+      'soft-blob',
+      'paper-cut',
+      'inset-frames',
+    );
   }
 
   if (includesAny(normalized, ['motif', 'minimal dark'])) {
     candidates.unshift('contour-lines', 'layered-wave', 'constellation');
+  }
+
+  if (includesAny(normalized, ['noir', 'cinematic', 'shadow', 'venetian'])) {
+    candidates.unshift(
+      'venetian-shadow-bands',
+      'constellation',
+      'scanline-band',
+    );
   }
 
   const filtered = candidates.filter((family, index, array) => {
@@ -1869,9 +2308,11 @@ function pickArtworkFamily(
         ? filtered
         : ([
             'layered-wave',
+            'offset-paper-windows',
             'contour-lines',
             'paper-cut',
             'folded-ribbon',
+            'venetian-shadow-bands',
             'constellation',
           ] satisfies StyleTransferArtworkFamily[]),
     ) ?? 'layered-wave'
@@ -1888,7 +2329,7 @@ function getArtworkBindings(
       background: 'surfacePaper',
       primary: 'surfaceTint',
       secondary: 'backgroundAlt',
-      stroke: 'muted',
+      stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
   }
 
@@ -1897,7 +2338,7 @@ function getArtworkBindings(
       background: 'background',
       primary: 'accent',
       secondary: 'accentStrong',
-      stroke: 'focus',
+      stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
   }
 
@@ -1906,7 +2347,25 @@ function getArtworkBindings(
       background: 'background',
       primary: 'accentStrong',
       secondary: 'accent',
-      stroke: 'focus',
+      stroke: 'accent',
+    } satisfies StyleTransferArtworkSpec['colorBinding'];
+  }
+
+  if (family === 'holo-shards') {
+    return {
+      background: 'backgroundAlt',
+      primary: 'surfaceStrong',
+      secondary: 'accentStrong',
+      stroke: 'accent',
+    } satisfies StyleTransferArtworkSpec['colorBinding'];
+  }
+
+  if (family === 'offset-paper-windows') {
+    return {
+      background: 'surfacePaper',
+      primary: 'surfaceStrong',
+      secondary: 'surfaceTint',
+      stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
   }
 
@@ -1915,7 +2374,7 @@ function getArtworkBindings(
       background: 'backgroundAlt',
       primary: 'surfaceStrong',
       secondary: 'accent',
-      stroke: 'muted',
+      stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
   }
 
@@ -1924,7 +2383,7 @@ function getArtworkBindings(
       background: 'background',
       primary: theme.pattern === 'grid' ? 'text' : 'accent',
       secondary: 'muted',
-      stroke: theme.pattern === 'grid' ? 'muted' : 'accentStrong',
+      stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
   }
 
@@ -1933,7 +2392,7 @@ function getArtworkBindings(
       background: 'surfacePaper',
       primary: 'surfaceStrong',
       secondary: 'accent',
-      stroke: 'text',
+      stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
   }
 
@@ -1942,7 +2401,16 @@ function getArtworkBindings(
       background: 'background',
       primary: 'accent',
       secondary: 'surfaceTint',
-      stroke: 'muted',
+      stroke: 'accent',
+    } satisfies StyleTransferArtworkSpec['colorBinding'];
+  }
+
+  if (family === 'venetian-shadow-bands') {
+    return {
+      background: 'backgroundAlt',
+      primary: 'surfaceStrong',
+      secondary: 'accentStrong',
+      stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
   }
 
@@ -1958,7 +2426,7 @@ function getArtworkBindings(
   if (family === 'paper-cut') {
     return {
       background: 'surfacePaper',
-      primary: 'surface',
+      primary: 'surfaceStrong',
       secondary: 'surfaceTint',
       stroke: 'accent',
     } satisfies StyleTransferArtworkSpec['colorBinding'];
@@ -1968,7 +2436,7 @@ function getArtworkBindings(
     background: 'background',
     primary: 'accent',
     secondary: 'surfaceStrong',
-    stroke: 'muted',
+    stroke: 'accent',
   } satisfies StyleTransferArtworkSpec['colorBinding'];
 }
 
@@ -2028,13 +2496,21 @@ export function createFallbackStyleTransferArtworkSpec({
         ? seededBetween(seed, 7, 1.8, 3.8)
         : family === 'grid-mesh'
           ? seededBetween(seed, 8, 0.9, 1.8)
-          : seededBetween(seed, 9, 1.1, 2.4);
+          : family === 'venetian-shadow-bands'
+            ? seededBetween(seed, 8.75, 1.4, 2.3)
+            : family === 'holo-shards'
+              ? seededBetween(seed, 8.5, 1.2, 2.1)
+              : seededBetween(seed, 9, 1.1, 2.4);
   const jitter =
     family === 'soft-blob'
       ? seededBetween(seed, 10, 0.34, 0.8)
       : family === 'paper-cut'
         ? seededBetween(seed, 11, 0.08, 0.26)
-        : seededBetween(seed, 12, 0.08, 0.24);
+        : family === 'offset-paper-windows'
+          ? seededBetween(seed, 11.25, 0.04, 0.16)
+          : family === 'holo-shards'
+            ? seededBetween(seed, 11.5, 0.06, 0.18)
+            : seededBetween(seed, 12, 0.08, 0.24);
   const rotation =
     family === 'angled-panel'
       ? includesAny(normalizedPrompt, ['angular'])
@@ -2042,11 +2518,17 @@ export function createFallbackStyleTransferArtworkSpec({
         : seededBetween(seed, 14, 6, 16)
       : family === 'offset-rings'
         ? seededBetween(seed, 15, -14, 14)
-        : seededBetween(seed, 16, -4, 4);
+        : family === 'holo-shards'
+          ? seededBetween(seed, 15.5, -10, 10)
+          : seededBetween(seed, 16, -4, 4);
   const scale =
     intent.usage === 'accent-graphic'
       ? seededBetween(seed, 17, 0.72, 0.96)
-      : seededBetween(seed, 18, 0.94, 1.08);
+      : family === 'offset-paper-windows'
+        ? seededBetween(seed, 17.5, 1.02, 1.12)
+        : family === 'holo-shards'
+          ? seededBetween(seed, 18, 1.08, 1.24)
+          : seededBetween(seed, 18, 0.94, 1.08);
   const opacity =
     intent.visualWeight === 'whisper'
       ? seededBetween(seed, 19, 0.12, 0.18)
@@ -2079,23 +2561,16 @@ export function createFallbackStyleTransferArtworkSpec({
             ? 'gradient'
             : family === 'folded-ribbon'
               ? 'gradient'
-              : family === 'modular-tiles'
-                ? 'tinted'
-                : intent.usage === 'scrim'
+              : family === 'holo-shards'
+                ? 'gradient'
+                : family === 'venetian-shadow-bands'
                   ? 'tinted'
-                  : 'solid',
-    strokeStyle:
-      family === 'contour-lines' || family === 'grid-mesh'
-        ? 'hairline'
-        : family === 'constellation'
-          ? 'soft'
-          : family === 'offset-rings'
-            ? 'soft'
-            : family === 'angled-panel'
-              ? 'soft'
-              : family === 'inset-frames'
-                ? 'soft'
-                : 'none',
+                  : family === 'modular-tiles'
+                    ? 'tinted'
+                    : intent.usage === 'scrim'
+                      ? 'tinted'
+                      : 'solid',
+    strokeStyle: getDefaultArtworkStrokeStyle(family),
     opacityMode:
       intent.visualWeight === 'whisper'
         ? 'whisper'
@@ -2113,11 +2588,17 @@ export function createFallbackStyleTransferArtworkSpec({
     cornerStyle:
       family === 'angled-panel'
         ? 'sharp'
-        : family === 'modular-tiles'
-          ? 'rounded'
-          : family === 'paper-cut'
+        : family === 'venetian-shadow-bands'
+          ? 'sharp'
+          : family === 'modular-tiles'
             ? 'rounded'
-            : 'organic',
+            : family === 'offset-paper-windows'
+              ? 'rounded'
+              : family === 'paper-cut'
+                ? 'rounded'
+                : family === 'holo-shards'
+                  ? 'rounded'
+                  : 'organic',
     motionStyle:
       theme.motion === 'off'
         ? 'still'
@@ -2142,10 +2623,14 @@ export function createFallbackStyleTransferArtworkSpec({
       amplitude,
       curvature:
         family === 'soft-blob' ||
+        family === 'offset-paper-windows' ||
         family === 'paper-cut' ||
+        family === 'holo-shards' ||
         family === 'folded-ribbon'
           ? seededBetween(seed, 22, 0.62, 0.88)
-          : seededBetween(seed, 23, 0.2, 0.42),
+          : family === 'venetian-shadow-bands'
+            ? seededBetween(seed, 22.5, 0.12, 0.24)
+            : seededBetween(seed, 23, 0.2, 0.42),
       inset:
         intent.usage === 'scrim'
           ? seededBetween(seed, 24, 22, 40)
@@ -2163,9 +2648,15 @@ export function createFallbackStyleTransferArtworkSpec({
           ? seededBetween(seed, 28, 1, 1.8)
           : family === 'constellation'
             ? seededBetween(seed, 29, 1.2, 2.2)
-            : family === 'offset-rings'
-              ? seededBetween(seed, 30, 1.8, 3.2)
-              : seededBetween(seed, 31, 1.2, 2.4),
+            : family === 'offset-paper-windows'
+              ? seededBetween(seed, 29.25, 1.6, 2.4)
+              : family === 'holo-shards'
+                ? seededBetween(seed, 29.5, 1.8, 3)
+                : family === 'venetian-shadow-bands'
+                  ? seededBetween(seed, 29.75, 1.3, 2.1)
+                  : family === 'offset-rings'
+                    ? seededBetween(seed, 30, 1.8, 3.2)
+                    : seededBetween(seed, 31, 1.2, 2.4),
       frequency,
     },
   });

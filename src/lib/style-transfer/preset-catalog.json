@@ -110,7 +110,7 @@
     "prompt": "Y2K Futurism — chrome, glow, synthetic color, early-digital optimism.",
     "source": "preset",
     "meta": {
-      "artworkFamily": "radial-burst",
+      "artworkFamily": "holo-shards",
       "category": "future",
       "tags": ["chrome", "glow", "synthetic", "optimistic"],
       "notes": "This is the loud future preset. Keep it more synthetic than sleek."
@@ -285,7 +285,7 @@
     "prompt": "Noir Interface — dark, cinematic, muted accents.",
     "source": "preset",
     "meta": {
-      "artworkFamily": "constellation",
+      "artworkFamily": "venetian-shadow-bands",
       "category": "atmospheric",
       "tags": ["dark", "cinematic", "muted", "noir"],
       "notes": "Favor matte darkness and muted burgundy over luminous neon."
@@ -390,7 +390,7 @@
     "prompt": "Toasted Marshmallow — stone, sand, paper, and bronze-leaning restraint.",
     "source": "preset",
     "meta": {
-      "artworkFamily": "paper-cut",
+      "artworkFamily": "offset-paper-windows",
       "category": "neutral",
       "tags": ["stone", "sand", "paper", "bronze"],
       "notes": "Let warmth come from material tone rather than loud accent color."

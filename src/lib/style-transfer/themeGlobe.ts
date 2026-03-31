@@ -265,7 +265,8 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
     surfaceStyle === 'glow'
       ? 0.22
       : input.artworkFamily === 'radial-burst' ||
-          input.artworkFamily === 'offset-rings'
+          input.artworkFamily === 'offset-rings' ||
+          input.artworkFamily === 'holo-shards'
         ? 0.12
         : 0.05;
 
@@ -290,15 +291,19 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
   axisScale.y +=
     input.artworkFamily === 'soft-blob'
       ? 0.04
-      : input.artworkFamily === 'angled-panel'
+      : input.artworkFamily === 'angled-panel' ||
+          input.artworkFamily === 'holo-shards'
         ? -0.02
         : 0;
   axisScale.z +=
     input.artworkFamily === 'folded-ribbon'
       ? 0.03
-      : input.artworkFamily === 'paper-cut'
+      : input.artworkFamily === 'paper-cut' ||
+          input.artworkFamily === 'offset-paper-windows'
         ? -0.015
-        : 0;
+        : input.artworkFamily === 'venetian-shadow-bands'
+          ? 0.018
+          : 0;
 
   return {
     axisScale,

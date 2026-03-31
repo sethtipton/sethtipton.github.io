@@ -78,7 +78,10 @@ describe('route smoke tests', () => {
           (await page.locator('h1').textContent())?.trim().length,
         ).toBeGreaterThan(0);
         expect(
-          await page.locator('nav a[aria-current="page"]').textContent(),
+          await page
+            .getByLabel('Primary', { exact: true })
+            .locator('a[aria-current="page"]')
+            .textContent(),
         ).toContain('Home');
         expect(await page.locator('.button-row a[href="/work/"]').count()).toBe(
           1,

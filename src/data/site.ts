@@ -40,10 +40,10 @@ export const socialLinks: LinkItem[] = [
 export const heroContent = {
   name: 'Seth Tipton',
   title:
-    'I design and build the foundations that teams, platforms, and products need to scale.',
+    'I design and build the solid foundations that teams, platforms, and products actually need to grow with confidence',
   statement: [
-    'I focus on the systems that make shared product work more reliable at scale, including component libraries, durable UI patterns, reusable logic, and CMS or product integrations that support real team workflows.',
-    'My work is strongest where fast delivery and responsible ownership overlap, especially in accessibility, performance, rollout safety, editor experience, and standards that remain useful long after launch. I’ve built across enterprise platforms, commerce, CMS-driven experiences, and product UI, using AI to strengthen implementation and QA while keeping thoughtful engineering decisions at the center.',
+    'I geek out over the systems that make shared product work feel reliable and sane at scale: thoughtful component libraries, reusable patterns that don’t fight you later, smart logic that teams can actually trust, and CMS/product integrations that respect real human workflows instead of making everyone’s life harder.',
+    'My sweet spot is where fast delivery meets responsible ownership. That’s where I pour my energy into making things accessible by default, ridiculously performant, safe to roll out, delightful for editors, and built on standards that still feel useful years down the road. I’ve done this across big enterprise platforms, commerce experiences, CMS-driven sites, and product UIs. These days I also love bringing AI into the mix to supercharge implementation and QA… while keeping real engineering judgment firmly in the driver’s seat.',
   ],
   ctas: [
     { label: 'See case studies', href: '/work/' },

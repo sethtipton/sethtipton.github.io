@@ -5,6 +5,7 @@ import type {
   StyleTransferArtworkRenderConfig,
   StyleTransferArtworkShape,
 } from '../../lib/style-transfer/artwork';
+import { getStyleTransferArtworkBackgroundOpacity } from '../../lib/style-transfer/artwork';
 
 type StyleTransferArtworkSvgProps = {
   ariaLabel: string;
@@ -161,7 +162,7 @@ export default function StyleTransferArtworkSvg({
           config.bindings.background?.cssValue ??
           'color-mix(in srgb, var(--color-surface) 92%, transparent)'
         }
-        fillOpacity={artwork.spec.usage === 'scrim' ? 0.38 : 0.12}
+        fillOpacity={getStyleTransferArtworkBackgroundOpacity(artwork.spec)}
         data-style-transfer-artwork-background="true"
       />
       <g
