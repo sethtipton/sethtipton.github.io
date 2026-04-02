@@ -65,7 +65,7 @@ describe('StyleTransferLauncher', () => {
     ).toBeInTheDocument();
 
     expect(
-      await screen.findByLabelText(/give the portfolio this vibe/i, undefined, {
+      await screen.findByLabelText(/remix the theme/i, undefined, {
         timeout: 3000,
       }),
     ).toBeInTheDocument();

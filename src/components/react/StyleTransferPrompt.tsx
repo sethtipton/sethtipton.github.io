@@ -1,4 +1,5 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useId,
@@ -7,6 +8,7 @@ import {
   useState,
   type CSSProperties,
   type ComponentProps,
+  type RefObject,
 } from 'react';
 
 import ActiveThemeGlobe from './ActiveThemeGlobe';
@@ -47,6 +49,7 @@ import type { StyleTransferThemeRecord } from '../../lib/style-transfer/schema';
 import {
   createPaletteFromStoredApplication,
   defaultCanvasPalette,
+  resolveStyleTransferEffectiveMode,
 } from '../../lib/style-transfer/palette';
 import { getRuntimeStyleTransferMotionProfile } from '../../lib/style-transfer/motion';
 import { getStyleTransferSupportStatus } from '../../lib/style-transfer/support';
@@ -295,6 +298,199 @@ function getLauncherThemeLabel(source: StyleTransferControllerState['source']) {
 type TraceVisibilityState = 'hidden' | 'entering' | 'visible' | 'exiting';
 type LauncherGlobeActivityState = 'idle' | 'generating' | 'success' | 'error';
 
+type StyleTransferPromptFormProps = {
+  error: string | null;
+  isGenerating: boolean;
+  isPromptSubmissionAvailable: boolean;
+  isStyleTransferSupported: boolean;
+  notice: string | null;
+  promptCharacterCountId: string;
+  promptRef: RefObject<HTMLTextAreaElement | null>;
+  submitButtonRef: RefObject<HTMLButtonElement | null>;
+  syncedPrompt: string;
+  unavailableNotice: string | null;
+  onClearError: () => void;
+  onSubmitPrompt: (prompt: string) => void;
+};
+
+const StyleTransferPromptForm = memo(function StyleTransferPromptForm({
+  error,
+  isGenerating,
+  isPromptSubmissionAvailable,
+  isStyleTransferSupported,
+  notice,
+  promptCharacterCountId,
+  promptRef,
+  submitButtonRef,
+  syncedPrompt,
+  unavailableNotice,
+  onClearError,
+  onSubmitPrompt,
+}: StyleTransferPromptFormProps) {
+  const [prompt, setPrompt] = useState(() => syncedPrompt);
+  const promptLength = prompt.length;
+  const isPromptOverLimit = promptLength > maximumPromptLength;
+  const isLoadingNotice = isGenerating && notice?.includes(loadingNoticeCopy);
+  const showNotice = Boolean(isLoadingNotice || notice);
+
+  const handleSubmit: FormSubmitHandler = useCallback(
+    (event) => {
+      event.preventDefault();
+      onSubmitPrompt(prompt);
+    },
+    [onSubmitPrompt, prompt],
+  );
+
+  const handlePromptKeyDown: NonNullable<
+    ComponentProps<'textarea'>['onKeyDown']
+  > = useCallback(
+    (event) => {
+      if (
+        event.key !== 'Enter' ||
+        event.shiftKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.nativeEvent.isComposing ||
+        isGenerating ||
+        !isPromptSubmissionAvailable ||
+        !event.currentTarget.value.trim() ||
+        event.currentTarget.value.length > maximumPromptLength
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      const form = event.currentTarget.form;
+
+      if (!form) {
+        return;
+      }
+
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+        return;
+      }
+
+      if (submitButtonRef.current && !submitButtonRef.current.disabled) {
+        submitButtonRef.current.click();
+        return;
+      }
+
+      form.dispatchEvent(
+        new Event('submit', { bubbles: true, cancelable: true }),
+      );
+    },
+    [isGenerating, isPromptSubmissionAvailable, submitButtonRef],
+  );
+
+  return (
+    <div className="style-transfer__panel-main">
+      <form className="style-transfer__form" onSubmit={handleSubmit}>
+        <label
+          className="style-transfer__label"
+          htmlFor="style-transfer-prompt"
+        >
+          Remix the theme
+        </label>
+
+        <div className="style-transfer-prompt-wrapper">
+          <textarea
+            ref={promptRef}
+            id="style-transfer-prompt"
+            className="style-transfer__input"
+            rows={2}
+            placeholder="Creative and artsy, with off-white, terracotta, dusty pink, and deep green."
+            value={prompt}
+            disabled={!isStyleTransferSupported || !isPromptSubmissionAvailable}
+            aria-describedby={promptCharacterCountId}
+            aria-invalid={isPromptOverLimit}
+            onChange={(event) => {
+              const nextPrompt = event.currentTarget.value;
+
+              setPrompt(nextPrompt);
+
+              if (
+                error === promptTooLongMessage &&
+                nextPrompt.length <= maximumPromptLength
+              ) {
+                onClearError();
+              }
+            }}
+            onKeyDown={handlePromptKeyDown}
+          />
+          <p
+            id={promptCharacterCountId}
+            className={`style-transfer__character-count${
+              isPromptOverLimit
+                ? ' style-transfer__character-count--over-limit'
+                : ''
+            }`}
+          >
+            {promptLength} / {maximumPromptLength}
+          </p>
+        </div>
+
+        {unavailableNotice ? (
+          <p className="style-transfer__notice" aria-live="polite">
+            {unavailableNotice}
+          </p>
+        ) : showNotice ? (
+          <p
+            className={`style-transfer__notice${
+              isLoadingNotice ? ' style-transfer__notice--loading' : ''
+            }`}
+            aria-live="polite"
+          >
+            {isLoadingNotice ? (
+              <>
+                {loadingNoticeCopy}
+                <span
+                  className="style-transfer__loading-ellipsis"
+                  aria-hidden="true"
+                >
+                  <span>.</span>
+                  <span>.</span>
+                  <span>.</span>
+                </span>
+              </>
+            ) : (
+              notice
+            )}
+          </p>
+        ) : null}
+
+        <div className="style-transfer__button-row">
+          <button
+            ref={submitButtonRef}
+            className="button-link"
+            type="submit"
+            disabled={
+              !isStyleTransferSupported ||
+              !isPromptSubmissionAvailable ||
+              !prompt.trim() ||
+              isPromptOverLimit
+            }
+          >
+            {isGenerating ? 'Generating…' : 'Generate remix'}
+          </button>
+        </div>
+      </form>
+
+      {error ? (
+        <p
+          className="style-transfer__error"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+});
+
 function getTraceEnterDurationMs(trace: StyleTransferTrace | null) {
   if (!trace || typeof document === 'undefined') {
     return 0;
@@ -347,7 +543,6 @@ export default function StyleTransferPrompt({
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [isShellExpanded, setIsShellExpanded] = useState(initialOpen);
   const [shellWidth, setShellWidth] = useState<number | null>(null);
-  const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -382,6 +577,7 @@ export default function StyleTransferPrompt({
     useState(true);
   const [styleTransferUnavailableMessage, setStyleTransferUnavailableMessage] =
     useState<string | null>(null);
+  const [prefersDarkScheme, setPrefersDarkScheme] = useState(false);
   const resolveTraceForState = useCallback(
     (
       nextState: StyleTransferControllerState,
@@ -469,10 +665,6 @@ export default function StyleTransferPrompt({
     setActiveTrace(
       resolveTraceForState(next, nextPresets, nextGenerated, activeArtwork),
     );
-
-    if (next.source === 'prompt' && next.prompt) {
-      setPrompt(next.prompt);
-    }
   }, [resolveTraceForState]);
 
   const getCollapsedLauncherWidth = useCallback(() => {
@@ -567,6 +759,27 @@ export default function StyleTransferPrompt({
       syncControllerState as EventListener,
     );
   }, [syncControllerState]);
+
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function'
+    ) {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const syncPreference = () => {
+      setPrefersDarkScheme(mediaQuery.matches);
+    };
+
+    syncPreference();
+    mediaQuery.addEventListener('change', syncPreference);
+
+    return () => {
+      mediaQuery.removeEventListener('change', syncPreference);
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -817,9 +1030,6 @@ export default function StyleTransferPrompt({
       return;
     }
 
-    if (controllerState.mode !== mode) {
-      setHasStartedRemixing(true);
-    }
     setControllerState((previousState) => ({
       ...previousState,
       mode,
@@ -920,8 +1130,6 @@ export default function StyleTransferPrompt({
     return 0;
   }, [allThemes, controllerState]);
   const renderedThemeTickCount = allThemes.length + (isGenerating ? 1 : 0);
-  const isLoadingNotice = isGenerating && notice?.includes(loadingNoticeCopy);
-  const showNotice = Boolean(isLoadingNotice || notice);
   const unavailableNotice = !isStyleTransferSupported
     ? styleTransferUnavailableMessage
     : apiUrl
@@ -929,8 +1137,6 @@ export default function StyleTransferPrompt({
       : remixUnavailableMessage;
   const showIntro =
     !activeTrace && !hasStartedRemixing && isStyleTransferSupported;
-  const promptLength = prompt.length;
-  const isPromptOverLimit = promptLength > maximumPromptLength;
 
   useEffect(() => {
     if (introDismissTimeoutRef.current !== null) {
@@ -1079,6 +1285,10 @@ export default function StyleTransferPrompt({
     '--theme-explorer-progress-scale': `${themeSliderProgress / 100}`,
   } as CSSProperties;
   const launcherThemeLabel = getLauncherThemeLabel(controllerState.source);
+  const activeThemeEffectiveMode = resolveStyleTransferEffectiveMode(
+    controllerState.mode,
+    prefersDarkScheme,
+  );
 
   useEffect(() => {
     if (!isOpen || wasOpenRef.current) {
@@ -1097,46 +1307,6 @@ export default function StyleTransferPrompt({
 
     wasOpenRef.current = false;
   }, [isOpen]);
-
-  const handlePromptKeyDown: NonNullable<
-    ComponentProps<'textarea'>['onKeyDown']
-  > = (event) => {
-    if (
-      event.key !== 'Enter' ||
-      event.shiftKey ||
-      event.altKey ||
-      event.ctrlKey ||
-      event.metaKey ||
-      event.nativeEvent.isComposing ||
-      isGenerating ||
-      !apiUrl ||
-      !event.currentTarget.value.trim() ||
-      event.currentTarget.value.length > maximumPromptLength
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-    const form = event.currentTarget.form;
-
-    if (!form) {
-      return;
-    }
-
-    if (typeof form.requestSubmit === 'function') {
-      form.requestSubmit();
-      return;
-    }
-
-    if (submitButtonRef.current && !submitButtonRef.current.disabled) {
-      submitButtonRef.current.click();
-      return;
-    }
-
-    form.dispatchEvent(
-      new Event('submit', { bubbles: true, cancelable: true }),
-    );
-  };
 
   const handleThemeTickKeyDown = (
     event: Parameters<NonNullable<ComponentProps<'button'>['onKeyDown']>>[0],
@@ -1176,457 +1346,458 @@ export default function StyleTransferPrompt({
     focusThemeTick(nextIndex);
   };
 
-  const handleSubmit: FormSubmitHandler = async (event) => {
-    event.preventDefault();
+  const handleSubmitPrompt = useCallback(
+    async (nextPrompt: string) => {
+      const trimmedPrompt = nextPrompt.trim();
 
-    const trimmedPrompt = prompt.trim();
+      if (!trimmedPrompt) {
+        return;
+      }
 
-    if (!trimmedPrompt) {
-      return;
-    }
+      if (nextPrompt.length > maximumPromptLength) {
+        setError(promptTooLongMessage);
+        setNotice(null);
+        return;
+      }
 
-    if (prompt.length > maximumPromptLength) {
-      setError(promptTooLongMessage);
-      setNotice(null);
-      return;
-    }
-
-    if (!apiUrl) {
-      setError(remixUnavailableMessage);
-      setNotice(null);
-      logDebugError('submit blocked: missing PUBLIC_STYLE_TRANSFER_API_URL');
-      recordStyleTransferDiagnostic({
-        level: 'error',
-        message:
-          'Theme remix submission was blocked because the API URL is missing.',
-        source: 'prompt-submit',
-      });
-      return;
-    }
-
-    if (!getStyleTransferController()) {
-      setError(remixUnavailableMessage);
-      setNotice(null);
-      logDebugError('submit blocked: style transfer controller unavailable');
-      recordStyleTransferDiagnostic({
-        level: 'error',
-        message:
-          'Theme remix submission was blocked because the style transfer controller is unavailable.',
-        source: 'prompt-submit',
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    setLauncherGlobeActivity('generating');
-    setError(null);
-    setNotice(`${loadingNoticeCopy}…`);
-    const apiPrompt = normalizePromptForApi(trimmedPrompt);
-    const artworkIntent = createStyleTransferArtworkIntent(trimmedPrompt);
-    logDebug('submit start', {
-      endpoint: apiUrl,
-      normalizedPrompt: apiPrompt,
-      prompt: trimmedPrompt,
-    });
-
-    try {
-      const [
-        { deriveStyleTransferApplication },
-        { ensurePromptStyleTransferThemeCompliance },
-        {
-          createCustomStyleTransferThemeRecord,
-          styleTransferModelOutputSchema,
-        },
-        { evaluateStyleTransferThemeQuality },
-      ] = await Promise.all([
-        import('../../lib/style-transfer/deriveTheme'),
-        import('../../lib/style-transfer/compliance'),
-        import('../../lib/style-transfer/schema'),
-        import('../../lib/style-transfer/quality'),
-      ]);
-
-      const requestThemeAttempt = async (attemptPrompt: string) => {
-        const requestBody = {
-          artworkIntent,
-          prompt: attemptPrompt,
-        };
-        logDebug('request payload', requestBody);
-
-        let response: Response;
-
-        try {
-          response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-          });
-        } catch (fetchError) {
-          logDebugError('fetch failure', fetchError);
-          recordStyleTransferDiagnostic({
-            detail: fetchError,
-            level: 'error',
-            message:
-              'Theme remix request failed before a response was received.',
-            source: 'prompt-fetch',
-          });
-          throw new Error(remixNetworkErrorMessage);
-        }
-
-        logDebug('response status', {
-          ok: response.ok,
-          status: response.status,
-          statusText: response.statusText,
+      if (!apiUrl) {
+        setError(remixUnavailableMessage);
+        setNotice(null);
+        logDebugError('submit blocked: missing PUBLIC_STYLE_TRANSFER_API_URL');
+        recordStyleTransferDiagnostic({
+          level: 'error',
+          message:
+            'Theme remix submission was blocked because the API URL is missing.',
+          source: 'prompt-submit',
         });
+        return;
+      }
 
-        const responseText = await response.text();
-        let payload: ApiResponse | null = null;
+      if (!getStyleTransferController()) {
+        setError(remixUnavailableMessage);
+        setNotice(null);
+        logDebugError('submit blocked: style transfer controller unavailable');
+        recordStyleTransferDiagnostic({
+          level: 'error',
+          message:
+            'Theme remix submission was blocked because the style transfer controller is unavailable.',
+          source: 'prompt-submit',
+        });
+        return;
+      }
 
-        if (responseText) {
+      setIsGenerating(true);
+      setLauncherGlobeActivity('generating');
+      setError(null);
+      setNotice(`${loadingNoticeCopy}…`);
+      const apiPrompt = normalizePromptForApi(trimmedPrompt);
+      const artworkIntent = createStyleTransferArtworkIntent(trimmedPrompt);
+      logDebug('submit start', {
+        endpoint: apiUrl,
+        normalizedPrompt: apiPrompt,
+        prompt: trimmedPrompt,
+      });
+
+      try {
+        const [
+          { deriveStyleTransferApplication },
+          { ensurePromptStyleTransferThemeCompliance },
+          {
+            createCustomStyleTransferThemeRecord,
+            styleTransferModelOutputSchema,
+          },
+          { evaluateStyleTransferThemeQuality },
+        ] = await Promise.all([
+          import('../../lib/style-transfer/deriveTheme'),
+          import('../../lib/style-transfer/compliance'),
+          import('../../lib/style-transfer/schema'),
+          import('../../lib/style-transfer/quality'),
+        ]);
+
+        const requestThemeAttempt = async (attemptPrompt: string) => {
+          const requestBody = {
+            artworkIntent,
+            prompt: attemptPrompt,
+          };
+          logDebug('request payload', requestBody);
+
+          let response: Response;
+
           try {
-            payload = JSON.parse(responseText) as ApiResponse;
-          } catch (parseError) {
-            logDebugError('invalid JSON response', {
-              parseError,
-              responseText,
+            response = await fetch(apiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(requestBody),
+            });
+          } catch (fetchError) {
+            logDebugError('fetch failure', fetchError);
+            recordStyleTransferDiagnostic({
+              detail: fetchError,
+              level: 'error',
+              message:
+                'Theme remix request failed before a response was received.',
+              source: 'prompt-fetch',
+            });
+            throw new Error(remixNetworkErrorMessage);
+          }
+
+          logDebug('response status', {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+          });
+
+          const responseText = await response.text();
+          let payload: ApiResponse | null = null;
+
+          if (responseText) {
+            try {
+              payload = JSON.parse(responseText) as ApiResponse;
+            } catch (parseError) {
+              logDebugError('invalid JSON response', {
+                parseError,
+                responseText,
+              });
+              recordStyleTransferDiagnostic({
+                detail: {
+                  parseError,
+                  responseText,
+                },
+                level: 'error',
+                message: 'Theme remix returned invalid JSON.',
+                source: 'prompt-response',
+              });
+              throw new Error(remixUnexpectedResponseMessage);
+            }
+          }
+
+          logDebug('raw API response', payload);
+
+          if (!response.ok) {
+            const message =
+              response.status >= 500
+                ? remixUnavailableMessage
+                : response.status === 429
+                  ? remixBusyMessage
+                  : response.status === 400 &&
+                      typeof payload?.error === 'string' &&
+                      payload.error.trim()
+                    ? payload.error.trim()
+                    : remixRejectedMessage;
+            logDebugError('non-200 response', {
+              payload,
+              status: response.status,
             });
             recordStyleTransferDiagnostic({
               detail: {
-                parseError,
-                responseText,
+                payload,
+                status: response.status,
               },
+              level: response.status >= 500 ? 'error' : 'warning',
+              message: 'Theme remix returned a non-success response.',
+              source: 'prompt-response',
+            });
+            throw new Error(message);
+          }
+
+          if (!payload?.theme) {
+            logDebugError('missing theme in API payload', payload);
+            recordStyleTransferDiagnostic({
+              detail: payload,
               level: 'error',
-              message: 'Theme remix returned invalid JSON.',
+              message: 'Theme remix response did not include a theme payload.',
               source: 'prompt-response',
             });
             throw new Error(remixUnexpectedResponseMessage);
           }
-        }
 
-        logDebug('raw API response', payload);
-
-        if (!response.ok) {
-          const message =
-            response.status >= 500
-              ? remixUnavailableMessage
-              : response.status === 429
-                ? remixBusyMessage
-                : response.status === 400 &&
-                    typeof payload?.error === 'string' &&
-                    payload.error.trim()
-                  ? payload.error.trim()
-                  : remixRejectedMessage;
-          logDebugError('non-200 response', {
-            payload,
-            status: response.status,
-          });
-          recordStyleTransferDiagnostic({
-            detail: {
-              payload,
-              status: response.status,
-            },
-            level: response.status >= 500 ? 'error' : 'warning',
-            message: 'Theme remix returned a non-success response.',
-            source: 'prompt-response',
-          });
-          throw new Error(message);
-        }
-
-        if (!payload?.theme) {
-          logDebugError('missing theme in API payload', payload);
-          recordStyleTransferDiagnostic({
-            detail: payload,
-            level: 'error',
-            message: 'Theme remix response did not include a theme payload.',
-            source: 'prompt-response',
-          });
-          throw new Error(remixUnexpectedResponseMessage);
-        }
-
-        return payload;
-      };
-
-      const materializeThemeAttempt = async (
-        attemptPrompt: string,
-        payload: ApiResponse,
-      ) => {
-        const themePayloadResult = styleTransferModelOutputSchema.safeParse(
-          payload.theme,
-        );
-
-        if (!themePayloadResult.success) {
-          const flattenedIssues = themePayloadResult.error.flatten();
-          logDebugError('zod parse failed', flattenedIssues);
-          recordStyleTransferDiagnostic({
-            detail: flattenedIssues,
-            level: 'warning',
-            message: 'Theme remix response failed local validation.',
-            source: 'prompt-validation',
-          });
-          throw new Error(formatValidationIssues(flattenedIssues));
-        }
-
-        logDebug('theme', themePayloadResult.data);
-
-        let themeRecord: StyleTransferThemeRecord;
-        let application;
-        let complianceResult;
-
-        try {
-          themeRecord = createCustomStyleTransferThemeRecord(
-            trimmedPrompt,
-            themePayloadResult.data,
-          );
-          complianceResult =
-            ensurePromptStyleTransferThemeCompliance(themeRecord);
-          themeRecord = complianceResult.theme;
-          application = deriveStyleTransferApplication(themeRecord);
-        } catch (deriveError) {
-          logDebugError('derive/apply preparation failed', deriveError);
-          recordStyleTransferDiagnostic({
-            detail: deriveError,
-            level: 'error',
-            message:
-              'Theme remix could not be converted into a local application.',
-            source: 'prompt-derive',
-          });
-          throw new Error(formatValidationIssues(null));
-        }
-
-        const quality = evaluateStyleTransferThemeQuality(
-          themeRecord,
-          complianceResult.analysis,
-        );
-
-        logDebug('derived application object', {
-          application,
-          quality,
-        });
-
-        const artworkSlotsResult = styleTransferArtworkSlotsSchema.safeParse(
-          payload.artwork ?? {},
-        );
-        let previewArtwork: StyleTransferArtworkPreviewData | null = null;
-
-        if (!artworkSlotsResult.success) {
-          const flattenedIssues = artworkSlotsResult.error.flatten();
-          logDebugError('artwork validation failed', flattenedIssues);
-          recordStyleTransferDiagnostic({
-            detail: flattenedIssues,
-            level: 'warning',
-            message:
-              'Theme remix artwork payload failed validation and fell back locally.',
-            source: 'prompt-artwork',
-          });
-        } else {
-          const previewSlot = pickPrimaryArtworkSlot(artworkSlotsResult.data);
-
-          if (previewSlot) {
-            previewArtwork = {
-              slotKey: previewSlot.slotKey,
-              source: 'api',
-              spec: previewSlot.spec,
-            };
-            logDebug('artwork', previewArtwork);
-          }
-        }
-
-        if (!previewArtwork) {
-          const fallbackSpec = createFallbackStyleTransferArtworkSpec({
-            intent: artworkIntent,
-            prompt: trimmedPrompt,
-            theme: themeRecord,
-          });
-          const fallbackSlot = createFallbackArtworkSlotFromIntent(
-            artworkIntent,
-            fallbackSpec,
-          );
-
-          previewArtwork = {
-            slotKey: fallbackSlot.slotKey,
-            source: 'fallback',
-            spec: fallbackSlot.spec,
-          };
-
-          logDebug('artwork fallback', previewArtwork);
-        }
-
-        return {
-          apiPrompt: attemptPrompt,
-          application,
-          complianceResult,
-          payload,
-          previewArtwork,
-          quality,
-          themePayloadResult,
-          themeRecord,
+          return payload;
         };
-      };
 
-      let attempt = await materializeThemeAttempt(
-        apiPrompt,
-        await requestThemeAttempt(apiPrompt),
-      );
-      const attempts = [attempt];
-      let usedRetry = false;
+        const materializeThemeAttempt = async (
+          attemptPrompt: string,
+          payload: ApiResponse,
+        ) => {
+          const themePayloadResult = styleTransferModelOutputSchema.safeParse(
+            payload.theme,
+          );
 
-      for (
-        let retryIndex = 0;
-        retryIndex < maximumPromptRetries;
-        retryIndex += 1
-      ) {
-        const needsRetry =
-          !attempt.complianceResult.passesRequiredPairings ||
-          !attempt.quality.passes ||
-          countActionableComplianceAdjustments(
-            attempt.complianceResult.adjustments,
-          ) >= 4;
+          if (!themePayloadResult.success) {
+            const flattenedIssues = themePayloadResult.error.flatten();
+            logDebugError('zod parse failed', flattenedIssues);
+            recordStyleTransferDiagnostic({
+              detail: flattenedIssues,
+              level: 'warning',
+              message: 'Theme remix response failed local validation.',
+              source: 'prompt-validation',
+            });
+            throw new Error(formatValidationIssues(flattenedIssues));
+          }
 
-        if (!needsRetry) {
-          break;
-        }
+          logDebug('theme', themePayloadResult.data);
 
-        const retryPrompt = createRetryPrompt(
-          attempt.apiPrompt,
-          [...attempt.quality.notes, ...attempt.complianceResult.notes],
-          !attempt.complianceResult.passesSupportPairings,
+          let themeRecord: StyleTransferThemeRecord;
+          let application;
+          let complianceResult;
+
+          try {
+            themeRecord = createCustomStyleTransferThemeRecord(
+              trimmedPrompt,
+              themePayloadResult.data,
+            );
+            complianceResult =
+              ensurePromptStyleTransferThemeCompliance(themeRecord);
+            themeRecord = complianceResult.theme;
+            application = deriveStyleTransferApplication(themeRecord);
+          } catch (deriveError) {
+            logDebugError('derive/apply preparation failed', deriveError);
+            recordStyleTransferDiagnostic({
+              detail: deriveError,
+              level: 'error',
+              message:
+                'Theme remix could not be converted into a local application.',
+              source: 'prompt-derive',
+            });
+            throw new Error(formatValidationIssues(null));
+          }
+
+          const quality = evaluateStyleTransferThemeQuality(
+            themeRecord,
+            complianceResult.analysis,
+          );
+
+          logDebug('derived application object', {
+            application,
+            quality,
+          });
+
+          const artworkSlotsResult = styleTransferArtworkSlotsSchema.safeParse(
+            payload.artwork ?? {},
+          );
+          let previewArtwork: StyleTransferArtworkPreviewData | null = null;
+
+          if (!artworkSlotsResult.success) {
+            const flattenedIssues = artworkSlotsResult.error.flatten();
+            logDebugError('artwork validation failed', flattenedIssues);
+            recordStyleTransferDiagnostic({
+              detail: flattenedIssues,
+              level: 'warning',
+              message:
+                'Theme remix artwork payload failed validation and fell back locally.',
+              source: 'prompt-artwork',
+            });
+          } else {
+            const previewSlot = pickPrimaryArtworkSlot(artworkSlotsResult.data);
+
+            if (previewSlot) {
+              previewArtwork = {
+                slotKey: previewSlot.slotKey,
+                source: 'api',
+                spec: previewSlot.spec,
+              };
+              logDebug('artwork', previewArtwork);
+            }
+          }
+
+          if (!previewArtwork) {
+            const fallbackSpec = createFallbackStyleTransferArtworkSpec({
+              intent: artworkIntent,
+              prompt: trimmedPrompt,
+              theme: themeRecord,
+            });
+            const fallbackSlot = createFallbackArtworkSlotFromIntent(
+              artworkIntent,
+              fallbackSpec,
+            );
+
+            previewArtwork = {
+              slotKey: fallbackSlot.slotKey,
+              source: 'fallback',
+              spec: fallbackSlot.spec,
+            };
+
+            logDebug('artwork fallback', previewArtwork);
+          }
+
+          return {
+            apiPrompt: attemptPrompt,
+            application,
+            complianceResult,
+            payload,
+            previewArtwork,
+            quality,
+            themePayloadResult,
+            themeRecord,
+          };
+        };
+
+        let attempt = await materializeThemeAttempt(
+          apiPrompt,
+          await requestThemeAttempt(apiPrompt),
         );
+        const attempts = [attempt];
+        let usedRetry = false;
 
-        if (retryPrompt === attempt.apiPrompt) {
-          break;
-        }
+        for (
+          let retryIndex = 0;
+          retryIndex < maximumPromptRetries;
+          retryIndex += 1
+        ) {
+          const needsRetry =
+            !attempt.complianceResult.passesRequiredPairings ||
+            !attempt.quality.passes ||
+            countActionableComplianceAdjustments(
+              attempt.complianceResult.adjustments,
+            ) >= 4;
 
-        logDebug('retrying prompt theme generation', {
-          quality: attempt.quality,
-          retryPrompt,
-          retryIndex: retryIndex + 1,
-        });
-        recordStyleTransferDiagnostic({
-          detail: {
+          if (!needsRetry) {
+            break;
+          }
+
+          const retryPrompt = createRetryPrompt(
+            attempt.apiPrompt,
+            [...attempt.quality.notes, ...attempt.complianceResult.notes],
+            !attempt.complianceResult.passesSupportPairings,
+          );
+
+          if (retryPrompt === attempt.apiPrompt) {
+            break;
+          }
+
+          logDebug('retrying prompt theme generation', {
             quality: attempt.quality,
             retryPrompt,
             retryIndex: retryIndex + 1,
+          });
+          recordStyleTransferDiagnostic({
+            detail: {
+              quality: attempt.quality,
+              retryPrompt,
+              retryIndex: retryIndex + 1,
+            },
+            level: 'warning',
+            message:
+              'Theme remix triggered another pass to improve readability and surface quality.',
+            source: 'prompt-retry',
+          });
+
+          attempt = await materializeThemeAttempt(
+            retryPrompt,
+            await requestThemeAttempt(retryPrompt),
+          );
+          attempts.push(attempt);
+          usedRetry = true;
+        }
+
+        const bestAttempt = attempts.reduce<(typeof attempts)[number] | null>(
+          (best, nextAttempt) => {
+            if (!nextAttempt.complianceResult.passesRequiredPairings) {
+              return best;
+            }
+
+            return pickPreferredPromptAttempt(best, nextAttempt);
           },
-          level: 'warning',
-          message:
-            'Theme remix triggered another pass to improve readability and surface quality.',
-          source: 'prompt-retry',
-        });
-
-        attempt = await materializeThemeAttempt(
-          retryPrompt,
-          await requestThemeAttempt(retryPrompt),
+          null,
         );
-        attempts.push(attempt);
-        usedRetry = true;
-      }
 
-      const bestAttempt = attempts.reduce<(typeof attempts)[number] | null>(
-        (best, nextAttempt) => {
-          if (!nextAttempt.complianceResult.passesRequiredPairings) {
-            return best;
-          }
+        if (!bestAttempt) {
+          throw new Error(
+            attempt.complianceResult.failureMessage ?? remixRejectedMessage,
+          );
+        }
 
-          return pickPreferredPromptAttempt(best, nextAttempt);
-        },
-        null,
-      );
+        const appliedBelowQualityThreshold = !bestAttempt.quality.passes;
 
-      if (!bestAttempt) {
-        throw new Error(
-          attempt.complianceResult.failureMessage ?? remixRejectedMessage,
-        );
-      }
+        if (appliedBelowQualityThreshold) {
+          recordStyleTransferDiagnostic({
+            detail: {
+              prompt: trimmedPrompt,
+              quality: bestAttempt.quality,
+              selectedTheme: bestAttempt.themeRecord.name,
+            },
+            level: 'warning',
+            message:
+              'Theme remix applied a best-effort palette after retries kept the quality score below the preferred threshold.',
+            source: 'prompt-quality',
+          });
+        }
 
-      const appliedBelowQualityThreshold = !bestAttempt.quality.passes;
-
-      if (appliedBelowQualityThreshold) {
-        recordStyleTransferDiagnostic({
-          detail: {
-            prompt: trimmedPrompt,
-            quality: bestAttempt.quality,
-            selectedTheme: bestAttempt.themeRecord.name,
-          },
-          level: 'warning',
-          message:
-            'Theme remix applied a best-effort palette after retries kept the quality score below the preferred threshold.',
-          source: 'prompt-quality',
-        });
-      }
-
-      const nextTrace = createPromptStyleTransferTrace({
-        accessibility:
-          bestAttempt.complianceResult.analysis ??
-          analyzeStyleTransferThemeAccessibility(bestAttempt.themeRecord),
-        apiPrompt: bestAttempt.apiPrompt,
-        application: bestAttempt.application,
-        artwork: bestAttempt.previewArtwork,
-        compliance: bestAttempt.complianceResult,
-        prompt: trimmedPrompt,
-        responseArtwork: bestAttempt.payload.artwork ?? null,
-        responseTheme: bestAttempt.themePayloadResult.data,
-        themeRecord: bestAttempt.themeRecord,
-      });
-
-      try {
-        applyStyleTransferApplication(bestAttempt.application, {
+        const nextTrace = createPromptStyleTransferTrace({
+          accessibility:
+            bestAttempt.complianceResult.analysis ??
+            analyzeStyleTransferThemeAccessibility(bestAttempt.themeRecord),
+          apiPrompt: bestAttempt.apiPrompt,
+          application: bestAttempt.application,
           artwork: bestAttempt.previewArtwork,
+          compliance: bestAttempt.complianceResult,
+          prompt: trimmedPrompt,
+          responseArtwork: bestAttempt.payload.artwork ?? null,
+          responseTheme: bestAttempt.themePayloadResult.data,
+          themeRecord: bestAttempt.themeRecord,
         });
-      } catch (applyError) {
-        logDebugError('controller apply failed', applyError);
-        recordStyleTransferDiagnostic({
-          detail: applyError,
-          level: 'error',
-          message: 'Theme remix failed while applying the generated theme.',
-          source: 'prompt-apply',
-        });
-        throw new Error(remixApplyFailureMessage);
-      }
 
-      traceCacheRef.current.set(
-        getTraceCacheKey('prompt', bestAttempt.themeRecord.id),
-        nextTrace,
-      );
-      setActiveTrace(nextTrace);
-      syncControllerState();
-      logDebug('theme applied', {
-        id: bestAttempt.themeRecord.id,
-        name: bestAttempt.themeRecord.name,
-      });
-      setNotice(
-        appliedBelowQualityThreshold
-          ? `Applied "${bestAttempt.themeRecord.name}" after some local tuning. It passes, though the palette still leans soft.`
-          : bestAttempt.complianceResult.status === 'normalized'
-            ? `Applied "${bestAttempt.themeRecord.name}" with dark mode adjusted for readability.`
-            : bestAttempt.complianceResult.status === 'repaired'
-              ? `Applied "${bestAttempt.themeRecord.name}" with readability repairs.`
-              : usedRetry
-                ? `Applied "${bestAttempt.themeRecord.name}" after another pass for readability.`
-                : `Applied "${bestAttempt.themeRecord.name}".`,
-      );
-      setLauncherGlobeActivity('success', 560);
-    } catch (caughtError) {
-      logDebugError('submit failed', caughtError);
-      recordStyleTransferDiagnostic({
-        detail: caughtError,
-        level: 'error',
-        message: 'Theme remix submission failed.',
-        source: 'prompt-submit',
-      });
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : 'Style remix failed.',
-      );
-      setNotice(null);
-      setLauncherGlobeActivity('error', 520);
-    } finally {
-      setHasStartedRemixing(true);
-      setIsGenerating(false);
-      setIsOpen(true);
-    }
-  };
+        try {
+          applyStyleTransferApplication(bestAttempt.application, {
+            artwork: bestAttempt.previewArtwork,
+          });
+        } catch (applyError) {
+          logDebugError('controller apply failed', applyError);
+          recordStyleTransferDiagnostic({
+            detail: applyError,
+            level: 'error',
+            message: 'Theme remix failed while applying the generated theme.',
+            source: 'prompt-apply',
+          });
+          throw new Error(remixApplyFailureMessage);
+        }
+
+        traceCacheRef.current.set(
+          getTraceCacheKey('prompt', bestAttempt.themeRecord.id),
+          nextTrace,
+        );
+        setActiveTrace(nextTrace);
+        syncControllerState();
+        logDebug('theme applied', {
+          id: bestAttempt.themeRecord.id,
+          name: bestAttempt.themeRecord.name,
+        });
+        setNotice(
+          appliedBelowQualityThreshold
+            ? `Applied "${bestAttempt.themeRecord.name}" after some local tuning. It passes, though the palette still leans soft.`
+            : bestAttempt.complianceResult.status === 'normalized'
+              ? `Applied "${bestAttempt.themeRecord.name}" with dark mode adjusted for readability.`
+              : bestAttempt.complianceResult.status === 'repaired'
+                ? `Applied "${bestAttempt.themeRecord.name}" with readability repairs.`
+                : usedRetry
+                  ? `Applied "${bestAttempt.themeRecord.name}" after another pass for readability.`
+                  : `Applied "${bestAttempt.themeRecord.name}".`,
+        );
+        setLauncherGlobeActivity('success', 560);
+      } catch (caughtError) {
+        logDebugError('submit failed', caughtError);
+        recordStyleTransferDiagnostic({
+          detail: caughtError,
+          level: 'error',
+          message: 'Theme remix submission failed.',
+          source: 'prompt-submit',
+        });
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : 'Style remix failed.',
+        );
+        setNotice(null);
+        setLauncherGlobeActivity('error', 520);
+      } finally {
+        setHasStartedRemixing(true);
+        setIsGenerating(false);
+        setIsOpen(true);
+      }
+    },
+    [setLauncherGlobeActivity, syncControllerState],
+  );
 
   const modeChips = (
     <fieldset className="style-transfer__mode-fieldset">
@@ -1979,120 +2150,39 @@ export default function StyleTransferPrompt({
                 </div>
                 */}
 
-                <div className="style-transfer__panel-main">
-                  <form
-                    className="style-transfer__form"
-                    onSubmit={handleSubmit}
+                <div className="style-transfer__panel-main-wrap">
+                  <StyleTransferPromptForm
+                    key={`prompt-form:${controllerState.source}:${controllerState.id ?? controllerState.presetId ?? 'default'}:${controllerState.prompt ?? ''}`}
+                    error={error}
+                    isGenerating={isGenerating}
+                    isPromptSubmissionAvailable={Boolean(
+                      isStyleTransferSupported && apiUrl && !isGenerating,
+                    )}
+                    isStyleTransferSupported={isStyleTransferSupported}
+                    notice={notice}
+                    promptCharacterCountId={promptCharacterCountId}
+                    promptRef={promptRef}
+                    submitButtonRef={submitButtonRef}
+                    syncedPrompt={
+                      controllerState.source === 'prompt' &&
+                      controllerState.prompt
+                        ? controllerState.prompt
+                        : ''
+                    }
+                    unavailableNotice={unavailableNotice}
+                    onClearError={() => {
+                      setError(null);
+                    }}
+                    onSubmitPrompt={handleSubmitPrompt}
+                  />
+                  <div
+                    id="style-transfer-preset-rail"
+                    className="style-transfer__preset-rail"
                   >
-                    <label
-                      className="style-transfer__label"
-                      htmlFor="style-transfer-prompt"
-                    >
-                      Give the portfolio this vibe:
-                    </label>
-
-                    <div className="style-transfer-prompt-wrapper">
-                      <textarea
-                        ref={promptRef}
-                        id="style-transfer-prompt"
-                        className="style-transfer__input"
-                        rows={2}
-                        placeholder="Creative and artsy, with off-white, terracotta, dusty pink, and deep green."
-                        value={prompt}
-                        disabled={
-                          !isStyleTransferSupported || !apiUrl || isGenerating
-                        }
-                        aria-describedby={promptCharacterCountId}
-                        aria-invalid={isPromptOverLimit}
-                        onChange={(event) => {
-                          const nextPrompt = event.currentTarget.value;
-
-                          setPrompt(nextPrompt);
-
-                          if (
-                            error === promptTooLongMessage &&
-                            nextPrompt.length <= maximumPromptLength
-                          ) {
-                            setError(null);
-                          }
-                        }}
-                        onKeyDown={handlePromptKeyDown}
-                      />
-                      <p
-                        id={promptCharacterCountId}
-                        className={`style-transfer__character-count${
-                          isPromptOverLimit
-                            ? ' style-transfer__character-count--over-limit'
-                            : ''
-                        }`}
-                      >
-                        {promptLength} / {maximumPromptLength}
-                      </p>
+                    <div className="style-transfer__rail-section">
+                      <p className="style-transfer__rail-label">Mode</p>
+                      {modeChips}
                     </div>
-
-                    {unavailableNotice ? (
-                      <p className="style-transfer__notice" aria-live="polite">
-                        {unavailableNotice}
-                      </p>
-                    ) : showNotice ? (
-                      <p
-                        className={`style-transfer__notice${
-                          isLoadingNotice
-                            ? ' style-transfer__notice--loading'
-                            : ''
-                        }`}
-                        aria-live="polite"
-                      >
-                        {isLoadingNotice ? (
-                          <>
-                            {loadingNoticeCopy}
-                            <span
-                              className="style-transfer__loading-ellipsis"
-                              aria-hidden="true"
-                            >
-                              <span>.</span>
-                              <span>.</span>
-                              <span>.</span>
-                            </span>
-                          </>
-                        ) : (
-                          notice
-                        )}
-                      </p>
-                    ) : null}
-
-                    <div className="style-transfer__button-row">
-                      <button
-                        ref={submitButtonRef}
-                        className="button-link"
-                        type="submit"
-                        disabled={
-                          !isStyleTransferSupported ||
-                          !apiUrl ||
-                          isGenerating ||
-                          !prompt.trim() ||
-                          isPromptOverLimit
-                        }
-                      >
-                        {isGenerating ? 'Generating…' : 'Generate remix'}
-                      </button>
-                    </div>
-                  </form>
-
-                  {error ? (
-                    <p className="style-transfer__error" aria-live="polite">
-                      {error}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div
-                  id="style-transfer-preset-rail"
-                  className="style-transfer__preset-rail"
-                >
-                  <div className="style-transfer__rail-section">
-                    <p className="style-transfer__rail-label">Mode</p>
-                    {modeChips}
                   </div>
                 </div>
 
@@ -2104,6 +2194,18 @@ export default function StyleTransferPrompt({
                   >
                     <StyleTransferTraceInspector
                       artwork={artworkPreview}
+                      effectiveMode={
+                        activeThemeExplorerItem &&
+                        activeThemeExplorerItem.type !== 'default'
+                          ? activeThemeEffectiveMode
+                          : undefined
+                      }
+                      palette={
+                        activeThemeExplorerItem &&
+                        activeThemeExplorerItem.type !== 'default'
+                          ? activeThemeExplorerItem.palette
+                          : undefined
+                      }
                       trace={renderedTrace}
                     />
                   </div>

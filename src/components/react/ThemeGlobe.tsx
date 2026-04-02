@@ -42,6 +42,7 @@ type ThemeGlobeCellProps = {
   cell: ThemeGlobeCellModel;
   effectiveMode: ThemeGlobeInput['effectiveMode'];
   onInspect: (token: StyleTransferThemeColorRole | null) => void;
+  outlineEmphasis: number;
   sequenceIndex: number;
   sequenceTotal: number;
   showOutlines: boolean;
@@ -139,6 +140,7 @@ function ThemeGlobeCell({
   cell,
   effectiveMode,
   onInspect,
+  outlineEmphasis,
   sequenceIndex,
   sequenceTotal,
   showOutlines,
@@ -229,6 +231,18 @@ function ThemeGlobeCell({
       ? { primary: 0.96, secondary: 0.36 }
       : { primary: 0.76, secondary: 0.22 };
   }, [active, effectiveMode]);
+  const baseOutlineOpacity = useMemo(
+    () => ({
+      filledActive: Math.min(0.48, 0.34 * outlineEmphasis),
+      filledIdle: Math.min(0.28, 0.2 * outlineEmphasis),
+      strokePrimary: Math.min(1, strokeOpacity.primary * outlineEmphasis),
+      strokeSecondary: Math.min(
+        0.44,
+        strokeOpacity.secondary * outlineEmphasis,
+      ),
+    }),
+    [outlineEmphasis, strokeOpacity],
+  );
 
   useEffect(() => {
     phaseStartRef.current = getTimestampMs();
@@ -265,11 +279,11 @@ function ThemeGlobeCell({
     let targetOutlineOpacity =
       variant === 'stroke'
         ? active
-          ? strokeOpacity.primary
-          : strokeOpacity.secondary
+          ? baseOutlineOpacity.strokePrimary
+          : baseOutlineOpacity.strokeSecondary
         : active
-          ? 0.34
-          : 0.2;
+          ? baseOutlineOpacity.filledActive
+          : baseOutlineOpacity.filledIdle;
 
     if (activityState === 'generating') {
       pulse = getSequencePulse(
@@ -286,8 +300,8 @@ function ThemeGlobeCell({
       targetColor = pulse > 0.06 ? loadingColor : targetColor;
       targetOutlineOpacity =
         variant === 'stroke'
-          ? strokeOpacity.secondary + pulse * 0.6
-          : 0.2 + pulse * 0.42;
+          ? Math.min(1, baseOutlineOpacity.strokeSecondary + pulse * 0.6)
+          : Math.min(0.62, baseOutlineOpacity.filledIdle + pulse * 0.42);
     } else if (activityState === 'success') {
       pulse = getSettlingPulse(phaseElapsedSeconds, 0.42);
       targetScale += pulse * 0.08;
@@ -299,8 +313,8 @@ function ThemeGlobeCell({
       targetColor = pulse > 0.03 ? successColor : targetColor;
       targetOutlineOpacity =
         variant === 'stroke'
-          ? strokeOpacity.secondary + pulse * 0.38
-          : 0.2 + pulse * 0.24;
+          ? Math.min(1, baseOutlineOpacity.strokeSecondary + pulse * 0.38)
+          : Math.min(0.48, baseOutlineOpacity.filledIdle + pulse * 0.24);
     } else if (activityState === 'error') {
       pulse = getSettlingPulse(phaseElapsedSeconds, 0.34);
       targetScale -= pulse * 0.03;
@@ -312,8 +326,8 @@ function ThemeGlobeCell({
       targetColor = errorColor;
       targetOutlineOpacity =
         variant === 'stroke'
-          ? Math.max(0.08, strokeOpacity.secondary - pulse * 0.12)
-          : Math.max(0.08, 0.16 - pulse * 0.08);
+          ? Math.max(0.08, baseOutlineOpacity.strokeSecondary - pulse * 0.12)
+          : Math.max(0.08, baseOutlineOpacity.filledIdle - pulse * 0.08);
     }
 
     groupRef.current.scale.x = THREE.MathUtils.damp(
@@ -422,7 +436,11 @@ function ThemeGlobeCell({
                   outlineMaterialRefs.current[0] = material;
                 }}
                 color={filledOutlineColor}
-                opacity={active ? 0.34 : 0.2}
+                opacity={
+                  active
+                    ? baseOutlineOpacity.filledActive
+                    : baseOutlineOpacity.filledIdle
+                }
                 transparent
               />
             </lineLoop>
@@ -444,7 +462,9 @@ function ThemeGlobeCell({
                 }}
                 color={active ? activeColor : baseColor}
                 opacity={
-                  index === 0 ? strokeOpacity.primary : strokeOpacity.secondary
+                  index === 0
+                    ? baseOutlineOpacity.strokePrimary
+                    : baseOutlineOpacity.strokeSecondary
                 }
                 transparent
               />
@@ -569,6 +589,7 @@ function ThemeGlobeScene({
             effectiveMode={effectiveMode}
             key={cell.token}
             onInspect={onInspect}
+            outlineEmphasis={model.outlineEmphasis}
             sequenceIndex={index}
             sequenceTotal={model.cells.length}
             showOutlines={showOutlines}

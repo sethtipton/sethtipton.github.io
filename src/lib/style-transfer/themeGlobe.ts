@@ -59,6 +59,7 @@ export type ThemeGlobeCellModel = {
 
 export type ThemeGlobeModel = {
   cells: ThemeGlobeCellModel[];
+  outlineEmphasis: number;
   rotationSpeed: number;
 };
 
@@ -74,6 +75,7 @@ type ThemeGlobeShapeProfile = {
   facetStrength: number;
   gap: number;
   metalness: number;
+  outlineEmphasis: number;
   panelLift: number;
   roughness: number;
   rotationSpeed: number;
@@ -195,53 +197,53 @@ function createThemeGlobeCacheKey(input: ThemeGlobeInput) {
 }
 
 function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
-  const random = createRandom(createThemeGlobeCacheKey(input));
   const surfaceStyle = input.dataset.styleSurface ?? 'flat';
   const density = input.dataset.styleDensity ?? 'balanced';
   const motion = (input.dataset.styleMotion ??
     'calm') as StyleTransferMotionLevel;
   const buttonStyle = input.dataset.styleButton ?? 'soft';
   const pattern = input.dataset.stylePattern ?? 'none';
+  const family = input.artworkFamily ?? 'none';
 
   const axisScale = {
-    x: 1 + (random() - 0.5) * 0.06,
-    y: 1 + (random() - 0.5) * 0.08,
-    z: 1 + (random() - 0.5) * 0.06,
+    x: 1.01,
+    y: 1.03,
+    z: 0.99,
   };
 
-  const baseRadius =
-    1.02 +
-    (density === 'airy' ? 0.03 : density === 'compact' ? -0.02 : 0) +
-    (surfaceStyle === 'glow' ? 0.015 : 0);
+  const baseRadius = 1.03;
+  const bulge = 0.022;
+  const gap = 0.054;
 
-  const bulge =
-    0.02 +
-    (density === 'airy' ? 0.018 : density === 'compact' ? -0.005 : 0.006) +
-    (surfaceStyle === 'glass' ? 0.01 : 0) +
-    (surfaceStyle === 'paper' ? -0.004 : 0) +
-    (input.source === 'prompt' ? 0.008 : 0);
+  const panelLift = clamp(
+    0.034 +
+      (surfaceStyle === 'glow' ? 0.01 : 0) +
+      (surfaceStyle === 'glass' ? 0.008 : 0) +
+      (buttonStyle === 'pill' ? 0.004 : 0) +
+      (density === 'airy' ? 0.003 : density === 'compact' ? -0.002 : 0) +
+      (family === 'offset-rings' || family === 'radial-burst' ? 0.003 : 0),
+    0.028,
+    0.052,
+  );
 
-  const gap =
-    0.06 +
-    (buttonStyle === 'hard-edge' ? 0.016 : 0) +
-    (buttonStyle === 'pill' ? -0.008 : 0) +
-    (density === 'compact' ? 0.01 : density === 'airy' ? -0.006 : 0);
-
-  const panelLift =
-    0.035 +
-    (surfaceStyle === 'glow' ? 0.018 : 0) +
-    (surfaceStyle === 'glass' ? 0.012 : 0) +
-    (buttonStyle === 'pill' ? 0.01 : 0);
-
-  const seamDepth =
+  const seamDepth = clamp(
     0.018 +
-    (surfaceStyle === 'paper' ? 0.01 : 0.004) +
-    (buttonStyle === 'hard-edge' ? 0.012 : 0);
+      (surfaceStyle === 'paper' ? 0.006 : 0.002) +
+      (buttonStyle === 'hard-edge' ? 0.006 : 0) +
+      (pattern === 'grid' || pattern === 'scanlines' ? 0.003 : 0) +
+      (family === 'paper-cut' || family === 'offset-paper-windows' ? 0.003 : 0),
+    0.014,
+    0.03,
+  );
 
-  const facetStrength =
-    0.008 +
-    (buttonStyle === 'hard-edge' ? 0.016 : 0) +
-    (pattern === 'grid' || pattern === 'scanlines' ? 0.012 : 0);
+  const facetStrength = clamp(
+    0.009 +
+      (buttonStyle === 'hard-edge' ? 0.01 : 0) +
+      (pattern === 'grid' || pattern === 'scanlines' ? 0.006 : 0) +
+      (family === 'angled-panel' || family === 'holo-shards' ? 0.004 : 0),
+    0.007,
+    0.022,
+  );
 
   const roughness =
     surfaceStyle === 'glass'
@@ -264,46 +266,31 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
   const emissiveBoost =
     surfaceStyle === 'glow'
       ? 0.22
-      : input.artworkFamily === 'radial-burst' ||
-          input.artworkFamily === 'offset-rings' ||
-          input.artworkFamily === 'holo-shards'
+      : family === 'radial-burst' ||
+          family === 'offset-rings' ||
+          family === 'holo-shards'
         ? 0.12
         : 0.05;
 
   const rotationSpeed =
     getStyleTransferMotionProfile(motion).globeRotationSpeed;
 
-  const waveFrequency =
-    pattern === 'scanlines'
-      ? 3.6
-      : pattern === 'grid'
-        ? 3.2
-        : pattern === 'noise'
-          ? 4.4
-          : 2.6;
+  const waveFrequency = 3.1;
 
-  axisScale.x +=
-    input.artworkFamily === 'layered-wave'
-      ? 0.03
-      : input.artworkFamily === 'offset-rings'
-        ? -0.02
-        : 0;
-  axisScale.y +=
-    input.artworkFamily === 'soft-blob'
-      ? 0.04
-      : input.artworkFamily === 'angled-panel' ||
-          input.artworkFamily === 'holo-shards'
-        ? -0.02
-        : 0;
-  axisScale.z +=
-    input.artworkFamily === 'folded-ribbon'
-      ? 0.03
-      : input.artworkFamily === 'paper-cut' ||
-          input.artworkFamily === 'offset-paper-windows'
-        ? -0.015
-        : input.artworkFamily === 'venetian-shadow-bands'
-          ? 0.018
-          : 0;
+  const outlineEmphasis = clamp(
+    1 +
+      (surfaceStyle === 'paper' ? 0.08 : 0) +
+      (surfaceStyle === 'glass' ? -0.04 : 0) +
+      (buttonStyle === 'hard-edge' ? 0.12 : 0) +
+      (pattern === 'grid' || pattern === 'scanlines' ? 0.08 : 0) +
+      (family === 'paper-cut' ||
+      family === 'offset-paper-windows' ||
+      family === 'angled-panel'
+        ? 0.06
+        : 0),
+    0.9,
+    1.28,
+  );
 
   return {
     axisScale,
@@ -311,38 +298,20 @@ function createShapeProfile(input: ThemeGlobeInput): ThemeGlobeShapeProfile {
     bulge,
     emissiveBoost,
     facetStrength,
-    gap: clamp(gap, 0.035, 0.085),
+    gap,
     metalness,
-    panelLift: clamp(panelLift, 0.024, 0.08),
+    outlineEmphasis,
+    panelLift,
     roughness,
     rotationSpeed,
-    seamDepth: clamp(seamDepth, 0.012, 0.04),
+    seamDepth,
     waveFrequency,
   };
 }
 
-function createSeedPoints(input: ThemeGlobeInput) {
-  const globalRandom = createRandom(`${input.themeId}|seed-rotation`);
-  const yaw = (globalRandom() - 0.5) * 0.7;
-  const pitch = (globalRandom() - 0.5) * 0.4;
-  const roll = (globalRandom() - 0.5) * 0.25;
-  const rotation = new THREE.Quaternion().setFromEuler(
-    new THREE.Euler(pitch, yaw, roll),
-  );
-
+function createSeedPoints() {
   return tokenOrder.map((token, index) => {
-    const tokenRandom = createRandom(
-      `${input.themeId}|${input.source}|${token}|${input.artworkFamily ?? 'none'}`,
-    );
-    const jitter = new THREE.Vector3(
-      (tokenRandom() - 0.5) * 0.18,
-      (tokenRandom() - 0.5) * 0.18,
-      (tokenRandom() - 0.5) * 0.18,
-    );
-    const baseVector = createBaseSeed(index, tokenOrder.length)
-      .applyQuaternion(rotation)
-      .add(jitter)
-      .normalize();
+    const baseVector = createBaseSeed(index, tokenOrder.length);
     const lonLat = vectorToLonLat(baseVector);
 
     return {
@@ -435,7 +404,7 @@ function createCellModel(
     return null;
   }
 
-  const tokenRandom = createRandom(`${input.themeId}|cell|${token}`);
+  const tokenRandom = createRandom(`theme-globe|cell|${token}`);
   const tokenSeed = tokenRandom();
   const boundaryVectors = ring.map(([lon, lat], vertexIndex) =>
     createDeformedVector(
@@ -535,7 +504,7 @@ export function createThemeGlobeModel(input: ThemeGlobeInput): ThemeGlobeModel {
   }
 
   const shapeProfile = createShapeProfile(input);
-  const seedPoints = createSeedPoints(input);
+  const seedPoints = createSeedPoints();
   const voronoi = geoVoronoi(seedPoints.map((seed) => seed.coordinates));
   const polygons = voronoi.polygons().features as VoronoiFeature[];
 
@@ -554,6 +523,7 @@ export function createThemeGlobeModel(input: ThemeGlobeInput): ThemeGlobeModel {
 
   const model = {
     cells,
+    outlineEmphasis: shapeProfile.outlineEmphasis,
     rotationSpeed: shapeProfile.rotationSpeed,
   } satisfies ThemeGlobeModel;
 

@@ -1,7 +1,9 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { memo, useEffect, useRef, type CSSProperties } from 'react';
 
 import StyleTransferArtworkPreview from './StyleTransferArtworkPreview';
+import ThemeVoronoiSlab from './ThemeVoronoiSlab';
 import type { StyleTransferArtworkPreview as StyleTransferArtworkPreviewData } from '../../lib/style-transfer/artwork';
+import type { StyleTransferThemeRecord } from '../../lib/style-transfer/schema';
 import type {
   StyleTransferTrace,
   StyleTransferTraceDataView,
@@ -10,6 +12,8 @@ import type {
 
 type StyleTransferTraceInspectorProps = {
   artwork: StyleTransferArtworkPreviewData | null;
+  effectiveMode?: 'dark' | 'light';
+  palette?: StyleTransferThemeRecord['palette'];
   trace: StyleTransferTrace | null;
 };
 
@@ -177,7 +181,14 @@ function StyleTransferTraceStageItem({
             {hasDetails ? (
               <details className="style-transfer__trace-details accordion-item">
                 <summary className="style-transfer__trace-details-summary accordion-summary">
-                  <span>View structured details</span>
+                  <span className="style-transfer__trace-details-toggle">
+                    <span className="style-transfer__trace-details-toggle-closed">
+                      View structured details
+                    </span>
+                    <span className="style-transfer__trace-details-toggle-open">
+                      Hide structured details
+                    </span>
+                  </span>
                   <span className="accordion-icon" aria-hidden="true" />
                 </summary>
 
@@ -205,8 +216,10 @@ function StyleTransferTraceStageItem({
   );
 }
 
-export default function StyleTransferTraceInspector({
+function StyleTransferTraceInspector({
   artwork,
+  effectiveMode,
+  palette,
   trace,
 }: StyleTransferTraceInspectorProps) {
   if (!trace) {
@@ -218,31 +231,53 @@ export default function StyleTransferTraceInspector({
       className="style-transfer__trace"
       aria-labelledby="style-transfer-trace-heading"
     >
-      <div className="style-transfer__trace-header">
-        <div className="flow-sm">
-          <p
-            className="style-transfer__title"
-            id="style-transfer-trace-heading"
-          >
-            {trace.source === 'prompt'
-              ? 'How the remix turns into a theme'
-              : 'How this preset became a theme'}
-          </p>
-        </div>
-      </div>
+      <details className="style-transfer__trace-shell accordion-item">
+        <summary
+          className="style-transfer__trace-toggle accordion-summary"
+          id="style-transfer-trace-heading"
+        >
+          <span className="style-transfer__trace-toggle-copy">
+            <span className="style-transfer__title">
+              {trace.source === 'prompt'
+                ? 'How this remix shapes the site'
+                : 'How this preset shapes the site'}
+            </span>
+          </span>
+          <span className="accordion-icon" aria-hidden="true" />
+        </summary>
 
-      <ol className="style-transfer__trace-list accordion">
-        {trace.stages.map((stage, index) => (
-          <StyleTransferTraceStageItem
-            artwork={artwork}
-            key={`${trace.traceId}-${stage.id}`}
-            index={index}
-            shouldStartOpen={trace.source === 'prompt' && index === 0}
-            stage={stage}
-            totalStages={trace.stages.length}
-          />
-        ))}
-      </ol>
+        <div className="style-transfer__trace-body accordion-content">
+          <div className="style-transfer__trace-body-inner accordion-content-inner">
+            <p className="style-transfer__trace-intro">
+              Each preset or generated theme applies 61 theme variables that
+              shape the palette, materials, background artwork, border radius,
+              and the broader visual system.
+            </p>
+
+            {effectiveMode && palette ? (
+              <ThemeVoronoiSlab
+                effectiveMode={effectiveMode}
+                palette={palette}
+              />
+            ) : null}
+
+            <ol className="style-transfer__trace-list accordion">
+              {trace.stages.map((stage, index) => (
+                <StyleTransferTraceStageItem
+                  artwork={artwork}
+                  key={stage.id}
+                  index={index}
+                  shouldStartOpen={trace.source === 'prompt' && index === 0}
+                  stage={stage}
+                  totalStages={trace.stages.length}
+                />
+              ))}
+            </ol>
+          </div>
+        </div>
+      </details>
     </section>
   );
 }
+
+export default memo(StyleTransferTraceInspector);

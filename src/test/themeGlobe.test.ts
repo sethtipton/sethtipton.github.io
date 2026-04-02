@@ -8,6 +8,24 @@ import {
 } from '../lib/style-transfer/schema';
 
 function createThemeRecord() {
+  return createThemeRecordWithOverrides({});
+}
+
+function createThemeRecordWithOverrides(
+  overrides: Partial<{
+    buttonStyle: 'hard-edge' | 'outline' | 'pill' | 'soft';
+    density: 'airy' | 'balanced' | 'compact';
+    motion: 'calm' | 'expressive' | 'reduced';
+    pattern:
+      | 'constellation'
+      | 'grid'
+      | 'noise'
+      | 'none'
+      | 'orbital'
+      | 'scanlines';
+    surfaceStyle: 'flat' | 'glass' | 'glow' | 'paper';
+  }>,
+) {
   const prompt = 'Warm noir with luminous edges';
   const payload = styleTransferModelOutputSchema.parse({
     styleName: 'Warm Noir',
@@ -28,11 +46,11 @@ function createThemeRecord() {
       sans: 'humanist',
       serif: 'editorial',
     },
-    density: 'balanced',
-    surfaceStyle: 'glow',
-    buttonStyle: 'pill',
-    pattern: 'noise',
-    motion: 'calm',
+    density: overrides.density ?? 'balanced',
+    surfaceStyle: overrides.surfaceStyle ?? 'glow',
+    buttonStyle: overrides.buttonStyle ?? 'pill',
+    pattern: overrides.pattern ?? 'noise',
+    motion: overrides.motion ?? 'calm',
   });
 
   return createCustomStyleTransferThemeRecord(prompt, payload);
@@ -97,5 +115,74 @@ describe('theme globe model', () => {
     expect(firstModel.cells[0]?.positions).toEqual(
       secondModel.cells[0]?.positions,
     );
+  });
+
+  it('keeps the Voronoi layout stable across different theme treatments', () => {
+    const baseTheme = createThemeRecord();
+    const alternateTheme = createThemeRecordWithOverrides({
+      buttonStyle: 'hard-edge',
+      density: 'airy',
+      pattern: 'grid',
+      surfaceStyle: 'paper',
+    });
+
+    const baseModel = createThemeGlobeModel({
+      artworkFamily: 'offset-rings',
+      colors: resolvePaletteForMode(baseTheme.palette, 'dark'),
+      dataset: {
+        styleButton: baseTheme.buttonStyle,
+        styleDensity: baseTheme.density,
+        styleMotion: baseTheme.motion,
+        stylePattern: baseTheme.pattern,
+        styleSurface: baseTheme.surfaceStyle,
+      },
+      effectiveMode: 'dark',
+      source: baseTheme.source,
+      themeId: baseTheme.id,
+      themeName: baseTheme.name,
+    });
+
+    const alternateModel = createThemeGlobeModel({
+      artworkFamily: 'paper-cut',
+      colors: resolvePaletteForMode(alternateTheme.palette, 'light'),
+      dataset: {
+        styleButton: alternateTheme.buttonStyle,
+        styleDensity: alternateTheme.density,
+        styleMotion: alternateTheme.motion,
+        stylePattern: alternateTheme.pattern,
+        styleSurface: alternateTheme.surfaceStyle,
+      },
+      effectiveMode: 'light',
+      source: alternateTheme.source,
+      themeId: alternateTheme.id,
+      themeName: alternateTheme.name,
+    });
+
+    const normalizeCentroid = (centroid: [number, number, number]) => {
+      const length = Math.hypot(centroid[0], centroid[1], centroid[2]);
+      return centroid.map((value) => Number((value / length).toFixed(6)));
+    };
+
+    expect(baseModel.cells.map((cell) => cell.token)).toEqual(
+      alternateModel.cells.map((cell) => cell.token),
+    );
+    const baseCentroids = baseModel.cells.map((cell) =>
+      normalizeCentroid(cell.centroid),
+    );
+    const alternateCentroids = alternateModel.cells.map((cell) =>
+      normalizeCentroid(cell.centroid),
+    );
+
+    baseCentroids.forEach((centroid, index) => {
+      const alternateCentroid = alternateCentroids[index]!;
+      const distance = Math.hypot(
+        centroid[0]! - alternateCentroid[0]!,
+        centroid[1]! - alternateCentroid[1]!,
+        centroid[2]! - alternateCentroid[2]!,
+      );
+
+      expect(distance).toBeLessThan(0.01);
+    });
+    expect(baseModel.outlineEmphasis).not.toBe(alternateModel.outlineEmphasis);
   });
 });

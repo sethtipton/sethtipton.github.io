@@ -40,10 +40,10 @@ export const socialLinks: LinkItem[] = [
 export const heroContent = {
   name: 'Seth Tipton',
   title:
-    'I design and build the solid foundations that teams, platforms, and products actually need to grow with confidence',
+    'I design and build the solid foundations that teams, platforms, and products need to grow with confidence.',
   statement: [
-    'I geek out over the systems that make shared product work feel reliable and sane at scale: thoughtful component libraries, reusable patterns that don’t fight you later, smart logic that teams can actually trust, and CMS/product integrations that respect real human workflows instead of making everyone’s life harder.',
-    'My sweet spot is where fast delivery meets responsible ownership. That’s where I pour my energy into making things accessible by default, ridiculously performant, safe to roll out, delightful for editors, and built on standards that still feel useful years down the road. I’ve done this across big enterprise platforms, commerce experiences, CMS-driven sites, and product UIs. These days I also love bringing AI into the mix to supercharge implementation and QA… while keeping real engineering judgment firmly in the driver’s seat.',
+    'I geek out over the systems that make shared product work feel reliable and sane at scale. I love thoughtful component libraries, reusable patterns that dont fight you later, smart logic that teams can actually trust, and CMS/product integrations that respect real human workflows instead of making everyones life harder.',
+    'My sweet spot is where fast delivery meets responsible ownership. Thats where I pour my energy into making things accessible by default, ridiculously performant, safe to roll out, delightful for editors, and built on standards that still feel useful years down the road. Ive done this across big enterprise platforms, commerce experiences, CMS-driven sites, and product UIs. These days I also love bringing AI into the mix to supercharge implementation and QA while keeping real engineering judgment firmly in the drivers seat.',
   ],
   ctas: [
     { label: 'See case studies', href: '/work/' },

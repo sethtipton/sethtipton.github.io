@@ -342,7 +342,7 @@ export function createRestoredPromptStyleTransferTrace({
         id: 'prompt',
         type: 'input',
         status: 'complete',
-        title: 'Prompt',
+        title: 'Starting point',
         summary:
           'This generated theme was restored from compact client history, so the original prompt remains available even though the full live remix session is no longer in memory.',
         facts: [
@@ -373,7 +373,7 @@ export function createRestoredPromptStyleTransferTrace({
         id: 'response',
         type: 'response',
         status: 'synthetic',
-        title: 'What came back',
+        title: 'Theme setup',
         summary:
           'Raw model response JSON is intentionally ephemeral. This restored view uses the accepted generated-theme summary and runtime application preserved in client history.',
         facts: [
@@ -410,7 +410,7 @@ export function createRestoredPromptStyleTransferTrace({
         id: 'validation',
         type: 'validation',
         status: 'synthetic',
-        title: 'Validation',
+        title: 'Quick checks',
         summary:
           'The response was checked locally before the theme was allowed onto the page.',
         facts: [
@@ -439,7 +439,7 @@ export function createRestoredPromptStyleTransferTrace({
         id: 'derivation',
         type: 'derivation',
         status: 'complete',
-        title: 'How it was shaped',
+        title: 'How the site tuned it',
         summary:
           'The stored runtime application still exposes the bounded design-system decisions that were derived from the accepted remix.',
         facts: [
@@ -490,7 +490,7 @@ export function createRestoredPromptStyleTransferTrace({
         id: 'application',
         type: 'application',
         status: 'applied',
-        title: 'What hit the page',
+        title: 'What changed',
         summary:
           'The restored generated theme still applies through the same allow-listed CSS variables and dataset flags on <html>.',
         facts: [
@@ -539,7 +539,7 @@ export function createRestoredPromptStyleTransferTrace({
         id: 'artwork',
         type: 'artwork',
         status: artwork?.source === 'fallback' ? 'synthetic' : 'complete',
-        title: 'Artwork',
+        title: 'Background art',
         summary: artwork
           ? artwork.source === 'api'
             ? 'The stored history entry kept the structured artwork preview, so the restored trace still points at the deterministic SVG renderer.'
@@ -572,7 +572,7 @@ export function createRestoredPromptStyleTransferTrace({
         id: 'accessibility',
         type: 'accessibility',
         status: 'informational',
-        title: 'Accessibility notes',
+        title: 'Contrast and readability',
         summary:
           'These notes come from the restored runtime palette and stay informational in v1.',
         facts: createAccessibilityFacts(accessibility),
@@ -612,7 +612,7 @@ export function createPromptStyleTransferTrace({
         id: 'prompt',
         type: 'input',
         status: 'complete',
-        title: 'Prompt',
+        title: 'Starting point',
         summary:
           'A short natural-language brief set the visual direction while keeping the output constrained to the site theme contract.',
         facts: [
@@ -633,7 +633,7 @@ export function createPromptStyleTransferTrace({
         id: 'response',
         type: 'response',
         status: 'complete',
-        title: 'What came back',
+        title: 'Theme setup',
         summary:
           'The remix API returned a typed theme proposal and optional artwork slots. The proposal is then normalized locally before application rather than turning directly into runtime CSS.',
         facts: [
@@ -680,16 +680,16 @@ export function createPromptStyleTransferTrace({
         id: 'validation',
         type: 'validation',
         status: 'complete',
-        title: 'Validation',
+        title: 'Quick checks',
         summary:
-          'The proposal was rebuilt and validated locally. Support surfaces and muted text were normalized from the site semantic palette rules, then readability was checked across both core and support surfaces.',
+          'The proposal was rebuilt and validated locally. Support surfaces and muted text were normalized from the palette rules, then readability was checked across backgrounds.',
         facts: [
           {
             label: 'Theme schema',
             value: 'Accepted',
           },
           {
-            label: 'Readability gate',
+            label: 'Readability',
             value: formatComplianceStatus(compliance),
           },
           {
@@ -697,14 +697,14 @@ export function createPromptStyleTransferTrace({
             value: '11 dual-mode pairs',
           },
           {
-            label: 'Bounded enums',
+            label: 'Predefined options',
             value: `${responseTheme.density}, ${responseTheme.surfaceStyle}, ${responseTheme.buttonStyle}, ${responseTheme.pattern}, ${responseTheme.motion}`,
           },
         ],
         data: {
           notes: [
             ...compliance.notes,
-            'If a generated theme is readable but still weak on surface separation or support-text quality, the system can retry once or more, then apply the strongest readable result.',
+            'If a generated theme is readable but still weak on contrast or support-text quality, the system can retry once or more, then apply the strongest result.',
           ],
           views: [
             {
@@ -741,9 +741,9 @@ export function createPromptStyleTransferTrace({
         id: 'derivation',
         type: 'derivation',
         status: 'complete',
-        title: 'How it was shaped',
+        title: 'How the site tuned it',
         summary:
-          'The accepted theme was compiled into the site design grammar: semantic colors, type stacks, spacing, surfaces, controls, motion, and pattern tokens.',
+          'The accepted theme was compiled into the site design using semantic colors, type stacks, spacing, surfaces, controls, motion, and pattern tokens.',
         facts: [
           {
             label: 'Applied name',
@@ -797,9 +797,9 @@ export function createPromptStyleTransferTrace({
         id: 'application',
         type: 'application',
         status: 'applied',
-        title: 'What hit the page',
+        title: 'What changed',
         summary:
-          'Only allow-listed CSS variables and dataset flags are applied to <html>, preserving the constrained theming model.',
+          'Only approved CSS variables and dataset flags are applied to <html>, keeping the theming system controlled and predictable.',
         facts: [
           {
             label: 'Target',
@@ -807,11 +807,11 @@ export function createPromptStyleTransferTrace({
           },
           {
             label: 'CSS variables',
-            value: `${Object.keys(application.cssVars).length} allow-listed values`,
+            value: `${Object.keys(application.cssVars).length} allowed values`,
           },
           {
             label: 'Dataset flags',
-            value: `${Object.keys(application.dataset).length} runtime markers`,
+            value: `${Object.keys(application.dataset).length} allowed values`,
           },
           {
             label: 'Theme color',
@@ -846,13 +846,13 @@ export function createPromptStyleTransferTrace({
         id: 'artwork',
         type: 'artwork',
         status: artwork?.source === 'fallback' ? 'synthetic' : 'complete',
-        title: 'Artwork',
+        title: 'Background art',
         summary: artwork
           ? artwork.source === 'api'
-            ? 'The active hero artwork comes from the structured artwork response and is rendered through the deterministic SVG path.'
+            ? 'The active hero artwork comes from the structured artwork response.'
             : artwork.source === 'fallback'
-              ? 'Artwork fell back to the local deterministic generator, using the accepted theme and prompt intent instead of raw model-authored SVG.'
-              : 'The preset ships with a deterministic artwork preview that stays inside the same bounded rendering system.'
+              ? 'Artwork fell back to the local generator, using the accepted theme and prompt.'
+              : 'The preset ships with a deterministic artwork preview that stays inside the same rendering system.'
           : 'This theme did not resolve to a preview artwork.',
         facts: createArtworkFacts(artwork),
         data: artwork
@@ -881,7 +881,7 @@ export function createPromptStyleTransferTrace({
         id: 'accessibility',
         type: 'accessibility',
         status: 'informational',
-        title: 'Accessibility notes',
+        title: 'Contrast and readability',
         summary:
           'These notes are informational only. They help explain readability and motion behavior without mutating the applied theme.',
         facts: createAccessibilityFacts(accessibility),
@@ -918,9 +918,9 @@ export function createPresetStyleTransferTrace({
         id: 'prompt',
         type: 'input',
         status: 'synthetic',
-        title: 'Preset brief',
+        title: 'Starting point',
         summary:
-          'This path starts from a local preset brief and flows through the shared bounded theme system.',
+          'This starts from a local preset and runs through the same shared theme system as every other theme.',
         facts: [
           {
             label: 'Input path',
@@ -941,7 +941,7 @@ export function createPresetStyleTransferTrace({
         id: 'response',
         type: 'response',
         status: 'synthetic',
-        title: 'Structured preset record',
+        title: 'Theme setup',
         summary:
           'The selected preset already exists as structured theme data in the local catalog, so the response stage is a zero-fetch local equivalent.',
         facts: [
@@ -989,7 +989,7 @@ export function createPresetStyleTransferTrace({
         id: 'validation',
         type: 'validation',
         status: 'complete',
-        title: 'Validation',
+        title: 'Quick checks',
         summary:
           'The response was checked locally before the theme was allowed onto the page.',
         facts: [
@@ -1040,9 +1040,9 @@ export function createPresetStyleTransferTrace({
         id: 'derivation',
         type: 'derivation',
         status: 'complete',
-        title: 'How it was shaped',
+        title: 'How the site tuned it',
         summary:
-          'The preset is compiled into the same runtime design grammar as a prompt remix, so presets and remixes share one model.',
+          'The preset is shaped by the same system as a prompt remix, so both paths use the same underlying model.',
         facts: [
           {
             label: 'Fonts',
@@ -1089,7 +1089,7 @@ export function createPresetStyleTransferTrace({
         id: 'application',
         type: 'application',
         status: 'applied',
-        title: 'What hit the page',
+        title: 'What changed',
         summary:
           'The preset resolves to the same allow-listed CSS variables and dataset flags that drive prompt remixes, then applies them to <html>.',
         facts: [
@@ -1138,9 +1138,9 @@ export function createPresetStyleTransferTrace({
         id: 'artwork',
         type: 'artwork',
         status: 'complete',
-        title: 'Artwork',
+        title: 'Background art',
         summary: artwork
-          ? 'Preset artwork uses the same deterministic rendering path as remixes, keeping visual provenance inside the bounded system.'
+          ? 'Preset artwork uses the same rendering path as remixes, keeping visuals inside the bounded system.'
           : 'This preset did not resolve to a preview artwork.',
         facts: createArtworkFacts(artwork),
         data: artwork
@@ -1169,8 +1169,9 @@ export function createPresetStyleTransferTrace({
         id: 'accessibility',
         type: 'accessibility',
         status: 'informational',
-        title: 'Accessibility notes',
-        summary: 'Just context on contrast and readability. No preset changes.',
+        title: 'Contrast and readability',
+        summary:
+          'Local context on contrast, readability, and theme fit. No preset changes were made.',
         facts: createAccessibilityFacts(accessibility),
         data: {
           notes: accessibility.notes,

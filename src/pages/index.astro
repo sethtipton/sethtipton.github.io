@@ -56,13 +56,9 @@ const homeMeta = {
   <section class="section-shell hero">
     <HeroPattern />
     <StyleTransferHeroArtwork client:load />
-
     <div class="container hero__grid">
+      <h1>{heroContent.title}</h1>
       <div class="flow-lg">
-        <div class="flow-sm">
-          <h1>{heroContent.title}</h1>
-        </div>
-
         <div class="flow">
           {
             heroContent.statement.map((paragraph) => (

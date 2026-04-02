@@ -95,7 +95,7 @@ describe('style transfer traces', () => {
     expect(
       trace.stages
         .find((stage) => stage.id === 'validation')
-        ?.facts.find((fact) => fact.label === 'Readability gate')?.value,
+        ?.facts.find((fact) => fact.label === 'Readability')?.value,
     ).toBe('Passed');
   });
 

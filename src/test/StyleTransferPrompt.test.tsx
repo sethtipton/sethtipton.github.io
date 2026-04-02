@@ -138,9 +138,7 @@ describe('StyleTransferPrompt', () => {
     await openPromptPanel();
 
     await waitFor(() => {
-      expect(
-        screen.getByLabelText(/give the portfolio this vibe/i),
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/remix the theme/i)).toBeInTheDocument();
     });
     expect(
       screen.getByRole('region', { name: /theme explorer/i }),
@@ -152,7 +150,7 @@ describe('StyleTransferPrompt', () => {
       null,
     );
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: {
         value: 'Make it cinematic and moody.',
       },
@@ -238,9 +236,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    const textarea = await screen.findByLabelText(
-      /give the portfolio this vibe/i,
-    );
+    const textarea = await screen.findByLabelText(/remix the theme/i);
 
     fireEvent.change(textarea, {
       target: {
@@ -277,9 +273,7 @@ describe('StyleTransferPrompt', () => {
     await openPromptPanel(launcher);
 
     await waitFor(() => {
-      expect(
-        screen.getByLabelText(/give the portfolio this vibe/i),
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/remix the theme/i)).toBeInTheDocument();
     });
 
     fireEvent.keyDown(document, { key: 'Escape' });
@@ -339,6 +333,7 @@ describe('StyleTransferPrompt', () => {
 
     await act(async () => {
       outsideButton.focus();
+      fireEvent.focusIn(outsideButton);
     });
 
     await waitFor(() => {
@@ -661,7 +656,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    expect(screen.getByText(/^preset brief$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^starting point$/i)).toBeInTheDocument();
   });
 
   it('opens the corresponding trace card when a stage step is clicked', async () => {
@@ -692,10 +687,10 @@ describe('StyleTransferPrompt', () => {
     await openPromptPanel();
 
     const presetBriefSummary = screen
-      .getByText(/^preset brief$/i)
+      .getByText(/^starting point$/i)
       .closest('summary');
     const structuredPresetSummary = screen
-      .getByText(/^structured preset record$/i)
+      .getByText(/^theme setup$/i)
       .closest('summary');
 
     expect(presetBriefSummary).toBeTruthy();
@@ -728,9 +723,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    const textarea = await screen.findByLabelText(
-      /give the portfolio this vibe/i,
-    );
+    const textarea = await screen.findByLabelText(/remix the theme/i);
 
     fireEvent.change(textarea, {
       target: {
@@ -769,9 +762,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    const textarea = await screen.findByLabelText(
-      /give the portfolio this vibe/i,
-    );
+    const textarea = await screen.findByLabelText(/remix the theme/i);
 
     fireEvent.change(textarea, {
       target: {
@@ -817,7 +808,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: {
         value: 'Glacial editorial with cobalt accents',
       },
@@ -895,7 +886,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: {
         value: 'sunshine',
       },
@@ -953,7 +944,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: {
         value: 'a'.repeat(400),
       },
@@ -1011,7 +1002,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: {
         value: 'sunshine',
       },
@@ -1051,7 +1042,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: {
         value: 'A clean, modern website with soft colors',
       },
@@ -1081,7 +1072,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: {
         value: 'white one white',
       },
@@ -1113,9 +1104,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    const textarea = await screen.findByLabelText(
-      /give the portfolio this vibe/i,
-    );
+    const textarea = await screen.findByLabelText(/remix the theme/i);
 
     fireEvent.change(textarea, {
       target: {
@@ -1213,7 +1202,7 @@ describe('StyleTransferPrompt', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/how the remix turns into a theme/i),
+        screen.getByText(/how this remix shapes the site/i),
       ).toBeInTheDocument();
     });
 
@@ -1264,7 +1253,7 @@ describe('StyleTransferPrompt', () => {
     await openPromptPanel();
 
     const traceHeading = await screen.findByText(
-      /how the remix turns into a theme/i,
+      /how this remix shapes the site/i,
     );
     const tracePanel = traceHeading.closest(
       '.style-transfer__panel-trace',
@@ -1381,7 +1370,7 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    fireEvent.change(screen.getByLabelText(/give the portfolio this vibe/i), {
+    fireEvent.change(screen.getByLabelText(/remix the theme/i), {
       target: { value: prompt },
     });
     fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
