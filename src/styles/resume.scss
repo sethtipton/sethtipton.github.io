@@ -13,11 +13,14 @@
 }
 
 .resume-document__header {
+  display: grid;
+  grid-template-columns:
+    minmax(18rem, 1fr)
+    minmax(13rem, max-content)
+    minmax(14rem, 18rem);
+  gap: var(--space-5);
+  align-items: start;
   padding-bottom: var(--space-6);
-  border-bottom: 1px solid var(--color-border-muted);
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
 }
 
 .resume-document__identity {
@@ -78,16 +81,43 @@
 }
 
 .resume-document .resume-document__actions {
-  margin-top: var(--space-5);
+  margin-top: 0;
+  justify-self: end;
+  //max-width: 18rem;
+}
+
+.resume-document__actions .button-row {
+  justify-content: flex-end;
 }
 
 .resume-document__pdf-note {
   display: flex;
   align-items: center;
-  min-height: 3rem;
   margin: 0;
   font-size: var(--text-meta);
   line-height: var(--leading-ui);
+}
+
+@media (max-width: 68rem) {
+  .resume-document__header {
+    grid-template-columns: minmax(0, 1fr) minmax(13rem, max-content);
+  }
+
+  .resume-document .resume-document__actions {
+    grid-column: 1 / -1;
+    justify-self: start;
+    max-width: none;
+  }
+
+  .resume-document__actions .button-row {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 48rem) {
+  .resume-document__header {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .resume-document__section-heading {
@@ -100,18 +130,12 @@
 
 .resume-document__section-heading h2 {
   margin: 0;
-  font-size: var(--text-h3);
-  line-height: var(--leading-heading);
   text-wrap: balance;
-}
-
-.resume-document__section .resume-document__section-heading h2 {
-  font-size: var(--text-h2);
 }
 
 .resume-document__profile {
   max-width: 48rem;
-  font-size: var(--text-body-lg);
+  font-size: var(--text-lead-section);
   line-height: var(--leading-body-relaxed);
   text-wrap: pretty;
 }
@@ -139,8 +163,6 @@
 
 .experience-card__title {
   margin: 0;
-  font-size: var(--text-h3);
-  line-height: var(--leading-heading);
   font-weight: var(--font-weight-strong);
 }
 
@@ -180,7 +202,7 @@
 }
 
 .pdf-entry__bullets li {
-  font-size: var(--text-body-lg);
+  font-size: var(--text-lead-section);
   padding-left: 0.1rem;
   line-height: var(--leading-body-compact);
 }
@@ -202,7 +224,7 @@
 .resume-education p {
   margin-top: 0.28rem;
   color: var(--color-muted);
-  font-size: var(--text-body-lg);
+  font-size: var(--text-lead-section);
   line-height: var(--leading-body-compact);
 }
 

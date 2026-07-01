@@ -18,19 +18,6 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  ::view-transition-group(site-nav-active-chip) {
-    z-index: 5;
-    animation-duration: var(--site-motion-view-fast);
-    animation-timing-function: var(--site-motion-ease-emphasized);
-  }
-
-  ::view-transition-old(site-nav-active-chip),
-  ::view-transition-new(site-nav-active-chip) {
-    border-radius: 4px;
-    overflow: clip;
-    mix-blend-mode: normal;
-  }
-
   ::view-transition-group(.case-study-visual) {
     z-index: 2;
     animation-duration: var(--site-motion-view-slow);

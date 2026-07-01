@@ -134,6 +134,36 @@ function countActionableComplianceAdjustments(
     .length;
 }
 
+function createAppliedThemeNotice({
+  appliedBelowQualityThreshold,
+  complianceStatus,
+  themeName,
+  usedRetry,
+}: {
+  appliedBelowQualityThreshold: boolean;
+  complianceStatus: 'normalized' | 'repaired' | 'pass';
+  themeName: string;
+  usedRetry: boolean;
+}) {
+  if (appliedBelowQualityThreshold) {
+    return `Remix "${themeName}" created after some local tuning. It passes, though the palette still leans soft.`;
+  }
+
+  if (complianceStatus === 'normalized') {
+    return `Remix "${themeName}" created with dark mode adjusted for readability.`;
+  }
+
+  if (complianceStatus === 'repaired') {
+    return `Remix "${themeName}" created with readability repairs.`;
+  }
+
+  if (usedRetry) {
+    return `Remix "${themeName}" created after another pass for readability.`;
+  }
+
+  return `Remix "${themeName}" created.`;
+}
+
 function createRetryPrompt(
   apiPrompt: string,
   issues: string[],
@@ -295,6 +325,25 @@ function getLauncherThemeLabel(source: StyleTransferControllerState['source']) {
   return 'Generated theme';
 }
 
+function normalizeGeneratedLauncherValue(name: string) {
+  const collapsedName = name.replace(/\s+/g, ' ').trim();
+  const trimmedName = collapsedName.replace(/[\s\p{P}\p{S}]+$/u, '').trim();
+  const safeName = trimmedName || collapsedName || 'Generated theme';
+
+  if (safeName.length <= 28) {
+    return safeName;
+  }
+
+  const truncatedName = safeName.slice(0, 28);
+  const wordBoundaryIndex = truncatedName.lastIndexOf(' ');
+  const shortenedName =
+    wordBoundaryIndex >= 18
+      ? truncatedName.slice(0, wordBoundaryIndex)
+      : truncatedName;
+
+  return `${shortenedName.replace(/[\s\p{P}\p{S}]+$/u, '').trim()}...`;
+}
+
 type TraceVisibilityState = 'hidden' | 'entering' | 'visible' | 'exiting';
 type LauncherGlobeActivityState = 'idle' | 'generating' | 'success' | 'error';
 
@@ -331,7 +380,7 @@ const StyleTransferPromptForm = memo(function StyleTransferPromptForm({
   const promptLength = prompt.length;
   const isPromptOverLimit = promptLength > maximumPromptLength;
   const isLoadingNotice = isGenerating && notice?.includes(loadingNoticeCopy);
-  const showNotice = Boolean(isLoadingNotice || notice);
+  const showNotice = Boolean(isLoadingNotice);
 
   const handleSubmit: FormSubmitHandler = useCallback(
     (event) => {
@@ -498,10 +547,7 @@ function getTraceEnterDurationMs(trace: StyleTransferTrace | null) {
 
   const motion = getRuntimeStyleTransferMotionProfile(document.documentElement);
 
-  return (
-    motion.durations.itemEnter +
-    Math.max(0, trace.stages.length - 1) * motion.stagger.sm
-  );
+  return motion.durations.viewFast;
 }
 
 function getTraceExitDurationMs(trace: StyleTransferTrace | null) {
@@ -511,10 +557,7 @@ function getTraceExitDurationMs(trace: StyleTransferTrace | null) {
 
   const motion = getRuntimeStyleTransferMotionProfile(document.documentElement);
 
-  return (
-    motion.durations.exit +
-    Math.max(0, trace.stages.length - 1) * motion.stagger.sm
-  );
+  return motion.durations.exit;
 }
 
 export default function StyleTransferPrompt({
@@ -1285,6 +1328,10 @@ export default function StyleTransferPrompt({
     '--theme-explorer-progress-scale': `${themeSliderProgress / 100}`,
   } as CSSProperties;
   const launcherThemeLabel = getLauncherThemeLabel(controllerState.source);
+  const launcherThemeValue =
+    controllerState.source === 'prompt'
+      ? normalizeGeneratedLauncherValue(controllerState.name)
+      : controllerState.name;
   const activeThemeEffectiveMode = resolveStyleTransferEffectiveMode(
     controllerState.mode,
     prefersDarkScheme,
@@ -1724,6 +1771,13 @@ export default function StyleTransferPrompt({
           });
         }
 
+        const appliedNotice = createAppliedThemeNotice({
+          appliedBelowQualityThreshold,
+          complianceStatus: bestAttempt.complianceResult.status,
+          themeName: bestAttempt.themeRecord.name,
+          usedRetry,
+        });
+
         const nextTrace = createPromptStyleTransferTrace({
           accessibility:
             bestAttempt.complianceResult.analysis ??
@@ -1733,6 +1787,7 @@ export default function StyleTransferPrompt({
           artwork: bestAttempt.previewArtwork,
           compliance: bestAttempt.complianceResult,
           prompt: trimmedPrompt,
+          resultNote: appliedNotice,
           responseArtwork: bestAttempt.payload.artwork ?? null,
           responseTheme: bestAttempt.themePayloadResult.data,
           themeRecord: bestAttempt.themeRecord,
@@ -1763,17 +1818,7 @@ export default function StyleTransferPrompt({
           id: bestAttempt.themeRecord.id,
           name: bestAttempt.themeRecord.name,
         });
-        setNotice(
-          appliedBelowQualityThreshold
-            ? `Applied "${bestAttempt.themeRecord.name}" after some local tuning. It passes, though the palette still leans soft.`
-            : bestAttempt.complianceResult.status === 'normalized'
-              ? `Applied "${bestAttempt.themeRecord.name}" with dark mode adjusted for readability.`
-              : bestAttempt.complianceResult.status === 'repaired'
-                ? `Applied "${bestAttempt.themeRecord.name}" with readability repairs.`
-                : usedRetry
-                  ? `Applied "${bestAttempt.themeRecord.name}" after another pass for readability.`
-                  : `Applied "${bestAttempt.themeRecord.name}".`,
-        );
+        setNotice(null);
         setLauncherGlobeActivity('success', 560);
       } catch (caughtError) {
         logDebugError('submit failed', caughtError);
@@ -1864,7 +1909,7 @@ export default function StyleTransferPrompt({
           {launcherThemeLabel}
         </span>
         <span className="style-transfer__launcher-value">
-          {controllerState.name}
+          {launcherThemeValue}
         </span>
         {isOpen ? (
           <span className="style-transfer__launcher-close" aria-hidden="true">
@@ -1883,7 +1928,7 @@ export default function StyleTransferPrompt({
         aria-controls={panelId}
         aria-label={`${
           isOpen ? 'Hide' : 'Show'
-        } theme explorer. ${launcherThemeLabel}: ${controllerState.name}`}
+        } theme explorer. ${launcherThemeLabel}: ${launcherThemeValue}`}
         onClick={() => {
           if (isOpen) {
             closePanel();
@@ -1900,7 +1945,7 @@ export default function StyleTransferPrompt({
           {launcherThemeLabel}
         </span>
         <span className="style-transfer__launcher-value">
-          {controllerState.name}
+          {launcherThemeValue}
         </span>
         {isOpen ? (
           <span className="style-transfer__launcher-close" aria-hidden="true">

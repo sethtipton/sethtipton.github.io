@@ -312,7 +312,6 @@
   --text-lead: clamp(1.1rem, 2vw, 1.3rem);
   --text-lead-section: clamp(1rem, 1.6vw, 1.15rem);
   --text-body: 1rem;
-  --text-body-lg: 1.2rem;
   --text-meta: 0.95rem;
   --text-label: 0.78rem;
   --text-caption: 0.72rem;
@@ -325,7 +324,6 @@
   --leading-ui: 1.45;
   --tracking-heading: -0.02em;
   --tracking-label: 0.08em;
-  --tracking-label-tight: 0.06em;
 }
 
 :root[data-theme='light'] {

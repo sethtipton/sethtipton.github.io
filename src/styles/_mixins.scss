@@ -7,7 +7,9 @@
 }
 
 @mixin section-space {
-  padding-block: clamp(var(--space-7), 10vw, var(--space-9));
+  //padding-block: clamp(var(--space-7), 10vw, var(--space-9));
+  //padding-block: clamp(var(--space-7), 10dvh, var(--space-9));
+  padding-block: clamp(var(--space-3), 8dvh, var(--space-9));
 }
 
 @mixin card-surface {

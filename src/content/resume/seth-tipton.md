@@ -21,9 +21,9 @@ experience:
   - company: Oracle
     title: Senior Front-End Developer
     location: Remote
-    years: 2015 - Present
+    years: 2015 - Mar 2026
     bullets:
-      - Led front-end architecture and delivery for core Oracle.com experiences, including global navigation, search, and 200+ shared components supporting a large-scale enterprise platform.
+      - Led architecture and delivery of scalable React-based component systems and complex user interfaces supporting enterprise-scale platforms, including shared libraries used across 300+ components.
       - Modernized component patterns, engineering standards, and team workflows, keeping Oracle.com aligned with evolving best practices in accessibility, performance, and maintainability.
       - Built scalable UI systems and AI-assisted development workflows that improved reuse, accelerated delivery, and reduced cross-team maintenance by ~20%.
       - Drove accessibility as a default engineering practice, advancing WCAG 2.2 AA compliance, resolving ~50 issues, and validating behavior through screen reader and keyboard testing.

@@ -51,11 +51,7 @@ const headerLinks = socialLinks.slice(0, 3).map((item) => ({
                   aria-current={active ? 'page' : undefined}
                 >
                   {active ? (
-                    <span
-                      class="site-nav__chip site-nav__chip--active"
-                      transition:name="site-nav-active-chip"
-                      transition:animate="initial"
-                    >
+                    <span class="site-nav__chip site-nav__chip--active">
                       <span class="site-nav__active-pill" aria-hidden="true" />
                       <span class="site-nav__label">{item.label}</span>
                     </span>

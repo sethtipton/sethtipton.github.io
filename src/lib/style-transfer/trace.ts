@@ -95,6 +95,7 @@ type PromptTraceInput = {
   artwork: StyleTransferArtworkPreview | null;
   compliance: StyleTransferThemeComplianceResult;
   prompt: string;
+  resultNote?: string | null;
   responseArtwork: unknown;
   responseTheme: StyleTransferModelOutput;
   themeRecord: StyleTransferThemeRecord;
@@ -441,7 +442,7 @@ export function createRestoredPromptStyleTransferTrace({
         status: 'complete',
         title: 'How the site tuned it',
         summary:
-          'The stored runtime application still exposes the bounded design-system decisions that were derived from the accepted remix.',
+          'The accepted remix flows through the same controlled design-system layer.',
         facts: [
           {
             label: 'Density',
@@ -456,7 +457,7 @@ export function createRestoredPromptStyleTransferTrace({
             ),
           },
           {
-            label: 'Controls',
+            label: 'Buttons and controls',
             value: formatEnumLabel(
               application.dataset.styleButton ?? 'unknown',
             ),
@@ -599,6 +600,7 @@ export function createPromptStyleTransferTrace({
   artwork,
   compliance,
   prompt,
+  resultNote,
   responseArtwork,
   responseTheme,
   themeRecord,
@@ -627,6 +629,11 @@ export function createPromptStyleTransferTrace({
         ],
         data: {
           highlight: prompt,
+          ...(resultNote
+            ? {
+                notes: [resultNote],
+              }
+            : {}),
         },
       },
       {
@@ -762,7 +769,7 @@ export function createPromptStyleTransferTrace({
             value: formatEnumLabel(themeRecord.surfaceStyle),
           },
           {
-            label: 'Controls',
+            label: 'Buttons and controls',
             value: `${formatEnumLabel(themeRecord.buttonStyle)} / ${formatEnumLabel(themeRecord.radiusProfile ?? 'balanced')}`,
           },
           {
@@ -1042,7 +1049,7 @@ export function createPresetStyleTransferTrace({
         status: 'complete',
         title: 'How the site tuned it',
         summary:
-          'The preset is shaped by the same system as a prompt remix, so both paths use the same underlying model.',
+          'Whether a theme starts as a preset or a remix, it follows the same rules once it’s applied.',
         facts: [
           {
             label: 'Fonts',
@@ -1057,7 +1064,7 @@ export function createPresetStyleTransferTrace({
             value: formatEnumLabel(theme.surfaceStyle),
           },
           {
-            label: 'Controls',
+            label: 'Buttons and controls',
             value: `${formatEnumLabel(theme.buttonStyle)} / ${formatEnumLabel(theme.radiusProfile ?? 'balanced')}`,
           },
           {

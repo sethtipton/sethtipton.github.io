@@ -8,3 +8,6 @@ coverage
 !.env.example
 tmp/
 .DS_Store
+.playwright-mcp/
+site-home-desktop.png
+site-home-mobile.png

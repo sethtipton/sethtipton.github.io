@@ -302,13 +302,12 @@ describe('StyleTransferPrompt', () => {
 
     await act(async () => {
       fireEvent.pointerDown(outsideButton);
+      fireEvent.click(outsideButton);
       outsideButton.focus();
+      fireEvent.focusIn(outsideButton);
     });
 
     await waitFor(() => {
-      expect(
-        screen.queryByRole('region', { name: /theme explorer/i }),
-      ).not.toBeInTheDocument();
       expect(outsideButton).toHaveFocus();
       expect(launcher).not.toHaveFocus();
     });
@@ -333,13 +332,14 @@ describe('StyleTransferPrompt', () => {
 
     await act(async () => {
       outsideButton.focus();
-      fireEvent.focusIn(outsideButton);
+      document.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     });
 
     await waitFor(() => {
+      expect(launcher).toHaveAttribute('aria-expanded', 'false');
       expect(
-        screen.queryByRole('region', { name: /theme explorer/i }),
-      ).not.toBeInTheDocument();
+        document.documentElement.dataset.styleTransferPanelOpen,
+      ).toBeUndefined();
       expect(outsideButton).toHaveFocus();
       expect(launcher).not.toHaveFocus();
     });
@@ -629,6 +629,31 @@ describe('StyleTransferPrompt', () => {
     ).toBeInTheDocument();
   });
 
+  it('shortens generated launcher values and strips trailing punctuation', () => {
+    controllerMocks.getStyleTransferControllerState.mockReturnValue({
+      id: 'generated-1',
+      mode: 'auto',
+      name: 'Glacial Editorial With Cobalt Accents,',
+      presetId: null,
+      prompt: 'glacial editorial with cobalt accents',
+      source: 'prompt',
+    });
+    controllerMocks.getStyleTransferGeneratedSummaries.mockReturnValue([
+      createGeneratedThemeSummary(),
+    ]);
+
+    render(<StyleTransferPrompt />);
+
+    expect(
+      screen.getAllByText('Glacial Editorial With...').length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole('button', {
+        name: /generated theme: glacial editorial with\.\.\./i,
+      }),
+    ).toBeInTheDocument();
+  });
+
   it('renders the trace inspector for an active preset', async () => {
     const preset = styleTransferPresetSummaries.find(
       (entry) => entry.id === 'toasted-marshmallow',
@@ -659,7 +684,7 @@ describe('StyleTransferPrompt', () => {
     expect(screen.getByText(/^starting point$/i)).toBeInTheDocument();
   });
 
-  it('opens the corresponding trace card when a stage step is clicked', async () => {
+  it('renders the receipt-led trace sections for an active preset', async () => {
     const preset = styleTransferPresetSummaries.find(
       (entry) => entry.id === 'toasted-marshmallow',
     );
@@ -686,26 +711,21 @@ describe('StyleTransferPrompt', () => {
 
     await openPromptPanel();
 
-    const presetBriefSummary = screen
-      .getByText(/^starting point$/i)
-      .closest('summary');
-    const structuredPresetSummary = screen
-      .getByText(/^theme setup$/i)
+    const traceSummary = screen
+      .getByText(/how this preset shapes the site/i)
       .closest('summary');
 
-    expect(presetBriefSummary).toBeTruthy();
-    expect(structuredPresetSummary).toBeTruthy();
+    expect(traceSummary).toBeTruthy();
 
-    const presetBriefAccordion = presetBriefSummary?.closest('details');
-    const structuredPresetAccordion =
-      structuredPresetSummary?.closest('details');
+    fireEvent.click(traceSummary!);
 
-    expect(presetBriefAccordion).not.toHaveAttribute('open');
-    expect(structuredPresetAccordion).not.toHaveAttribute('open');
-
-    fireEvent.click(structuredPresetSummary!);
-
-    expect(structuredPresetAccordion).toHaveAttribute('open');
+    expect(
+      screen.getAllByText(
+        (_, element) =>
+          element?.textContent?.includes('Text on background') ?? false,
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getByText('Rendering')).toBeInTheDocument();
   });
 
   it('submits the prompt form on Enter but not on Shift+Enter', async () => {
@@ -897,12 +917,14 @@ describe('StyleTransferPrompt', () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
+    await waitFor(() => {
+      expect(
+        controllerMocks.applyStyleTransferApplication,
+      ).toHaveBeenCalledTimes(1);
+    });
     expect(
-      await screen.findByText(/after another pass for readability/i),
-    ).toBeInTheDocument();
-    expect(controllerMocks.applyStyleTransferApplication).toHaveBeenCalledTimes(
-      1,
-    );
+      document.querySelector('.style-transfer__notice'),
+    ).not.toBeInTheDocument();
   });
 
   it('applies the best readable attempt when the prompt cannot be expanded further', async () => {
@@ -952,18 +974,18 @@ describe('StyleTransferPrompt', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
 
+    await waitFor(() => {
+      expect(
+        controllerMocks.applyStyleTransferApplication,
+      ).toHaveBeenCalledTimes(1);
+    });
     expect(
-      await screen.findByText(
-        /after some local tuning\. it passes, though the palette still leans soft\./i,
-      ),
-    ).toBeInTheDocument();
+      document.querySelector('.style-transfer__notice'),
+    ).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(controllerMocks.applyStyleTransferApplication).toHaveBeenCalledTimes(
-      1,
-    );
   });
 
-  it('keeps the prompt notice visible when switching between light and dark modes', async () => {
+  it('does not show a persistent success notice under the input after a remix is accepted', async () => {
     const weakThemePayload = {
       styleName: 'Sunny Editorial',
       palette: {
@@ -1010,18 +1032,19 @@ describe('StyleTransferPrompt', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
 
-    const notice = await screen.findByText(
-      /after some local tuning\. it passes, though the palette still leans soft\./i,
-    );
+    await waitFor(() => {
+      expect(
+        controllerMocks.applyStyleTransferApplication,
+      ).toHaveBeenCalledTimes(1);
+    });
 
     fireEvent.click(screen.getByRole('radio', { name: /^dark$/i }));
 
-    expect(notice).toBeInTheDocument();
     expect(
-      screen.getByText(
-        /after some local tuning\. it passes, though the palette still leans soft\./i,
+      screen.queryByText(
+        /remix "sunny editorial" created after some local tuning\. it passes, though the palette still leans soft\./i,
       ),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
     expect(controllerMocks.setStyleTransferMode).toHaveBeenCalledWith('dark');
   });
 
@@ -1206,7 +1229,9 @@ describe('StyleTransferPrompt', () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/restored from history/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /generated theme/i }),
+    ).toBeInTheDocument();
   });
 
   it('keeps the trace panel mounted in-flow while it animates out on reset', async () => {
@@ -1277,7 +1302,7 @@ describe('StyleTransferPrompt', () => {
     expect(traceHeading).toBeInTheDocument();
   });
 
-  it('clears the prompt notice when switching themes and does not resurrect it when reselecting a generated theme', async () => {
+  it('does not show or resurrect a success notice when switching themes', async () => {
     const prompt = 'frog';
     const payload = createPassingPromptThemePayload();
     const theme = createCustomStyleTransferThemeRecord(prompt, payload);
@@ -1366,7 +1391,7 @@ describe('StyleTransferPrompt', () => {
       return true;
     });
 
-    render(<StyleTransferPrompt />);
+    const { container } = render(<StyleTransferPrompt />);
 
     await openPromptPanel();
 
@@ -1375,7 +1400,11 @@ describe('StyleTransferPrompt', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /generate remix/i }));
 
-    expect(await screen.findByText(/applied "frog"\./i)).toBeInTheDocument();
+    await screen.findByRole('button', { name: /generated theme: frog/i });
+
+    expect(
+      container.querySelector('.style-transfer__notice'),
+    ).not.toBeInTheDocument();
 
     fireEvent.change(
       screen.getByRole('slider', { name: /explore and switch themes/i }),
@@ -1385,7 +1414,9 @@ describe('StyleTransferPrompt', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText(/applied "frog"\./i)).not.toBeInTheDocument();
+      expect(
+        container.querySelector('.style-transfer__notice'),
+      ).not.toBeInTheDocument();
     });
 
     fireEvent.change(
@@ -1396,7 +1427,9 @@ describe('StyleTransferPrompt', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText(/applied "frog"\./i)).not.toBeInTheDocument();
+      expect(
+        container.querySelector('.style-transfer__notice'),
+      ).not.toBeInTheDocument();
     });
   });
 });
